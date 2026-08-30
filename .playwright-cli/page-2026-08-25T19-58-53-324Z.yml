@@ -1,0 +1,764 @@
+- generic [ref=e2]:
+  - heading "Read First" [level=1] [ref=e3]
+  - paragraph [ref=e5]: Cerulean Crest · 25 August 2026
+  - generic [ref=e6]:
+    - 'heading "The Factory Floor, Part 2 of 4: On Design for Manufacturing" [level=2] [ref=e7]'
+    - paragraph [ref=e9]: Item 1 · Read First
+    - paragraph [ref=e11]: Andrew "bunnie" Huang — bunnie's blog — 2013 archive
+    - paragraph [ref=e13]: 14 min · original practitioner essay
+    - paragraph [ref=e14]: "Editor’s margin. A practical bridge from prototype to repeatable production, covering tolerances, yield and testability. The key idea: every manufactured product also needs a reliable way to test it."
+    - paragraph [ref=e16]: A prototype proves that a design can work. Manufacturing asks whether normal variation still lets it work repeatedly, economically and without heroic intervention.
+    - paragraph [ref=e17]: Huang’s central concern is yield. Component tolerances, voltage margins, PCB and mechanical variation, and cosmetic defects create combinations that a bench build may never reveal. A design that is sensitive to those combinations converts apparently cheap components into rework, scrap and late invoices. Spending more on a robust circuit can therefore lower the cost of each saleable unit.
+    - paragraph [ref=e18]: "The companion idea is testability. Every physical product implies a second product: the factory test system. Good test fixtures cover every user-facing feature, minimise setup, automate a linear pass/fail flow, record results against serial numbers and remain easy to update. Production testing checks assembly; validation asks whether the design survives its intended life. Confusing the two either misses faults or makes every unit carry an unnecessarily expensive test."
+    - generic [ref=e19]:
+      - heading "Carry into the workshop" [level=3] [ref=e20]
+      - list [ref=e21]:
+        - listitem [ref=e22]: Write tolerances and acceptance criteria before the production run.
+        - listitem [ref=e23]: Price yield loss per saleable unit, not only the bill of materials.
+        - listitem [ref=e24]: Design test points and fixture access into the product from the start.
+        - listitem [ref=e25]: Make pass/fail evidence auditable and tied to a serial number.
+      - paragraph [ref=e27]:
+        - link "Read the original at source →" [ref=e28] [cursor=pointer]:
+          - /url: https://www.bunniestudios.com/blog/the-factory-floor-part-1-of-4the-quotation-or-how-to-make-a-bom/the-factory-floor-part-2-of-4on-design-for-manufacturing/
+  - generic [ref=e29]:
+    - heading "South Africa Infrastructure Modernization and Job Creation Development Policy Loan" [level=2] [ref=e30]
+    - paragraph [ref=e32]: Item 2 · Read First
+    - paragraph [ref=e34]: World Bank — Factsheet — 22 Jul 2026
+    - paragraph [ref=e36]: 9 min · primary institutional factsheet / policy reform map
+    - paragraph [ref=e37]: Editor’s margin. A useful map of proposed electricity, freight and water reforms. It is the lender's account of its own programme, so compare its forecasts with the manufacturing and labour data later in the edition.
+    - paragraph [ref=e39]: The operation is a USD 1.5 billion general-budget loan tied to completed reforms in electricity, freight transport, and water and sanitation rather than to a list of construction projects.
+    - paragraph [ref=e40]: Its electricity pillar supports a wholesale market, a stronger regulator, private transmission investment and improved distribution. Freight measures aim to introduce private rail operators and port concessions. Water measures focus on regulatory oversight, performance-based licensing and greater financial autonomy for the National Water Resources Infrastructure Agency.
+    - paragraph [ref=e41]: The institution’s model projects that the wider reform programme could support the equivalent of almost 600,000 additional, better-paid jobs by 2032. That is a scenario, not an observed labour-market result. The useful follow-up is to compare milestones on the public reform dashboard with freight, electricity, manufacturing and employment data over time.
+    - paragraph [ref=e43]:
+      - link "Read the original at source →" [ref=e44] [cursor=pointer]:
+        - /url: https://www.worldbank.org/en/news/factsheet/2026/07/22/south-africa-infrastructure-modernization-and-job-creation-development-policy-loan
+  - generic [ref=e45]:
+    - heading "How to find the right career for you" [level=2] [ref=e46]
+    - paragraph [ref=e48]: Item 3 · Read First
+    - paragraph [ref=e50]: Benjamin Todd — 80,000 Hours — May 2026
+    - paragraph [ref=e52]: 10 min · decision framework / career strategy
+    - paragraph [ref=e53]: Editor’s margin. Keep the experimental method—test career hypotheses through progressively costlier contact with reality—without needing to adopt the organisation's wider moral framework.
+    - paragraph [ref=e55]: Career fit is hard to predict from introspection alone. Treat it as a sequence of hypotheses that earn progressively more expensive tests.
+    - paragraph [ref=e56]: "Begin with provisional rankings. Then list the uncertainties that would actually change the ordering: day-to-day enjoyment, rate of skill growth, realistic entry chances, fit with personal constraints, or performance relative to peers. Resolve the most decision-relevant uncertainty with the cheapest available contact with reality."
+    - list [ref=e57]:
+      - listitem [ref=e58]: Read enough to sharpen the question.
+      - listitem [ref=e59]: Talk to practitioners and ask about the work behind the job title.
+      - listitem [ref=e60]: Try a short project that resembles the real activity.
+      - listitem [ref=e61]: Escalate to a placement or larger commitment only when earlier tests justify it.
+      - listitem [ref=e62]: Update the ranking; stop testing when new evidence no longer changes the decision.
+    - paragraph [ref=e63]: This approach turns “find the right path” from a demand for certainty into a managed learning process.
+    - paragraph [ref=e65]:
+      - link "Read the original at source →" [ref=e66] [cursor=pointer]:
+        - /url: https://80000hours.org/career-guide/personal-fit/
+  - generic [ref=e67]:
+    - heading "Climate dependent feasibility of closing water and nutrient cycles in industrial aqua-agriculture" [level=2] [ref=e68]
+    - paragraph [ref=e70]: Item 4 · Read First
+    - paragraph [ref=e72]: Milan de Korte, Joris Bergman, L. Gerard van Willigenburg, Victor Lobanov, Alyssa Joyce, Xiaodong Cheng & Karel J. Keesman — iScience — 8 Jun 2026
+    - paragraph [ref=e74]: 13 min for abstract, figures, introduction/conclusion and selected methods · peer-reviewed research; constrained optimal-control modelling study
+    - paragraph [ref=e75]: Editor’s margin. The paper models tilapia, hydroponic lettuce and anaerobic digestion as one optimised system. Climate seasonality makes water and nutrient matching harder, particularly for phosphorus; manure co-digestion helps in the model. This is a design study, not a commercial field demonstration.
+    - paragraph [ref=e77]: Open-access research article · Main text
+    - paragraph [ref=e79]:
+      - text: Milan de Korte, Joris Bergman, L. Gerard van Willigenburg, Victor Lobanov, Alyssa Joyce, Xiaodong Cheng & Karel J. Keesman ·
+      - emphasis [ref=e80]: iScience
+      - text: 29(6), 116266 · 8 June 2026
+    - paragraph [ref=e82]:
+      - strong [ref=e83]: Included under CC BY 4.0.
+      - text: This reading version contains the summary, highlights, introduction, results, discussion and limitations. STAR Methods, references and supplementary files are available at the source. Formatting and heading levels were adapted for EPUB; the scientific text was not rewritten.
+    - generic [ref=e84]:
+      - heading "Summary" [level=3] [ref=e85]
+      - paragraph [ref=e86]: In integrated aqua-agriculture, matching waste-derived nutrient supply with crop demand while maintaining optimal fish and crop conditions remains challenging. We formulate a closed-loop aquaculture-hydroponics network with anaerobic digestion as a constrained optimal-control problem and combine static sizing with climate-driven dynamic flow optimization for contrasting climates. Under weak seasonality (Jakarta), internal wastes (aquaculture water, fish sludge, and plant residues) support discharge-free operation with water, nitrogen, and phosphorus use-efficiencies of 100%, 79%, and 72%. As seasonality increases (Cairo, Amsterdam), feasibility and robustness decline due to shifting demand and limited phosphorus recoverability. Using manure as co-digestion substrate restores closed-cycle operation without synthetic fertilizers. The optimizer prefers pig manure in Cairo and chicken manure in Amsterdam, reflecting climate-specific N:P deficits. Relative to climate-matched decoupled aquaponics, optimized integrated networks cut water, nitrogen, and phosphorus waste by 86%, 46%, and 35%. Overall, the framework enables climate-robust design of circular aqua-agriculture networks, reducing resource use and pollution.
+    - generic [ref=e87]:
+      - heading "Highlights" [level=3] [ref=e88]
+      - list [ref=e89]:
+        - listitem [ref=e90]: Integrating anaerobic digestion enables circular industrial aqua-agriculture.
+        - listitem [ref=e91]: Internal waste allows discharge- and fertilizer-free operation in tropical climates.
+        - listitem [ref=e92]: Increasing seasonality reduces both water and phosphorus loop closure.
+        - listitem [ref=e93]: Co-digestion restores loop closure with a climate-dependent optimal manure type.
+      - paragraph
+    - generic [ref=e94]:
+      - heading "Introduction" [level=3] [ref=e95]
+      - paragraph [ref=e96]: Over the last few decades, global food production has expanded rapidly, placing increasing pressure on natural resources. Fresh water, arable land, and essential mineral nutrients such as nitrogen and phosphorus are already being used beyond safe planetary limits, threatening ecosystem integrity, the sustainable availability of renewable freshwater resources, and finite phosphate-rock reserves. Improving self-sufficiency and use-efficiency by replacing virgin inputs with resources recovered from waste streams is one way to more sustainably meet future food demand. In this context, integrated aqua-agriculture offers a promising pathway toward closed-resource-cycle food production by growing crops using the metabolic waste products of fish or other aquatic animals as nutrient sources.
+      - paragraph [ref=e97]: Aquaculture is the fastest-growing segment of the global food industry and has recently surpassed capture fisheries in seafood production for human consumption. This shift can be attributed to the limitations and decline of wild fisheries stocks, as well as technological advancements that have enhanced aquaculture productivity. As the industry grows, an increasing amount of nutrient-rich waste is produced, particularly nitrogen and phosphorus. Fish retain only about half of the nitrogen and phosphorus supplied in feed, with the remainder released to the culture water as dissolved and particulate waste through gill excretion of ammonia, urine and feces, and feed leftovers. Nitrogen-containing compounds, such as proteins, are catabolized, releasing toxic ammonia, which in recirculating aquaculture systems (RAS) is controlled by biological nitrification in biofilters. However, once nitrate concentrations surpass tolerable limits, part of the water is often discharged without sufficient treatment.
+      - paragraph [ref=e98]: Integrating RAS with protected hydroponic systems (i.e., soil-less crop production) can substantially improve water and nitrogen use-efficiency by reusing nutrient-rich aquaculture water for crop production. In contrast to nitrogen, aquaculture water typically contains only small amounts of dissolved phosphorus because inorganic phosphates excreted by fish bind to feed particles and fecal matter, which are removed through mechanical filtration as concentrated sludge. Anaerobic digesters can convert this sludge into an organic fertilizer containing plant-available mineral forms such as phosphates and ammonium. In addition to fish sludge, anaerobic digestion can treat and recycle nitrogen and phosphorus from other organic farm wastes, thereby contributing to the nitrogen and phosphorus recovery that is possible within an industrial aqua-agriculture network. Integrating anaerobic digestion can simultaneously prevent aquaculture from releasing nutrients into the environment and reduce reliance on synthetic fertilizers for plant production.
+      - paragraph [ref=e99]: While anaerobic digestion offers many advantages, its integration also increases the level of complexity. A key challenge is to identify system dimensions and corresponding flows that match waste-derived nutrient supply to crop nutrient demand without synthetic fertilizers or allowing nutrients to vary between tolerable levels in both fish or crops components. This is particularly challenging in regions with seasonal climates, given that crop nutrient uptake is largely driven by the climate-dependent crop transpiration rate. As transpiration rates drop from summer to winter, a larger plant cultivation area is needed to balance nitrogen and phosphorus inputs from aquaculture and subsequent sludge digestion. A recent optimization study demonstrated that this supply-demand mismatch in integrated aqua-agriculture can be managed by adopting a staggered production strategy and sizing the protected cultivation area to meet winter requirements, supplemented by an external mineralizable organic source. For example, manure can be diluted to mitigate ammonia toxicity and co-digested to boost nutrient availability during periods of high demand, while staggered fish and crop production helps smooth feed inputs and crop transpiration rates. However, this specific strategy has so far only been investigated in steady-state scenarios in the Netherlands and remains untested under dynamic conditions across contrasting climates.
+      - paragraph [ref=e100]: The aim of this model-based study was to quantify under what climatic conditions industrial aqua-agriculture networks can operate in closed water and nutrient cycles, i.e., reusing aquaculture water for irrigation without synthetic fertilizer addition, under realistic daily weather variability, and how this feasibility changes with increasing seasonality. We represent the network with coupled sub-models for water and nutrient dynamics in a RAS producing Nile Tilapia, a hydroponic production system (HPS) growing lettuce, and two anaerobic digesters that separately treat fish sludge and crop residues. Using these models, we applied combined static and dynamic optimization to determine location-specific optimal designs and time-varying flows that minimize discharge and synthetic fertilizer inputs while maintaining fish- and crop water-quality constraints.
+      - paragraph [ref=e101]: We evaluated the framework for three contrasting climates using historical weather data. We started with Jakarta, Indonesia, which has a relatively stable tropical climate. The Indonesian aquaculture sector has expanded rapidly in recent decades, and Jakarta is one of the most populous and climate-vulnerable cities globally. We then considered Cairo, Egypt, with a two-seasonal, arid climate characterized by very hot summers and mild winters. Egypt is the largest aquaculture producer in Africa but already relies on water beyond its internal renewable sources, making it increasingly prone to future water stress. Finally, to explore the potential of sustainable integrated aqua-agriculture in strong temperate climates, we selected the Netherlands, where the highly variable four-season climate in Amsterdam makes it the most challenging of the three case studies. For each location, we first assessed a baseline configuration relying only on internal waste streams (aquaculture water, fish sludge, and plant residues). Where internal recycling proved constrained, we analyzed an extended configuration with manure co-digestion and quantified when it restores operational flexibility, including which manure type (chicken, pig, or cattle) is preferred under different seasonal demand profiles. We also benchmarked each location’s best-performing integrated configuration against an optimized decoupled aquaponics (DAP) reference network (RAS-HPS without anaerobic digestion) under identical system boundaries. To the best of our knowledge, no model study has been conducted that explores closure of nutrient and water cycles in integrated aqua-agriculture networks across different climates under dynamic conditions.
+      - paragraph [ref=e102]: Figure 1 shows an overview of each submodel used to describe the different set-ups explored in this study. Analyzing these set-ups with a year-scale optimal-control formulation, we show that the internal-waste baseline can maintain fish- and crop water-quality constraints under weak seasonality (Jakarta), becomes marginally phosphorus-limited under moderate seasonality (Cairo), and under strong seasonality (Amsterdam) requires discharge and/or external supplementation to remain feasible. A ±20% parameter perturbation analysis further shows that performance as measured by the key performance indicators (water/nutrient use-efficiency and nutrient self-sufficiency) is largely insensitive to parameter perturbations in Jakarta, whereas in Cairo and Amsterdam manure co-digestion restores N and P balance and increases robustness by providing an additional lever over the N:P supply ratio. Finally, benchmarking against optimized decoupled aquaponics confirms that integrating anaerobic digestion reduces water and nutrient losses and lowers virgin input requirements.
+      - figure [ref=e103]:
+        - paragraph
+        - generic [ref=e104]:
+          - text: Simplified material flow diagram of the industrial aqua-agriculture network The blue dashed box represents the recirculating aquaculture system (RAS), the green dashed box the hydroponic production system (HPS), the yellow dashed box the anaerobic digestion system (ADS). The blue valves depict the location of the decision variables used in the model and the red arrows represent the streams that reduce the network performance in terms of water and nutrient use-efficiency or nutrient self-sufficiency. The decoupled aquaponics network only consists of the RAS and HPS subsystem whereas the addition of livestock manure (black dashed line) is only used in the extended integrated aqua-agriculture network. Created in BioRender. Korte, M. (2026)
+          - link [ref=e105] [cursor=pointer]:
+            - /url: https://BioRender.com/scyfszq
+            - emphasis [ref=e106]: https://BioRender.com/scyfszq
+          - text: .
+    - generic [ref=e107]:
+      - heading "Results" [level=3] [ref=e108]
+      - generic [ref=e109]:
+        - heading "Computational performance" [level=4] [ref=e110]
+        - paragraph [ref=e111]:
+          - text: The following simulation results were obtained using the IPOPT solver and reached the prescribed non-linear problem optimality error tolerance below 10
+          - superscript [ref=e112]: −5
+          - text: "across all scenarios with an average computation time of 183 s per annual simulation on a laptop with an Intel Core i5-1235U CPU and 16 GB RAM (Windows 11, Python v3.11.13, GEKKO v1.3.0, IPOPT v3.12, linear solver: MA57). This indicates that the framework is computationally efficient and hence suitable for real-time implementation."
+      - generic [ref=e113]:
+        - heading "Weak seasonality allows closed-cycle operation on internal waste streams" [level=4] [ref=e114]
+        - paragraph [ref=e115]: Under Jakarta’s relatively stable tropical climate (temperature, humidity, and radiation are similar year-round), the optimal control solution maintained nitrate and total ammonia nitrogen in the RAS below toxic thresholds while simultaneously keeping the hydroponic nutrient solution within the prescribed crop ranges (Figures 2A–2C). The greenhouse was therefore operated exclusively using nutrients from internal waste streams and without any water discharge to the environment, which resulted in 100% nitrogen and phosphorus self-sufficiency (NSS, PSS), 100% water use-efficiency (WUE), and a nitrogen and phosphorus use-efficiency (NUE, PUE) of 79% and 72%.
+        - figure [ref=e116]:
+          - paragraph
+          - generic [ref=e117]:
+            - text: Nutrient and mass transfer profiles of the Jakarta case study (A) Shows the nitrate (NO
+            - subscript [ref=e118]: "3"
+            - superscript [ref=e119]: −
+            - text: ) and total ammonia nitrogen (TAN) concentration for a 100 m
+            - superscript [ref=e120]: "3"
+            - text: recirculating aquaculture system (RAS). (B) Displays the N contributions of mineralized plant waste (PW), fish sludge (FS), and aquaculture-water transfer (AW) to the HPS. (C) Shows the total nitrogen (N) and phosphorus (P) profiles for the hydroponic production system (HPS) with a 1530 m
+            - superscript [ref=e121]: "2"
+            - text: cultivation area. (D) Shows the P contributions of mineralized plant waste (PW), fish sludge (FS), and aquaculture-water transfer (AW) to the HPS.
+        - paragraph [ref=e122]:
+          - text: At the optimal design, the 1530 m
+          - superscript [ref=e123]: "2"
+          - text: HPS (306 m
+          - superscript [ref=e124]: "3"
+          - text: irrigation volume) received most of its nitrogen (54%) and a smaller share of its P (7%) directly via aquaculture water transfers (Figures 2B–2D). Phosphorus largely entered the hydroponic loop through mineralization of captured solids. A 14 m
+          - superscript [ref=e125]: "3"
+          - text: digester treating fish sludge (30-day HRT) supplied 32% of the hydroponic N and 79% of its P. A second, smaller digester (1.7 m
+          - superscript [ref=e126]: "3"
+          - text: ", 25-day HRT) mineralized inedible lettuce residues and provided the remaining nutrient fractions. The flows used to balance nutrient supply and demand are illustrated in Figure 3."
+        - figure "Hydraulic flow profiles of the Jakarta case study (A) Shows the water flows received by the hydroponic production system (HPS) from two anaerobic digesters, one digesting fish sludge (AD1) and another digesting plant waste (AD2), the recirculating aquaculture system (AW), and an external clean water source (CW). Together, they match the outgoing HPS evapotranspiration flux (ET) in Jakarta (indicated by the black dashed line). (B and C) Show the digester inflows from fish sludge (FS), plant waste (PW), and additional clean water to keep reactor volumes constant (CW1, CW2). The reactor inflows are determined based on a predefined range of total solid and volatile solid loading rates." [ref=e127]:
+          - paragraph
+        - paragraph [ref=e129]: Hydroponic volume only decreased in response to transpiration. Transpiration losses were offset by steady digester effluents, supplemented by aquaculture water and clean water to satisfy volume constraints (Figure 3A). Variations in fish-sludge inflow reflected the staggered fish production strategy, while the addition of water ensured constant reactor volumes during periods of low fish sludge production (Figure 3B). In the digester handling inedible lettuce residues, clean water was likewise added to keep the reactor volume constant as lettuce-waste production fluctuated due to weather conditions and changes in hydroponic nutrient concentrations (Figure 3C). Despite variation in fish feed and lettuce waste supply, digester feed concentrations and volatile-solids loading rates in both reactors remained within, or close to, the prescribed feasibility bounds throughout the year.
+      - generic [ref=e130]:
+        - heading "Seasonality narrows the feasible operating window and increases sensitivity" [level=4] [ref=e131]
+        - paragraph [ref=e132]:
+          - text: Compared to Cairo and Amsterdam (results shown in Figures S1 and S2), Jakarta represents the most favorable case, where relatively constant evapotranspiration keeps crop uptake easily aligned with the waste-derived nutrient supply. In more seasonal climates, the optimizer must instead navigate through alternating regimes where high-demand periods risk nutrient deficits and low-demand periods promote accumulation. In Cairo, the optimizer could still manage this trade-off without liquid discharge at an optimal HPS area of 1350 m
+          - superscript [ref=e133]: "2"
+          - text: ", maintaining full irrigation closure (WUE = 100%, NUE = 79%, PUE = 72%) and near-complete phosphorus self-sufficiency (PSS ≈ 99%). In Amsterdam, stronger seasonality increased the mismatch between demand and waste-derived supply, making periodic discharge and external inputs unavoidable at the optimal HPS area of 2700 m"
+          - superscript [ref=e134]: "2"
+          - text: and lowering WUE, NUE, PUE, and PSS to 93%, 75%, 70%, and 82%, respectively.
+        - paragraph [ref=e135]: Together, the Cairo and Amsterdam optima indicate that as seasonal variability increases, the feasible operating window narrows and performance becomes more sensitive to biological and operational uncertainty. To quantify this sensitivity, we re-solved the optimal control problem under ±20% perturbations of key parameters (Figure 4). Under perturbations, feasibility is still enforced through the path and balance constraints, but maintaining those constraints may require additional discharge and/or external nutrient inputs. We therefore use WUE, NSS, and PSS as sensitivity indicators that measure how strongly closed-loop performance decreases under uncertainty.
+        - figure [ref=e136]:
+          - paragraph
+          - generic [ref=e137]:
+            - text: Sensitivity of the key performance indicators to ±20% perturbations in key parameters (A) Jakarta (1530 m
+            - superscript [ref=e138]: "2"
+            - text: ; WUE = 100%, NSS = 100%, PSS = 100%). (B) Cairo (1350 m
+            - superscript [ref=e139]: "2"
+            - text: ; WUE = 100%, NSS = 100%, PSS = 99%). (C) Amsterdam (2700 m
+            - superscript [ref=e140]: "2"
+            - text: ; WUE = 93%, NSS = 100%, PSS = 82%). Each image shows the relative change in water use efficiency (WUE), nitrogen self-sufficiency (NSS), and phosphorus self-sufficiency (PSS) compared with the corresponding nominal optimization, expressed as ΔKPI (% of nominal). Perturbed parameters are, fish N and P excretion split between soluble and particulate forms, N and P mineralization coefficients in AD1 and AD2, plant-waste generation, feed conversion ratio (FCR), and crop evapotranspiration (ET). Columns group the −20% and +20% perturbations for each KPI. Colors indicate improvement (blue) or deterioration (red) relative to the nominal case, with white denoting zero change.
+        - paragraph [ref=e141]: Across all climates, the sensitivity patterns are dominated by evapotranspiration (ET) and feed conversion ratio (FCR), which shift crop nutrient demand and waste-derived nutrient loading. The largest WUE reductions under ±20% perturbations were 7.3% in Jakarta and Cairo (both driven by −20% ET) and 9.6% in Amsterdam (−20% ET). The largest PSS reductions were 8.2% in Jakarta (−20% FCR), 11.4% in Cairo (−20% FCR), and 5.4% in Amsterdam (+20% FCR). In contrast, excretion-partitioning parameters and most mineralization coefficients caused only minor KPI changes within ±20%. Among the digestion-related parameters, the largest effect was a 20% reduction in the AD1 P mineralization coefficient, which reduced PSS by 9.6% in Amsterdam, 8.6% in Cairo, and 6.3% in Jakarta. NSS remains robust in all cases, whereas the higher sensitivity in PSS confirms that P recoverability becomes the critical bottleneck under uncertainty.
+        - paragraph [ref=e142]: Jakarta shows the weakest response, consistent with its stable ET regime. KPI reduction occurs mainly when ET decreases, which reduces crop uptake and triggers discharge (lower WUE), and when effective phosphorus recovery decreases (e.g., lower AD1 P mineralization or lower waste generation), which reduces PSS.
+        - paragraph [ref=e143]: Cairo exhibits the same mechanisms as Jakarta but with a stronger PSS response. Reduced ET lowers crop demand, increasing the risk of accumulation and triggering discharge (WUE decreases), whereas increased ET exposes phosphorus limitation during peak demand, requiring external P inputs and reducing PSS. Taken together, this indicates that in two-season hot climates, peak-demand periods can amplify P limitation, particularly when biological P recovery is simultaneously reduced. Minor improvements in PSS are measured as well for positive perturbations that cause an increase in P supply.
+        - paragraph [ref=e144]: Amsterdam is the most sensitive overall. Strong seasonality pushes the network into both oversupply (cold, low-ET periods) and undersupply (warm, high-ET periods), so ±20% perturbations can have comparable but opposite effects. In this regime, perturbations that increase net N loading (e.g., higher fish excretion, higher mineralization, or higher plant-waste availability) can worsen performance by accelerating nitrate accumulation, increasing the need for discharge and thereby reducing WUE (and, indirectly, PSS). Conversely, lower ET further increases accumulation pressure and reduces WUE, whereas higher ET raises crop demand and shifts the limiting factor toward phosphorus availability, reducing PSS. Overall, FCR and AD1 P mineralization remain the strongest drivers of PSS.
+      - generic [ref=e145]:
+        - heading "Manure co-digestion restores closed-loop feasibility and robustness in seasonal climates" [level=4] [ref=e146]
+        - paragraph [ref=e147]: The results and sensitivity analysis from the base configurations indicate that closed-loop operation on internal waste streams is robust under tropical conditions, but becomes increasingly constrained as seasonality intensifies. While NSS remains stable across climates, PSS decreases under a wide range of parameter perturbations, especially in Amsterdam and, to a lesser extent, in Cairo, reflecting phosphorus limitation during high-demand periods and nitrogen accumulation beyond the target range during low-demand periods. We therefore evaluated an extended configuration in which manure is co-digested to provide an additional mineralizable nutrient source and increase operational flexibility. This extension was analyzed for Cairo and Amsterdam, where it is most relevant.
+        - paragraph [ref=e148]:
+          - text: "For both locations, the extended configuration enabled fully closed-cycle operation of the irrigation and nutrient supply, thereby achieving 100% performance in WUE, NSS, and PSS. Overall nutrient-use efficiencies achieved for Cairo: NUE = 76%, PUE = 59%, and in Amsterdam: NUE = 75%, PUE = 60%, reflecting nutrient losses through non-recovered digestate and denitrification streams within the network boundaries. Figure 5 presents the nutrient profiles and source contributions in the manure-extended configuration. In both cases, RAS water-quality indicators (NO"
+          - subscript [ref=e149]: "3"
+          - superscript [ref=e150]: −
+          - text: ", TAN) remain well below thresholds throughout the year, and HPS nutrient concentrations remain within their target bands. In Cairo, the dominant share of N and P is supplied by pig manure (44.5% and 47.7%), followed by fish sludge (25.6% and 28.0%), plant waste (17.8% and 13.5%), and chicken manure (12.0% and 10.8%). In Amsterdam, chicken manure becomes dominant (44.7% and 43.6%), followed by fish sludge (26.3% and 29.8%), plant waste (17.1% and 13.6%), and pig manure (11.8% and 12.6%). Cow manure remained unused in both locations, which demonstrates that the optimizer selects co-substrates that best match the location-specific N:P requirement under seasonal demand."
+        - figure [ref=e151]:
+          - paragraph
+          - generic [ref=e152]:
+            - text: Nutrient and mass transfer profiles of the Cairo (AB-EF) and Amsterdam (CD-GH) case studies (A–E) Show the nitrate (NO
+            - subscript [ref=e153]: "3"
+            - superscript [ref=e154]: −
+            - text: ) and total ammonia nitrogen (TAN) concentrations for a 100 m
+            - superscript [ref=e155]: "3"
+            - text: recirculating aquaculture system (RAS) in Cairo and Amsterdam. (B–F) Show the amount of N received by the HPS from fish sludge (FS + MAN) and plant waste, both co-digested with a manure mixture (PW + MAN), and aquaculture-water transfer (AW). (C and G) Show the total nitrogen (N) and phosphorus (P) profiles for the hydroponic production system (HPS) with a 3220 m
+            - superscript [ref=e156]: "2"
+            - text: and 5130 m
+            - superscript [ref=e157]: "2"
+            - text: cultivation area for Cairo and Amsterdam. (D–H) Show the amount of P received by the HPS from fish sludge (FS + MAN) and plant waste, both co-digested with a manure mixture (PW + MAN), and aquaculture-water transfer (AW).
+        - paragraph [ref=e158]:
+          - text: Figure 6 shows the hydraulic profiles of the manure-extended networks. Seasonal greenhouse evapotranspiration drives the net irrigation demand (Figures 6A–6D), which is met by a combination of aquaculture-water transfer, clean-water, and effluent from AD1-AD2. The digester inflows (Figures 6B–6F) show how the optimizer modulates manure inflows to adjust N:P ratios and adjusts volume based on the season. In Cairo pig manure represents 85% of the total manure volumetric flow input whereas in Amsterdam 71% of the flow originates from chicken manure. The required reactor volumes were 29 m
+          - superscript [ref=e159]: "3"
+          - text: and 26 m
+          - superscript [ref=e160]: "3"
+          - text: for AD1 and 12 m
+          - superscript [ref=e161]: "3"
+          - text: and 11 m
+          - superscript [ref=e162]: "3"
+          - text: for AD2 in Cairo and Amsterdam, respectively. Larger reactor volumes are required compared to the base-configuration to accommodate the additional manure flows that are needed to feed the oversized HPS area. For both locations, volatile solids (VS) loading rates and total solids (TS) levels were kept very close in range of the optimum. Finally, repeating the ±20% perturbation analysis for the manure-extended configurations showed that co-digestion completely dampened sensitivity. None of the perturbations caused changes in the KPIs (results not shown). The overall workflow used to obtain these base and manure-extended network configurations, including climate-data preprocessing, static sizing, dynamic optimization, and KPI evaluation, is summarized in Figure 7.
+        - figure "Hydraulic flow profiles of the Cairo (ABC) and Amsterdam (DEF) case studies (A–D) Shows the amount of water the HPS receives from two anaerobic digesters, one co-digesting fish sludge with a manure mixture (AD1) and the other co-digesting plant waste with a manure mixture (AD2), an external fresh water source (CW), and the recirculating aquaculture system (AW). These flows align with the greenhouse evapotranspiration (ET) denoted by the black dashed line. (B–F) Show the incoming anaerobic digester flows from fish sludge (FS), plant waste (PW), chicken manure (CM), pig manure (PM). Reactor inflows are determined based on a predefined range of total solid and volatile solid loading rates." [ref=e163]:
+          - paragraph
+        - figure "Flow chart of the modeling and optimization procedure" [ref=e165]:
+          - paragraph
+      - generic [ref=e167]:
+        - heading "Integrated anaerobic digestion outperforms optimized decoupled aquaponics" [level=4] [ref=e168]
+        - paragraph [ref=e169]: We evaluated each optimized network using water, nitrogen, and phosphorus use efficiencies (WUE, NUE, and PUE), defined as one minus the ratio of annual losses to annual inputs. We additionally report nitrogen and PSS (NSS, PSS), indicating the fraction of hydroponic nutrient demand met from internal sources (fish and plant waste, and manure optionally). For WUE, the wasted water stream excludes water contained in unutilized wet-solid material waste streams (digestate, sludge, and plant waste), which is reported separately, because it represents only a small fraction of total water inputs. Table 1 compares the indicators and associated resource flows with optimized decoupled aquaponics (DAP) reference network without anaerobic digestion under identical climate conditions. The decision variables and constraints underlying these optimizations are summarized in Table 2, and the KPI definitions used to calculate the indicators in Table 1 are provided in Table 3. DAP nutrient and fertilizer supplementation profiles are shown in Figures S5–S7.
+        - generic [ref=e170]:
+          - paragraph [ref=e172]: Optimized industrial aqua-agriculture (IAA) networks compared with optimized decoupled aquaponics (DAP)
+          - table [ref=e173]:
+            - rowgroup [ref=e182]:
+              - row [ref=e183]:
+                - columnheader [ref=e184]:
+                  - text: "Network: HPS area (m"
+                  - superscript [ref=e185]: "2"
+                  - text: "): Resource"
+                - columnheader "B-IAA Jak. 1530" [ref=e186]
+                - columnheader "DAP Jak. 1800" [ref=e187]
+                - columnheader "E-IAA Cai. 3220" [ref=e188]
+                - columnheader "DAP Cai. 1575" [ref=e189]
+                - columnheader "E-IAA Ams. 5130" [ref=e190]
+                - columnheader "DAP Ams. 2250" [ref=e191]
+            - rowgroup [ref=e192]:
+              - row [ref=e193]:
+                - cell "WUE (%)" [ref=e194]
+                - cell "100" [ref=e195]
+                - cell "100" [ref=e196]
+                - cell "100" [ref=e197]
+                - cell "100" [ref=e198]
+                - cell "100" [ref=e199]
+                - cell "100" [ref=e200]
+              - row [ref=e201]:
+                - cell "NUE (%)" [ref=e202]
+                - cell "79" [ref=e203]
+                - cell "58" [ref=e204]
+                - cell "76" [ref=e205]
+                - cell "64" [ref=e206]
+                - cell "75" [ref=e207]
+                - cell "63" [ref=e208]
+              - row [ref=e209]:
+                - cell "PUE (%)" [ref=e210]
+                - cell "72" [ref=e211]
+                - cell "53" [ref=e212]
+                - cell "59" [ref=e213]
+                - cell "60" [ref=e214]
+                - cell "60" [ref=e215]
+                - cell "58" [ref=e216]
+              - row [ref=e217]:
+                - cell "NSS (%)" [ref=e218]
+                - cell "100" [ref=e219]
+                - cell "100" [ref=e220]
+                - cell "100" [ref=e221]
+                - cell "100" [ref=e222]
+                - cell "100" [ref=e223]
+                - cell "100" [ref=e224]
+              - row [ref=e225]:
+                - cell "PSS (%)" [ref=e226]
+                - cell "100" [ref=e227]
+                - cell "8" [ref=e228]
+                - cell "100" [ref=e229]
+                - cell "7" [ref=e230]
+                - cell "100" [ref=e231]
+                - cell "8" [ref=e232]
+              - row [ref=e233]:
+                - cell [ref=e234]:
+                  - text: Yield lettuce (kg m
+                  - superscript [ref=e235]: −2
+                  - text: "y"
+                  - superscript [ref=e236]: −1
+                  - text: )
+                - cell "42" [ref=e237]
+                - cell "27" [ref=e238]
+                - cell "47" [ref=e239]
+                - cell "30" [ref=e240]
+                - cell "31" [ref=e241]
+                - cell "28" [ref=e242]
+              - row [ref=e243]:
+                - cell [ref=e244]:
+                  - text: Water input (L m
+                  - superscript [ref=e245]: −2
+                  - text: "y"
+                  - superscript [ref=e246]: −1
+                  - text: )
+                - cell "955" [ref=e247]
+                - cell "1237" [ref=e248]
+                - cell "1140" [ref=e249]
+                - cell "1232" [ref=e250]
+                - cell "730" [ref=e251]
+                - cell "1284" [ref=e252]
+              - row [ref=e253]:
+                - cell [ref=e254]:
+                  - text: Water loss via wet solidsa (L m
+                  - superscript [ref=e255]: −2
+                  - text: "y"
+                  - superscript [ref=e256]: −1
+                  - text: )
+                - cell "13" [ref=e257]
+                - cell "89" [ref=e258]
+                - cell "16" [ref=e259]
+                - cell "94" [ref=e260]
+                - cell "9" [ref=e261]
+                - cell "94" [ref=e262]
+              - row [ref=e263]:
+                - cell [ref=e264]:
+                  - text: N Input (gN m
+                  - superscript [ref=e265]: −2
+                  - text: "y"
+                  - superscript [ref=e266]: −1
+                  - text: )
+                - cell "437" [ref=e267]
+                - cell "372" [ref=e268]
+                - cell "335" [ref=e269]
+                - cell "425" [ref=e270]
+                - cell "214" [ref=e271]
+                - cell "298" [ref=e272]
+              - row [ref=e273]:
+                - cell [ref=e274]:
+                  - text: N wasted (gN m
+                  - superscript [ref=e275]: −2
+                  - text: "y"
+                  - superscript [ref=e276]: −1
+                  - text: )
+                - cell "107" [ref=e277]
+                - cell "157" [ref=e278]
+                - cell "81" [ref=e279]
+                - cell "154" [ref=e280]
+                - cell "53" [ref=e281]
+                - cell "127" [ref=e282]
+              - row [ref=e283]:
+                - cell [ref=e284]:
+                  - text: P input (gP m
+                  - superscript [ref=e285]: −2
+                  - text: "y"
+                  - superscript [ref=e286]: −1
+                  - text: )
+                - cell "87" [ref=e287]
+                - cell "99" [ref=e288]
+                - cell "92" [ref=e289]
+                - cell "115" [ref=e290]
+                - cell "55" [ref=e291]
+                - cell "78" [ref=e292]
+              - row [ref=e293]:
+                - cell [ref=e294]:
+                  - text: P wasted (gP m
+                  - superscript [ref=e295]: −2
+                  - text: "y"
+                  - superscript [ref=e296]: −1
+                  - text: )
+                - cell "25" [ref=e297]
+                - cell "46" [ref=e298]
+                - cell "38" [ref=e299]
+                - cell "46" [ref=e300]
+                - cell "22" [ref=e301]
+                - cell "37" [ref=e302]
+              - row [ref=e303]:
+                - cell [ref=e304]:
+                  - text: Input fertilizer (gP m
+                  - superscript [ref=e305]: −2
+                  - text: "y"
+                  - superscript [ref=e306]: −1
+                  - text: )
+                - cell "N/A" [ref=e307]
+                - cell "24" [ref=e308]
+                - cell "N/A" [ref=e309]
+                - cell "30" [ref=e310]
+                - cell "N/A" [ref=e311]
+                - cell "18" [ref=e312]
+              - row [ref=e313]:
+                - cell [ref=e314]:
+                  - text: Mineral input CO
+                  - subscript [ref=e315]: "2"
+                  - text: eq (kgCO
+                  - subscript [ref=e316]: "2"
+                  - text: m
+                  - superscript [ref=e317]: −2
+                  - text: "y"
+                  - superscript [ref=e318]: −1
+                  - text: )
+                - cell "4.1" [ref=e319]
+                - cell "4.1" [ref=e320]
+                - cell "3.7" [ref=e321]
+                - cell "4.7" [ref=e322]
+                - cell "2.4" [ref=e323]
+                - cell "4.7" [ref=e324]
+              - row [ref=e325]:
+                - cell [ref=e326]:
+                  - text: Squandered minerals CO
+                  - subscript [ref=e327]: "2"
+                  - text: "-eq (kgCO"
+                  - subscript [ref=e328]: "2"
+                  - text: m
+                  - superscript [ref=e329]: −2
+                  - text: "y"
+                  - superscript [ref=e330]: −1
+                  - text: )
+                - cell "1.06" [ref=e331]
+                - cell "1.7" [ref=e332]
+                - cell "0.59" [ref=e333]
+                - cell "1.7" [ref=e334]
+                - cell "0.38" [ref=e335]
+                - cell "2.0" [ref=e336]
+          - paragraph [ref=e337]: Key performance indicators (KPIs) and resource flows are compared between IAA and DAP for each location under identical climatic conditions. B-IAA denotes the base configuration (internal waste streams only), whereas E-IAA denotes the manure-extended configuration with co-digestion. Values are annual averages normalized by hydroponic production system (HPS) area.
+          - paragraph [ref=e338]: Water loss via wet solids consists of unused wet solid material (digestate, fish sludge, plant waste). It is important to note that these streams were not included in the water use-efficiency (WUE) KPI because for the IAA networks they are negligible and distort the effect of zero-water discharge.
+        - generic [ref=e339]:
+          - paragraph [ref=e341]: Decision variables and constraints used in the dynamic optimal control problem
+          - table [ref=e342]:
+            - rowgroup [ref=e349]:
+              - row [ref=e350]:
+                - columnheader "Symbol" [ref=e351]
+                - columnheader "Description" [ref=e352]
+                - columnheader "Unit" [ref=e353]
+                - columnheader "Base config" [ref=e354]
+                - columnheader "Extended config" [ref=e355]
+            - rowgroup [ref=e356]:
+              - row [ref=e357]:
+                - cell [ref=e358]:
+                  - generic [ref=e359]:
+                    - emphasis [ref=e360]: F
+                    - subscript [ref=e361]:
+                      - emphasis [ref=e362]: dis
+                      - text: ","
+                      - emphasis [ref=e363]: k
+                    - superscript [ref=e364]:
+                      - emphasis [ref=e365]: RAS
+                - cell "Ras water discharged to environment" [ref=e366]
+                - cell [ref=e367]:
+                  - text: "[m"
+                  - superscript [ref=e368]: "3"
+                  - text: d
+                  - superscript [ref=e369]: −1
+                  - text: "]"
+                - cell "[0, 10]" [ref=e370]
+                - cell "[0, 100]" [ref=e371]
+              - row [ref=e372]:
+                - cell [ref=e373]:
+                  - generic [ref=e374]:
+                    - emphasis [ref=e375]: F
+                    - subscript [ref=e376]:
+                      - emphasis [ref=e377]: k
+                    - superscript [ref=e378]:
+                      - emphasis [ref=e379]: RAS
+                      - text: →
+                      - emphasis [ref=e380]: HPS
+                - cell "Ras water sent to HPS" [ref=e381]
+                - cell [ref=e382]:
+                  - text: "[m"
+                  - superscript [ref=e383]: "3"
+                  - text: d
+                  - superscript [ref=e384]: −1
+                  - text: "]"
+                - cell "[0, 10]" [ref=e385]
+                - cell "[0, 100]" [ref=e386]
+              - row [ref=e387]:
+                - cell [ref=e388]:
+                  - generic [ref=e389]:
+                    - emphasis [ref=e390]: F
+                    - subscript [ref=e391]:
+                      - emphasis [ref=e392]: dis
+                      - text: ","
+                      - emphasis [ref=e393]: k
+                    - superscript [ref=e394]:
+                      - emphasis [ref=e395]: HPS
+                - cell "HPS water discharged to environment" [ref=e396]
+                - cell [ref=e397]:
+                  - text: "[m"
+                  - superscript [ref=e398]: "3"
+                  - text: d
+                  - superscript [ref=e399]: −1
+                  - text: "]"
+                - 'cell "$\\left\\lbrack {0,\\frac{V_{HPS}}{5}} \\right\\rbrack$" [ref=e400]'
+                - 'cell "$\\left\\lbrack {0,\\frac{V_{HPS}}{5}} \\right\\rbrack$" [ref=e401]'
+              - row [ref=e402]:
+                - cell [ref=e403]:
+                  - generic [ref=e404]:
+                    - emphasis [ref=e405]: M
+                    - subscript [ref=e406]:
+                      - emphasis [ref=e407]: "N"
+                      - subscript [ref=e408]:
+                        - emphasis [ref=e409]: fert
+                      - text: ","
+                      - emphasis [ref=e410]: k
+                - cell [ref=e411]:
+                  - text: fertilizer (NO
+                  - subscript [ref=e412]: "3"
+                  - text: or TAN) supplemented to the HPS
+                - cell [ref=e413]:
+                  - text: "[kg d"
+                  - superscript [ref=e414]: −1
+                  - text: "]"
+                - cell "[0, 10]" [ref=e415]
+                - cell "[0, 10]" [ref=e416]
+              - row [ref=e417]:
+                - cell [ref=e418]:
+                  - generic [ref=e419]:
+                    - emphasis [ref=e420]: M
+                    - subscript [ref=e421]:
+                      - emphasis [ref=e422]: P
+                      - subscript [ref=e423]:
+                        - emphasis [ref=e424]: fert
+                      - text: ","
+                      - emphasis [ref=e425]: k
+                - cell "fertilizer P supplemented to the HPS" [ref=e426]
+                - cell [ref=e427]:
+                  - text: "[kg d"
+                  - superscript [ref=e428]: −1
+                  - text: "]"
+                - cell "[0, 5]" [ref=e429]
+                - cell "[0, 5]" [ref=e430]
+              - row [ref=e431]:
+                - cell [ref=e432]:
+                  - generic [ref=e433]:
+                    - emphasis [ref=e434]: F
+                    - subscript [ref=e435]:
+                      - emphasis [ref=e436]: manure
+                    - superscript [ref=e437]:
+                      - emphasis [ref=e438]: tot
+                - cell "diluted manure (5% Total solid level) used in AD1 and AD2" [ref=e439]
+                - cell [ref=e440]:
+                  - text: "[m"
+                  - superscript [ref=e441]: "3"
+                  - text: d
+                  - superscript [ref=e442]: −1
+                  - text: "]"
+                - cell [ref=e443]:
+                  - emphasis [ref=e444]: "N"
+                  - text: /
+                  - emphasis [ref=e445]: A
+                - cell "[0, 0.4], [0, 0.35] [0, 0.8], [0, 0.5]" [ref=e446]
+              - row [ref=e447]:
+                - cell [ref=e448]
+              - row [ref=e449]:
+                - cell [ref=e450]:
+                  - strong [ref=e451]: System
+                - cell [ref=e452]:
+                  - strong [ref=e453]: Constraint
+                - cell [ref=e454]:
+                  - strong [ref=e455]: Unit
+                - cell [ref=e456]:
+                  - strong [ref=e457]: Description
+              - row [ref=e458]:
+                - cell [ref=e459]
+              - row [ref=e460]:
+                - cell "RAS" [ref=e461]
+                - cell [ref=e462]:
+                  - generic [ref=e463]:
+                    - text: 0 ≤
+                    - emphasis [ref=e464]: C
+                    - subscript [ref=e465]:
+                      - emphasis [ref=e466]: "NO"
+                      - subscript [ref=e467]: "3"
+                    - superscript [ref=e468]:
+                      - emphasis [ref=e469]: RAS
+                    - text: ≤ 200
+                - cell [ref=e470]:
+                  - text: "[mg L"
+                  - superscript [ref=e471]: −1
+                  - text: "]"
+                - cell "nitrate cap" [ref=e472]
+              - row [ref=e473]:
+                - cell "RAS" [ref=e474]
+                - cell [ref=e475]:
+                  - generic [ref=e476]:
+                    - emphasis [ref=e477]: C
+                    - subscript [ref=e478]:
+                      - emphasis [ref=e479]: TAN
+                    - superscript [ref=e480]:
+                      - emphasis [ref=e481]: RAS
+                    - text: ≤ 4
+                - cell [ref=e482]:
+                  - text: "[mg L"
+                  - superscript [ref=e483]: −1
+                  - text: "]"
+                - cell "TAN cap" [ref=e484]
+              - row [ref=e485]:
+                - cell "HPS" [ref=e486]
+                - cell [ref=e487]:
+                  - generic [ref=e488]:
+                    - text: 105 ≤
+                    - emphasis [ref=e489]: C
+                    - subscript [ref=e490]:
+                      - emphasis [ref=e491]: "N"
+                    - superscript [ref=e492]:
+                      - emphasis [ref=e493]: HPS
+                    - text: ≤ 250
+                - cell [ref=e494]:
+                  - text: "[mg L"
+                  - superscript [ref=e495]: −1
+                  - text: "]"
+                - cell "N target band" [ref=e496]
+              - row [ref=e497]:
+                - cell "HPS" [ref=e498]
+                - cell [ref=e499]:
+                  - generic [ref=e500]:
+                    - text: 30 ≤
+                    - emphasis [ref=e501]: C
+                    - subscript [ref=e502]:
+                      - emphasis [ref=e503]: P
+                    - superscript [ref=e504]:
+                      - emphasis [ref=e505]: HPS
+                    - text: ≤ 56
+                - cell [ref=e506]:
+                  - text: "[mg L"
+                  - superscript [ref=e507]: −1
+                  - text: "]"
+                - cell "P target band" [ref=e508]
+              - row [ref=e509]:
+                - cell "AD1" [ref=e510]
+                - cell [ref=e511]:
+                  - text: 1 ≤
+                  - emphasis [ref=e512]: TS
+                  - subscript [ref=e513]:
+                    - emphasis [ref=e514]: AD
+                    - text: 1,
+                    - emphasis [ref=e515]: in
+                  - text: ≤ 4
+                - cell "[%]" [ref=e516]
+                - cell "sludge TS feasibility" [ref=e517]
+              - row [ref=e518]:
+                - cell "AD2" [ref=e519]
+                - cell [ref=e520]:
+                  - text: 1 ≤
+                  - emphasis [ref=e521]: VS
+                  - subscript [ref=e522]:
+                    - emphasis [ref=e523]: AD
+                    - text: 2,
+                    - emphasis [ref=e524]: in
+                  - text: ≤ 2
+                - cell [ref=e525]:
+                  - text: "[g VS L"
+                  - superscript [ref=e526]: −1
+                  - text: d
+                  - superscript [ref=e527]: −1
+                  - text: "]"
+                - cell "volatile solid load feasibility" [ref=e528]
+              - row [ref=e529]:
+                - cell "AD1 & AD2" [ref=e530]
+                - cell [ref=e531]:
+                  - generic [ref=e532]:
+                    - emphasis [ref=e533]: F
+                    - subscript [ref=e534]:
+                      - emphasis [ref=e535]: manure
+                    - superscript [ref=e536]:
+                      - emphasis [ref=e537]: tot
+                    - text: =
+                    - emphasis [ref=e538]: F
+                    - subscript [ref=e539]:
+                      - emphasis [ref=e540]: chick
+                    - text: +
+                    - emphasis [ref=e541]: F
+                    - subscript [ref=e542]:
+                      - emphasis [ref=e543]: cow
+                    - text: +
+                    - emphasis [ref=e544]: F
+                    - subscript [ref=e545]:
+                      - emphasis [ref=e546]: pig
+                - cell [ref=e547]:
+                  - text: "[m"
+                  - superscript [ref=e548]: "3"
+                  - text: d
+                  - superscript [ref=e549]: −1
+                  - text: "]"
+                - cell "manure split equality" [ref=e550]
+              - row [ref=e551]:
+                - cell "All" [ref=e552]
+                - cell [ref=e553]:
+                  - text: ∑
+                  - emphasis [ref=e554]: F
+                  - subscript [ref=e555]:
+                    - emphasis [ref=e556]: in
+                    - text: ","
+                    - emphasis [ref=e557]: k
+                  - text: = ∑
+                  - emphasis [ref=e558]: F
+                  - subscript [ref=e559]:
+                    - emphasis [ref=e560]: out
+                    - text: ","
+                    - emphasis [ref=e561]: k
+                - cell [ref=e562]:
+                  - text: "[m"
+                  - superscript [ref=e563]: "3"
+                  - text: d
+                  - superscript [ref=e564]: −1
+                  - text: "]"
+                - cell "closed volume balance" [ref=e565]
+        - generic [ref=e566]:
+          - paragraph [ref=e568]: Description of the key performance indicators (KPIs)
+          - table [ref=e569]:
+            - rowgroup [ref=e570]:
+              - row [ref=e571]:
+                - columnheader "KPI" [ref=e572]
+                - columnheader "Mass balance description" [ref=e573]
+            - rowgroup [ref=e574]:
+              - row [ref=e575]:
+                - cell "WUE" [ref=e576]
+                - 'cell "$1 - \\frac{\\sum\\limits_{k}\\left( {F_{dis,k}^{RAS} + F_{dis,k}^{HPS}} \\right)}{\\sum_{k = 1}^{N}F_{clean\\ water,k}^{total,in}}$" [ref=e577]'
+              - row [ref=e578]:
+                - cell "NUE" [ref=e579]
+                - 'cell "$1 - \\frac{\\sum\\limits_{k = 1}\\left( {F_{dis,k}^{RAS} \\cdot C_{N_{soluble},k}^{RAS} + F_{dis,k}^{HPS} \\cdot C_{N_{soluble},k}^{HPS} + {M_{N}}_{digestate,k}} \\right)}{\\sum\\limits_{k = 1}\\left( {M_{N_{feed},k} + M_{N_{fert},k} + M_{N_{\\ manure},k}} \\right)}$" [ref=e580]'
+              - row [ref=e581]:
+                - cell "PUE" [ref=e582]
+                - 'cell "$1 - \\frac{\\sum\\limits_{k = 1}\\left( {F_{dis,k}^{RAS} \\cdot C_{P_{soluble}}^{RAS} + F_{dis,k}^{HPS} \\cdot C_{P_{soluble}}^{HPS} + {M_{P}}_{digestate,k}} \\right)}{\\sum\\limits_{k = 1}\\left( {M_{P_{feed},k} + M_{P_{fert},k} + M_{P_{\\ manure},k}} \\right)}$" [ref=e583]'
+              - row [ref=e584]:
+                - cell "NSS" [ref=e585]
+                - 'cell "$\\frac{\\sum\\limits_{k = 1}{\\left( {M_{N,k}^{RAS\\rightarrow HPS} + M_{N,k}^{AD_{1}\\rightarrow HPS} + M_{N,k}^{AD_{2}\\rightarrow HPS}} \\right)\\ }}{\\sum\\limits_{k = 1}\\left( {M_{N,k}^{RAS\\rightarrow HPS} + M_{N,k}^{AD_{1}\\rightarrow HPS} + M_{N,k}^{AD_{2}\\rightarrow HPS} + M}_{N_{fert},k} \\right)}$" [ref=e586]'
+              - row [ref=e587]:
+                - cell "PSS" [ref=e588]
+                - 'cell "$\\frac{\\sum\\limits_{k = 1}{\\left( {M_{P,k}^{RAS\\rightarrow HPS} + M_{P,k}^{AD_{1}\\rightarrow HPS} + M_{P,k}^{AD_{2}\\rightarrow HPS}} \\right)\\ }}{\\sum\\limits_{k = 1}\\left( {M_{P,k}^{RAS\\rightarrow HPS} + M_{P,k}^{AD_{1}\\rightarrow HPS} + M_{P,k}^{AD_{2}\\rightarrow HPS} + M}_{P_{fert},k} \\right)}$" [ref=e589]'
+          - paragraph [ref=e590]: KPIs allow to quantify water discharge requirements (WUE), squandering of nitrogen (NUE) and phosphorus (PUE) relative to total inputs. The numerator of the use-efficiency KPIs are losses and denominator are inputs. The amount of synthetic fertilizer relative to total inputs used in the hydroponic production system is measured using the nutrient self-sufficiency for nitrogen (NSS) and phosphorus (PSS). The numerator of the self-sufficiency is expressed as the nutrients originating from within the network over the total inputs.
+        - paragraph [ref=e591]: DAP networks were optimized by selecting the hydroponic area and control trajectories under the constraint that only dissolved nutrients are available to the crop. Across all three locations, the optimizer converged to the same operating principle since the hydroponic greenhouse was sized such that nitrogen could be maintained close to the lower hydroponic N boundary. This limits dissolved-nitrogen losses and avoids water discharge from the aquaculture-hydroponic loop, but pushes P demand, which requires substantial supplementation (PSS = 8%).
+        - paragraph [ref=e592]:
+          - text: Integrating anaerobic digestion within a RAS-HPS network enables recovery and reuse of nutrients contained in fish sludge and plant residues, alleviating phosphorus limitation and improving overall resource retention. Compared with DAP, wasted N decreased by 32% in Jakarta (157–107 gN m
+          - superscript [ref=e593]: −2
+          - text: ), 47% in Cairo (154–81 gN m
+          - superscript [ref=e594]: −2
+          - text: ), and 59% in Amsterdam (127–53 gN m
+          - superscript [ref=e595]: −2
+          - text: ), while wasted P decreased by 46% (46–25 gP m
+          - superscript [ref=e596]: −2
+          - text: ), 18% (46–38 gP m
+          - superscript [ref=e597]: −2
+          - text: ), and 40% (37–22 gP m
+          - superscript [ref=e598]: −2
+          - text: ), respectively. Consequently, the Jakarta base and extended configurations in Cairo and Amsterdam achieved full phosphorus self-sufficiency (PSS = 100%) without synthetic P additions, whereas DAP required 18–30 gP m
+          - superscript [ref=e599]: −2
+          - text: yr
+          - superscript [ref=e600]: −1
+          - text: of fertilizer (≈23%–26% of total P inputs). Total water inputs were also reduced in IAA by 23% in Jakarta (1237–955 L m
+          - superscript [ref=e601]: −2
+          - text: ), 7% in Cairo (1232–1140 L m
+          - superscript [ref=e602]: −2
+          - text: ), and 43% in Amsterdam (1284–730 L m
+          - superscript [ref=e603]: −2
+          - text: ). All optimized scenarios avoided liquid discharge. Remaining water loss occurred via wet solids (9.3–16.2 L m
+          - superscript [ref=e604]: −2
+          - text: in IAA, Table 1). In the manure-extended cases, mineral-input footprints decreased from 4.7 to 3.71 kgCO
+          - subscript [ref=e605]: "2"
+          - text: "-eq m"
+          - superscript [ref=e606]: −2
+          - text: in Cairo and from 4.7 to 2.36 kgCO
+          - subscript [ref=e607]: "2"
+          - text: "-eq m"
+          - superscript [ref=e608]: −2
+          - text: in Amsterdam, alongside large reductions in squandered minerals (−65% and −81%).
+    - generic [ref=e609]:
+      - heading "Discussion" [level=3] [ref=e610]
+      - paragraph [ref=e611]: "We treat an integrated recirculating aquaculture system (RAS) and hydroponic production system (HPS), coupled to anaerobic digestion, as a dynamic resource-allocation problem, in which time-varying, waste-derived nitrogen (N) and phosphorus (P) streams must be allocated to meet crop demand while maintaining fish- and crop water-quality constraints. By translating this coupled design-operation problem into a constrained optimal control problem, we position circular aqua-agriculture within the optimal control literature on constrained dynamic resource allocation. This connects our work to optimal-control studies in aquaculture, often focused on operational and economic decisions such as feeding regimes, stocking densities, harvesting, and system sizing and to agricultural optimal control, where applications range from minimizing actuator inputs while maximizing greenhouse climate conditions to efficient irrigation strategies. In the integrated setting, the aquaculture and hydroponic domains become coupled: operating policies that improve circularity (e.g., reduced discharge, higher nutrient reuse) can restrict feasible operating choices and change the best operating strategy, creating explicit trade-offs between resource conservation, operational robustness, and when economic objectives are included profitability."
+      - paragraph [ref=e612]: The optimal-control problem that we have defined (Equations 1, 2, 3, 4, 5, 6, 7, and 8) is nonconvex, due to the nonlinear terms in the mass-balance equations where control flows are multiplied by time-varying concentration states. Therefore, the existence of a globally unique optimum cannot be analytically guaranteed. Instead, multiple local optima may exist due to nonlinearity and nonconvexity. The feasibility of the solution is ensured numerically by the fulfillment of the KKT conditions within the IPOPT solver. From a control-theoretic perspective, the feasibility of the “closed-loop” state is constrained by the controllability of the nutrient ratios. In the base configuration (digesters treating only fish sludge and plant residues), the lack of independent control over N and P mineralization can lead to two types of “trapped” states. The first type is a deficit which can only be solved via supplementation of synthetic fertilizer, while the second type involves oversaturation where discharge of nutrient-rich water becomes the only feasible action to prevent accumulation. The introduction of manure co-digestion in the extended configuration adds an independent control input, which allows adjustment of the N:P supply ratio and hence restores feasibility of discharge-free operation. Even when multiple local optima exist, the resulting trajectories are still physically consistent and align with the limits set by mass balances and operating constraints of the network.
+      - paragraph [ref=e613]: Solving the optimal control problem separately for tropical, arid, and temperate climates shows that closed-loop operation in the base configuration is readily achievable under weak seasonality (Jakarta, Indonesia), becomes marginally P-limited under moderate seasonality (Cairo, Egypt), and requires discharge plus external synthetic fertilizers under strong seasonality due to N oversaturation and stronger P deficits (Amsterdam, the Netherlands). As seasonal variability increases, the network alternates more frequently between oversupply (cold, low-ET periods) and undersupply (warm, high-ET periods), making it harder to align waste-derived nutrient release with crop demand.
+      - paragraph [ref=e614]: Differences between N and P biogeochemistry help explain why P-based indicators (e.g., PUE/PSS) are lower or more sensitive than N-based indicators as seasonality intensifies. N is largely (60%–90%) excreted by fish in dissolved form (TAN), which is readily available for plant uptake, while losses via nitrification-denitrification depend on oxygenation and process conditions. In contrast, P is predominantly retained in solids and must first be mineralized before becoming available to plants. Moreover, during organic-matter breakdown under near-neutral pH, released orthophosphate can be re-immobilized through precipitation or binding with metals (e.g., Fe, Mg), reducing the fraction that remains soluble and directly available for uptake. Together, variable mineralization and partial re-immobilization reduce the controllability of P relative to N, which can cause differences in N:P supply ratios and amplify seasonal supply-demand mismatches. In the present model, these processes are captured by a lumped mineralization coefficient and are not resolved individually. Disentangling the contributions of precipitation, microbial immobilization, and incomplete hydrolysis would require coupling biokinetic and geochemical speciation models, which remains an important direction for improving nutrient recovery predictions.
+      - paragraph [ref=e615]: To address such imbalances, strategies such as desalination or buffer tanks have been proposed to concentrate nutrients or temporarily store and release them between low- and high-demand periods. Our optimization results and perturbation analysis suggest that such strategies can be omitted by adding an external mineralizable organic co-substrate to the digesters. When combined with an HPS sized beyond the internal waste-derived supply capacity, additional crop uptake helps consume nutrients during low-demand periods (reducing accumulation risk), while co-digestion supplies limiting nutrients during peak-demand periods.
+      - paragraph [ref=e616]: "In the manure-extended networks for Cairo and Amsterdam, co-digestion with livestock manure provided this additional flexibility and enabled closure of both N and P loops when combined with nutrient-rich RAS water. We considered three representative livestock manures with contrasting N:P ratios: chicken (3:1), pig (2.4:1), and cow (4.5:1). The optimizer selected predominantly pig manure in Cairo (85% of total input), whereas chicken manure was preferred in Amsterdam (71%). This difference originates from choosing an HPS area that matches the internal waste-derived nutrient supply during winter (or lowest evapotranspiration period). Subsequently, the optimal design in Amsterdam will require a larger HPS:RAS ratio compared to Cairo and is therefore more prone to nutrient deficits during summer (or highest evapotranspiration period). Under these conditions, the preferred co-substrate is the one that supplies sufficient mineralizable nutrients while keeping the N:P balance close to crop demand, which depends on both the N:P ratio and the amount of N and P supplied per unit of input under the evaluated bounds. This explains why chicken manure was favored over cattle manure in Amsterdam: despite cattle manure’s higher N:P ratio, it contributes less P relative to the required seasonal balance, so using it to cover peak-demand deficits would push the system toward N surplus. In Cairo, the required oversizing is smaller and P remains the dominant limiting nutrient, favoring a more P-targeted co-substrate such as pig manure. Overall, these results show that co-digestion is not only a way to address the mismatch between waste-derived nutrient supply and crop demand, but also a route to reduce external virgin inputs and nutrient-rich water losses under seasonal climates."
+      - paragraph [ref=e617]: The perturbation analysis further shows how co-digestion can improve robustness against parameter uncertainty propagation between coupled systems. In the internal-waste-only baseline, under tropical conditions KPI sensitivity is mainly driven by evapotranspiration (demand) and FCR (supply). As seasonality increases, the feasible operating window narrows and parameters that cause negligible changes under tropical conditions can become influential. In the temperate case, for example, perturbations in fish excretion partitioning were sufficient to push N or P trajectories toward water-quality bounds, occasionally triggering discharge or external supplementation to remain feasible. Introducing manure adds an extra control layer that is tunable in flow, and to a certain extent in composition, and allows the optimizer to compensate for temporary shifts in under- and oversupply while keeping state constraints satisfied. In the manure-extended cases, this additional adjustable input was able to suppress KPI sensitivity (ΔWUE/ΔPSS ≈0 under ±20% perturbations) and therefore also reduced uncertainty propagation through the coupled mass balances. The errors originating in one system (e.g., mineralization coefficient, evapotranspiration) can subsequently be absorbed before cascading into downstream states and decisions. However, this improved robustness comes at the expense of additional capacity requirements (higher digester volume throughputs and larger HPS sizing relative to RAS).
+      - paragraph [ref=e618]:
+        - text: "To quantify how the additional flexibility of anaerobic digestion improves the network performance we compared it with optimized decoupled aquaponics networks (RAS-HPS). Across the three climate cases, integrating anaerobic digestion reduced nutrient losses substantially relative to optimized decoupled aquaponics (DAP). Wasted N decreased by around 46% on average (range: 32%–59%) and wasted P decreased by 35% on average (range: 18%–46%). In the best-performing integrated aqua-agriculture configurations, synthetic P inputs were eliminated and discharge was avoided, saving roughly 18–30 gP m"
+        - superscript [ref=e619]: −2
+        - text: yr
+        - superscript [ref=e620]: −1
+        - text: relative to optimized DAP. This corresponded to an average 20% reduction in mineral-input CO
+        - subscript [ref=e621]: "2"
+        - text: "-eq (from virgin fertilizer manufacture) and a 60% reduction in squandered-minerals CO"
+        - subscript [ref=e622]: "2"
+        - text: "-eq per unit of cultivated area."
+      - paragraph [ref=e623]:
+        - text: Taken together, these reductions indicate that recovering nutrients from particulate waste streams, either internally generated (fish sludge and plant residues) or imported as a co-substrate, can substantially improve circular performance relative to decoupled aquaponics. The resource-efficiency gains identified in this study point to a larger global opportunity. A substantial share (often more than half for some species) of the N and P supplied in feed ultimately ends up in residual waste streams, across an estimated ∼58 million tons of fish feed used annually. Since aquaculture production is concentrated in many regions of the Global South (∼95% of global output), approaches that reduce reliance on virgin fertilizers by improving internal reuse may also strengthen resilience to input price volatility and help to improve food security. Beyond waste mitigation, fish-feed production itself poses environmental and economic challenges due to reliance on fishmeal and soybean meal. Within the network, valorizing the anaerobic digestate, the main remaining waste stream in our model, could further strengthen circularity. Options include conversion to insects (e.g., black soldier fly larvae), algae, or duckweed to recycle nutrients into feed, CO
+        - subscript [ref=e624]: "2"
+        - text: capture from biogas use for greenhouse enrichment, or bioplastic pathways from fish scales and plant residues. Such cascading use may be facilitated in eco-industrial food parks where firms co-locate and exchange by-products. Despite the pressing need, economic hurdles still hinder adoption of on-site waste-upcycling technologies. For example, it was found that large-scale anaerobic digestion of mixed farm residues in the Netherlands was unprofitable without subsidies, mainly due to transport costs and application limits that restricted fertilizer sales. In the integrated network proposed here, internal reuse can reduce disposal and fertilizer costs, but investment and operating costs remain non-trivial and profitability will likely depend on scale and logistics. However, looking forward, the economic tables might turn as resource scarcity and environmental policy instruments (e.g., carbon pricing or nutrient-emission regulation) could raise the cost of virgin fertilizers and feeds used in the aquaculture/livestock sector and incentivize circular resource recovery, potentially turning on-site anaerobic digestion from a cost burden into a competitive advantage.
+      - generic [ref=e625]:
+        - heading "Limitations of the study" [level=4] [ref=e626]
+        - paragraph [ref=e627]: It should be emphasized that this study is exploratory and primarily methodological. The main insights do not depend on precise parameter values, but on structural constraints, the admissible decision variables, and the optimization framework itself. Full validation at integrated-network scale remains challenging because large-scale coupled systems of the type modeled here are not yet widely available. Consequently, we rely on modular validation against literature-reported ranges for subsystem performance. Future pilot data would enable integrated validation and parameter identification, supporting site-specific engineering design and stronger uncertainty quantification.
+        - paragraph [ref=e628]: Several modeling simplifications may nonetheless influence the quantitative optima. The anaerobic digesters are represented using zeroth-order mineralization kinetics rather than ADM1-level biochemical detail, thereby omitting intermediate metabolite dynamics, microbial community effects, and pathway-specific inhibition. As a result, the model cannot fully resolve the fate and form of phosphorus and nitrogen during digestion, and may misrepresent the timing and extent of nutrient release under co-digestion, as well as the scope for optimizing reactor operation with respect to inhibition risk (e.g., ammonia, volatile fatty acids [VFAs]), crop-specific VFA tolerance, and plant-available nutrient recovery. Similarly, the radiation- and evapotranspiration-driven crop model tends to overpredict lettuce yields by 10%–20% under high-radiation conditions, which could affect optimal system sizing. The sensitivity assessment is also scenario-based (±20% perturbations) rather than probabilistic, as parameter distributions for integrated operation are not yet available.
+        - paragraph [ref=e629]: More broadly, the mass-balance KPIs do not capture greenhouse-gas emissions, logistics, storage losses, or residual organics in digestate. Life cycle and techno-economic assessment will be needed to translate resource-efficiency gains into net sustainability benefits. In addition, the loop-closing strategy presupposes controllable and capturable waste streams and is therefore most applicable to intensive or semi-closed production systems, whereas most global aquaculture still relies on ponds and open-water cages.
+        - paragraph [ref=e631]:
+          - text: "Source: de Korte, M. et al. (2026), “Climate dependent feasibility of closing water and nutrient cycles in industrial aqua-agriculture,”"
+          - emphasis [ref=e632]: iScience
+          - text: ", DOI 10.1016/j.isci.2026.116266. © 2026 the authors."
+          - link "CC BY 4.0" [ref=e633] [cursor=pointer]:
+            - /url: https://creativecommons.org/licenses/by/4.0/
+          - text: .
+        - paragraph [ref=e635]:
+          - link "Read the original at source →" [ref=e636] [cursor=pointer]:
+            - /url: https://doi.org/10.1016/j.isci.2026.116266

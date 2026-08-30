@@ -9,6 +9,7 @@ original reader briefs and canonical links.
 from __future__ import annotations
 
 import html
+import os
 import re
 import shutil
 import subprocess
@@ -19,6 +20,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 ASSETS = ROOT / "epub_assets"
+EDITION_SOURCE = ROOT / "editions" / "cerulean_crest_2026-08-25.md"
+GRINDSLOP_SOURCE = ROOT / "test.html"
 OUTPUT = ROOT / "deliverables" / "cerulean_crest_2026-08-25.epub"
 
 USER_AGENT = "Cerulean-Crest-EPUB-Builder/1.0 (personal reading edition)"
@@ -45,9 +48,9 @@ def run(*args: str, cwd: Path | None = None) -> None:
 
 def margin_note(text: str) -> str:
     return (
-        '<aside class="editorial-note"><p>'
+        '<div class="editorial-note"><p>'
         '<span class="editorial-label">Editor’s margin.</span> '
-        f"{text}</p></aside>"
+        f"{text}</p></div>"
     )
 
 
@@ -59,12 +62,115 @@ def source_link(url: str, label: str = "Read the original at source") -> str:
 
 
 def article_header(item: dict[str, str]) -> str:
+    body = item["body"]
+    if body == "__GRINDSLOP__":
+        status_class = "original"
+        status_text = "Original article"
+    elif body == "__PAPER__":
+        status_class = "original"
+        status_text = "Original article · Selected sections"
+    elif body == "__IEA__":
+        status_class = "original"
+        status_text = "Original source · Edited extract"
+    else:
+        status_class = "summary"
+        status_text = "Editorial summary"
     return f"""
-<h2>{item['title']}</h2>
-<p class="item-number">Item {item['number']} · {item['section']}</p>
-<p class="byline">{item['byline']}</p>
-<p class="reading-meta">{item['meta']}</p>
+<h2>{html.escape(item['title'])}</h2>
+<p class="article-subhead">{html.escape(item['byline'])}</p>
+<div class="content-status content-status-{status_class}"><p>{status_text}</p></div>
+<p class="reading-meta">{html.escape(item['meta'])}</p>
 {margin_note(item['margin'])}
+"""
+
+
+def plain_text(fragment: str) -> str:
+    """Reduce the small HTML fragments used in the Markdown to plain text."""
+    return html.unescape(re.sub(r"<[^>]+>", "", fragment)).strip()
+
+
+def parse_edition_source() -> dict[str, object]:
+    """Read edition metadata and editor's notes from the saved Markdown."""
+    source = EDITION_SOURCE.read_text(encoding="utf-8")
+    title_match = re.search(r"^# ([^\n]+)$", source, flags=re.MULTILINE)
+    date_match = re.search(r"^## ([^\n]+)$", source, flags=re.MULTILINE)
+    summary_match = re.search(r"^\*\*(\d+ items[^\n]+)\*\*$", source, flags=re.MULTILINE)
+    editor_match = re.search(
+        r"^### Editor's note\s*\n\s*<small>(.*?)</small>",
+        source,
+        flags=re.MULTILINE | re.DOTALL,
+    )
+    if not all([title_match, date_match, summary_match, editor_match]):
+        raise ValueError(f"Could not parse edition header from {EDITION_SOURCE}")
+
+    article_matches = list(
+        re.finditer(r"^## (\d+)\. ([^\n]+)$", source, flags=re.MULTILINE)
+    )
+    items: list[dict[str, str]] = []
+    for index, match in enumerate(article_matches):
+        end = article_matches[index + 1].start() if index + 1 < len(article_matches) else len(source)
+        block = source[match.end():end]
+        section_matches = re.findall(r"^# ([^\n]+)$", source[:match.start()], flags=re.MULTILINE)
+        if not section_matches:
+            raise ValueError(f"No section heading found for item {match.group(1)}")
+
+        byline_match = re.search(r"^\*\*([^*\n]+)\*\*\s*$", block, flags=re.MULTILINE)
+        reading_match = re.search(
+            r"^\*\*(?:Estimated reading time|Duration):\*\*\s*([^\n]+)$",
+            block,
+            flags=re.MULTILINE,
+        )
+        type_match = re.search(r"^\*\*Type:\*\*\s*([^\n]+)$", block, flags=re.MULTILINE)
+        url_match = re.search(
+            r"^\*\*(?:DOI / canonical link|Canonical link):\*\*\s*(\S+)",
+            block,
+            flags=re.MULTILINE,
+        )
+        note_match = re.search(r"<small>(.*?)</small>", block, flags=re.DOTALL)
+        if not all([byline_match, reading_match, type_match, url_match, note_match]):
+            raise ValueError(f"Could not parse item {match.group(1)} from {EDITION_SOURCE}")
+
+        note = plain_text(note_match.group(1))
+        note = re.sub(r"^Editor's note:\s*", "", note)
+        items.append(
+            {
+                "number": match.group(1),
+                "section": section_matches[-1],
+                "title": match.group(2).strip(),
+                "byline": byline_match.group(1).strip(),
+                "meta": " · ".join(
+                    [reading_match.group(1).strip(), type_match.group(1).strip()]
+                ),
+                "url": url_match.group(1).strip(),
+                "margin": note,
+            }
+        )
+
+    return {
+        "title": title_match.group(1).strip(),
+        "date": date_match.group(1).strip(),
+        "summary": summary_match.group(1).strip(),
+        "editor_note": plain_text(editor_match.group(1)),
+        "items": items,
+    }
+
+
+def build_grindslop_html() -> str:
+    """Extract the article and its local media from the user-supplied reading copy."""
+    source = GRINDSLOP_SOURCE.read_text(encoding="utf-8")
+    hero_match = re.search(
+        r'(<figure class="hero">.*?</figure>)', source, flags=re.DOTALL
+    )
+    article_match = re.search(r"<article>(.*?)</article>", source, flags=re.DOTALL)
+    if not hero_match or not article_match:
+        raise ValueError(f"Could not extract article content from {GRINDSLOP_SOURCE}")
+    article = re.sub(r'\sloading="lazy"', "", article_match.group(1))
+    hero = re.sub(r'\sloading="lazy"', "", hero_match.group(1))
+    return f"""
+<div class="grindslop-article">
+{hero}
+{article}
+</div>
 """
 
 
@@ -85,9 +191,24 @@ def build_paper_html(work: Path) -> str:
     )
     converted = raw_html_path.read_text(encoding="utf-8")
 
-    start = converted.index('<h1 id="sec1">')
-    end = converted.index('<h1 id="sec4">')
-    main_text = converted[start:end]
+    introduction_start = converted.index('<h1 id="sec1">')
+    introduction_end = converted.index('<h1 id="sec2">')
+    main_text = converted[introduction_start:introduction_end]
+
+    # Include a standalone Conclusion/Conclusions section when the source has
+    # one. This article ends with Discussion instead, so no long substitute is
+    # silently introduced.
+    conclusion_match = re.search(
+        r'<h1\b[^>]*>\s*Conclusions?\s*</h1>', converted, flags=re.IGNORECASE
+    )
+    if conclusion_match:
+        next_heading = re.search(r"<h1\b", converted[conclusion_match.end():])
+        conclusion_end = (
+            conclusion_match.end() + next_heading.start()
+            if next_heading
+            else len(converted)
+        )
+        main_text += converted[conclusion_match.start():conclusion_end]
 
     # The EPUB article heading is H2; keep the paper's own hierarchy beneath it.
     main_text = re.sub(
@@ -117,21 +238,18 @@ def build_paper_html(work: Path) -> str:
     )
     main_text = main_text.replace("<sup>,</sup>", "")
 
-    for name in ["ga1", "gr1", "gr2", "gr3", "gr4", "gr5", "gr6", "gr7"]:
-        (work / f"{name}.jpg").write_bytes(
-            fetch(PAPER_IMAGE_BASE.format(name=name))
-        )
+    for name in ["ga1", "gr1"]:
+        (work / f"{name}.jpg").write_bytes(fetch(PAPER_IMAGE_BASE.format(name=name)))
 
     return f"""
-<p class="format-label">Open-access research article · Main text</p>
 <p class="paper-authors">Milan de Korte, Joris Bergman, L. Gerard van
 Willigenburg, Victor Lobanov, Alyssa Joyce, Xiaodong Cheng &amp; Karel J.
 Keesman · <em>iScience</em> 29(6), 116266 · 8 June 2026</p>
 <div class="licence-note"><p><strong>Included under CC BY 4.0.</strong>
-This reading version contains the summary, highlights, introduction, results,
-discussion and limitations. STAR Methods, references and supplementary files are
-available at the source. Formatting and heading levels were adapted for EPUB;
-the scientific text was not rewritten.</p></div>
+This reading version contains the article’s Summary, Highlights and Introduction.
+The source has no standalone Conclusion section; Results, Discussion, STAR Methods,
+references and supplementary files remain at the source. Formatting and heading
+levels were adapted for EPUB; the scientific text was not rewritten.</p></div>
 <h3>Summary</h3>
 <p>In integrated aqua-agriculture, matching waste-derived nutrient supply with
 crop demand while maintaining optimal fish and crop conditions remains
@@ -166,7 +284,6 @@ aqua-agriculture,” <em>iScience</em>, DOI 10.1016/j.isci.2026.116266.
 
 
 IEA_BODY = """
-<p class="format-label">Open-licensed report chapter · Online reading version</p>
 <div class="licence-note"><p><strong>Included under CC BY 4.0.</strong>
 This substantial reading extract is adapted from the IEA’s online “Grids” chapter.
 Web navigation and chart controls were removed, the online table was shortened,
@@ -289,7 +406,7 @@ Changes are described above.</p></div>
 """
 
 
-ITEMS: list[dict[str, str]] = [
+BODY_ITEMS: list[dict[str, str]] = [
     {
         "number": "1",
         "section": "Read First",
@@ -521,57 +638,77 @@ announcement.</p>
     {
         "number": "12",
         "section": "Serendipity",
-        "title": "Don’t Eat Before Reading This",
-        "byline": "Anthony Bourdain · The New Yorker · 12 April 1999",
-        "meta": "14 min · First-person essay · Reader brief",
-        "url": "https://www.newyorker.com/magazine/1999/04/19/dont-eat-before-reading-this",
-        "margin": "Read it as a voice-rich essay about kitchens, craft and work—not as current food-safety guidance.",
+        "title": "The End of the Future",
+        "byline": "Peter Thiel · National Review · 3 October 2011",
+        "meta": "18 min · Long-form argument · Reader brief",
+        "url": "https://www.nationalreview.com/2011/10/end-future-peter-thiel/",
+        "margin": "Read this 2011 argument as a diagnosis to test against what happened next, not as a settled history of technological progress.",
         "body": """
-<p class="synopsis-lead">Bourdain writes from inside a skilled, chaotic physical
-workplace where hierarchy, timing, cost pressure, bodily endurance and camaraderie
-matter as much as culinary taste.</p>
-<p>The essay’s lasting value is professional texture: the codes by which a kitchen
-recognises competence, the compromises made under service pressure, and the pride
-that emerges from difficult collective work. Some restaurant and supply-chain
-claims are historically dated, including advice Bourdain later reconsidered. The
-voice and account of craft are the reason to read it.</p>
+<p class="synopsis-lead">Thiel argues that the broad technological acceleration
+expected in the mid-twentieth century narrowed after the 1970s, leaving computing
+as an exception rather than the rule.</p>
+<p>The essay connects slower progress in transport, energy, medicine and physical
+infrastructure to weaker growth and political strain. Its value here is the
+question it poses to an edition about productive capacity: which kinds of progress
+can society still build reliably, and what blocks the rest? The argument is both
+historical and political; subsequent advances in AI, batteries, renewable energy
+and commercial spaceflight provide evidence with which to update it.</p>
 """,
+    },
+    {
+        "number": "13",
+        "section": "Serendipity",
+        "title": "On Grindslop",
+        "byline": "Will Manidis · X Articles · 20 May 2026",
+        "meta": "20 min · Cultural essay · Full user-supplied text",
+        "url": "https://x.com/WillManidis/status/2057094527236665598",
+        "margin": "Separate the useful distinction between hard work and performed suffering from the essay’s deliberately provocative rhetoric.",
+        "body": "__GRINDSLOP__",
     },
 ]
 
 
 def build_html(work: Path) -> str:
+    edition = parse_edition_source()
     paper = build_paper_html(work)
+    body_by_number = {item["number"]: item for item in BODY_ITEMS}
+    source_items = edition["items"]
+    assert isinstance(source_items, list)
+
+    items: list[dict[str, str]] = []
+    for source_item in source_items:
+        body_item = body_by_number.get(source_item["number"])
+        if body_item is None:
+            raise ValueError(
+                f"No EPUB body is configured for item {source_item['number']}: "
+                f"{source_item['title']}"
+            )
+        items.append({**body_item, **source_item})
+
+    title = html.escape(str(edition["title"]))
+    date = html.escape(str(edition["date"]))
+    summary = html.escape(str(edition["summary"]))
+    editor_note = html.escape(str(edition["editor_note"]))
     chunks = [
-        """
-<div class="masthead">
-  <p class="masthead-kicker">Volume 1 · Number 1</p>
-  <p class="masthead-title">Cerulean Crest</p>
-  <p class="masthead-date">25 August 2026</p>
-  <hr class="masthead-rule" />
-  <p class="edition-deck">Building real things, and understanding the systems around them.</p>
-</div>
+        f"""
 <h1>About this edition</h1>
-<p>This first issue moves from design-for-manufacturing and practical motor control
-through South African infrastructure, production and labour data, into circular
-aqua-agriculture and global electricity grids. The final essay changes register
-entirely.</p>
-<aside class="editorial-note"><p><span class="editorial-label">Reading note.</span>
-Twelve items were selected for roughly 128 minutes of material, with an expected
-half-edition reading pattern. Two open-licensed works are carried offline in
-substantial form. Other entries are concise original briefs with canonical links;
-their copyrighted source text is not republished here.</p></aside>
-<p class="reading-meta">Personal reading edition · Designed for Kindle · Finite by design</p>
+<div class="frontmatter">
+  <p class="frontmatter-name">{title} · {date}</p>
+  <p class="edition-deck">Building real things, and understanding the systems around them.</p>
+  <aside class="editorial-note"><p><span class="editorial-label">Editor’s note.</span>
+  {editor_note}</p></aside>
+  <p class="reading-meta">{summary} · Personal Kindle edition</p>
+</div>
 """
     ]
 
     current_section = ""
-    for item in ITEMS:
+    for item in items:
         if item["section"] != current_section:
             current_section = item["section"]
             chunks.append(
                 f'<h1>{html.escape(current_section)}</h1>'
-                f'<p class="section-kicker">Cerulean Crest · 25 August 2026</p>'
+                f'<p class="section-kicker">{title} · {date}</p>'
             )
         chunks.append(article_header(item))
         body = item["body"]
@@ -579,18 +716,11 @@ their copyrighted source text is not republished here.</p></aside>
             body = paper
         elif body == "__IEA__":
             body = IEA_BODY
+        elif body == "__GRINDSLOP__":
+            body = build_grindslop_html()
         chunks.append(body)
         chunks.append(source_link(item["url"]))
 
-    chunks.append(
-        """
-<h1>Stop here</h1>
-<p class="synopsis-lead">This is the end of the edition.</p>
-<p>The remaining candidate pool exists to improve selection, not to create
-homework. Reading half of this issue meets the design target.</p>
-<p class="end-mark">◆</p>
-"""
-    )
     document = "\n".join(chunks)
     document = re.sub(
         r'<span\b(?=[^>]*\bclass="citation")[^>]*>.*?</span>',
@@ -656,11 +786,12 @@ def main() -> None:
             str(ASSETS / "cerulean_crest.css"),
             "--epub-cover-image",
             str(cover),
+            "--epub-title-page=false",
             "--toc",
             "--toc-depth=2",
-            "--split-level=2",
+            "--split-level=1",
             "--resource-path",
-            str(work),
+            os.pathsep.join([str(work), str(ROOT)]),
         )
 
     print(OUTPUT)

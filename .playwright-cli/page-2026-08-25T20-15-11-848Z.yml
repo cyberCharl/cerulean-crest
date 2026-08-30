@@ -1,0 +1,22 @@
+- generic [ref=e2]:
+  - heading "Read First" [level=1] [ref=e3]
+  - paragraph [ref=e5]: Cerulean Crest · 25 August 2026
+  - generic [ref=e6]:
+    - 'heading "The Factory Floor, Part 2 of 4: On Design for Manufacturing" [level=2] [ref=e7]'
+    - paragraph [ref=e9]: Andrew "bunnie" Huang — bunnie's blog — 2013 archive
+    - paragraph [ref=e11]: Editorial summary
+    - paragraph [ref=e13]: 14 min · original practitioner essay
+    - paragraph [ref=e15]: "Editor’s margin. A practical bridge from prototype to repeatable production, covering tolerances, yield and testability. The key idea: every manufactured product also needs a reliable way to test it."
+    - paragraph [ref=e17]: A prototype proves that a design can work. Manufacturing asks whether normal variation still lets it work repeatedly, economically and without heroic intervention.
+    - paragraph [ref=e18]: Huang’s central concern is yield. Component tolerances, voltage margins, PCB and mechanical variation, and cosmetic defects create combinations that a bench build may never reveal. A design that is sensitive to those combinations converts apparently cheap components into rework, scrap and late invoices. Spending more on a robust circuit can therefore lower the cost of each saleable unit.
+    - paragraph [ref=e19]: "The companion idea is testability. Every physical product implies a second product: the factory test system. Good test fixtures cover every user-facing feature, minimise setup, automate a linear pass/fail flow, record results against serial numbers and remain easy to update. Production testing checks assembly; validation asks whether the design survives its intended life. Confusing the two either misses faults or makes every unit carry an unnecessarily expensive test."
+    - generic [ref=e20]:
+      - heading "Carry into the workshop" [level=3] [ref=e21]
+      - list [ref=e22]:
+        - listitem [ref=e23]: Write tolerances and acceptance criteria before the production run.
+        - listitem [ref=e24]: Price yield loss per saleable unit, not only the bill of materials.
+        - listitem [ref=e25]: Design test points and fixture access into the product from the start.
+        - listitem [ref=e26]: Make pass/fail evidence auditable and tied to a serial number.
+      - paragraph [ref=e28]:
+        - link "Read the original at source →" [ref=e29] [cursor=pointer]:
+          - /url: https://www.bunniestudios.com/blog/the-factory-floor-part-1-of-4the-quotation-or-how-to-make-a-bom/the-factory-floor-part-2-of-4on-design-for-manufacturing/

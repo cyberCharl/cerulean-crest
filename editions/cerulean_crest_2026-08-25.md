@@ -6,9 +6,7 @@
 
 ### Editor's note
 
-Today's edition leans into the active priorities without becoming a project feed: roughly two-thirds of the reading budget is directly tied to Cerulean Works, practical engineering, life strategy, South African productive capacity, or practical finance. The centre of gravity is **building real things and understanding the systems around them**: design-for-manufacturing, DC motor control, South African infrastructure reform and actual industrial/labour outcomes. A recent open-access aqua-agriculture paper connects several long-term interests at once, while the IEA and Reuters provide limited but consequential world context. The final two essays change register: Peter Thiel's 2011 technological-stagnation thesis and Will Manidis's contemporary critique of performative grind culture.
-
-A useful tension runs through the South African items. Institutional sources describe substantial reforms and infrastructure programmes, while the latest Stats SA manufacturing and labour data remain weak. Read both. The purpose here is not to manufacture a mood about the country but to improve the model of what is actually changing, what is not, and how long transmission from reform to outcomes can take.
+<small>This edition centres on building real things and understanding the systems around them: manufacturing, motor control, productive infrastructure and circular food systems. Read the South African reform announcements against the weaker manufacturing and labour data; the gap between intention and outcome is part of the story. The two closing essays widen the lens to technological progress and the culture of work.</small>
 
 ---
 
@@ -21,9 +19,7 @@ A useful tension runs through the South African items. Institutional sources des
 **Type:** original practitioner essay  
 **Canonical link:** https://www.bunniestudios.com/blog/the-factory-floor-part-1-of-4the-quotation-or-how-to-make-a-bom/the-factory-floor-part-2-of-4on-design-for-manufacturing/
 
-**Why this made the edition:** This is unusually well matched to Cerulean Works because it starts where hobby prototyping usually stops: what changes when you need the _next hundred_ copies to work too. Huang works through tolerance stacks, yield, cost of defects, pilot runs, testability and factory test fixtures. The especially useful idea is that a physical product implicitly requires a second product: the manufacturing test system.
-
-**Orientation:** Read it less as "how to manufacture in China" and more as a mental model for robust physical-product design. The lesson scales down to workshop jigs, repeated assemblies, electronics enclosures and any object you may want to make more than once.
+<small><strong>Editor's note:</strong> A practical bridge from prototype to repeatable production, covering tolerances, yield and testability. The key idea: every manufactured product also needs a reliable way to test it.</small>
 
 ---
 
@@ -34,9 +30,7 @@ A useful tension runs through the South African items. Institutional sources des
 **Type:** primary institutional factsheet / policy reform map  
 **Canonical link:** https://www.worldbank.org/en/news/factsheet/2026/07/22/south-africa-infrastructure-modernization-and-job-creation-development-policy-loan
 
-**Why this made the edition:** It is a concise map of the electricity, freight and water reforms that are meant to remove some of South Africa's most binding productive-capacity constraints. It is more useful than another opinion piece about "reform" because it specifies mechanisms: electricity-market changes, transmission/distribution measures, rail and port competition, and water-sector institutional changes.
-
-**Evidence / uncertainty:** This is the lender describing a programme it supports, so treat forward-looking job and growth claims as programme expectations, not observed outcomes. The most useful approach is to compare it against the Stats SA manufacturing and labour items later in the edition.
+<small><strong>Editor's note:</strong> A useful map of proposed electricity, freight and water reforms. It is the lender's account of its own programme, so compare its forecasts with the manufacturing and labour data later in the edition.</small>
 
 ---
 
@@ -47,9 +41,7 @@ A useful tension runs through the South African items. Institutional sources des
 **Type:** decision framework / career strategy  
 **Canonical link:** https://80000hours.org/career-guide/personal-fit/
 
-**Why this made the edition:** The strongest part for the current life-strategy problem is not the article's broader career philosophy; it is the proposed experimental method. Make provisional guesses, identify the uncertainties that would actually change your ranking, then climb a ladder of increasingly expensive tests: reading, conversations, short projects, then larger commitments.
-
-**Read critically:** 80,000 Hours has its own normative framework about career impact. You do not need to inherit it wholesale. Extract the epistemic method: replace introspection-only career planning with contact with reality and deliberate updating.
+<small><strong>Editor's note:</strong> Keep the experimental method—test career hypotheses through progressively costlier contact with reality—without needing to adopt the organisation's wider moral framework.</small>
 
 ---
 
@@ -61,11 +53,7 @@ A useful tension runs through the South African items. Institutional sources des
 **DOI / canonical link:** https://doi.org/10.1016/j.isci.2026.116266  
 **Open access:** CC BY 4.0
 
-**Why this made the edition:** It nearly looks designed from the long-term-interest file: recirculating aquaculture, hydroponics, anaerobic digestion, water reuse, nutrient loops, waste valorisation and engineering optimisation in one system. More importantly, it asks an engineering question rather than treating circularity as a slogan: under what climatic conditions can the loops actually close?
-
-**Abstract orientation (paraphrased):** The authors model a recirculating tilapia system coupled to hydroponic lettuce and anaerobic digestion, then optimise flows under different climates. Weak seasonality makes tighter internal water and nutrient closure feasible; stronger seasonality makes matching supply and demand harder, especially for phosphorus. Adding manure as a co-digestion substrate can restore closure in the model. Compared with climate-matched decoupled aquaponics, the optimised networks substantially reduce water, nitrogen and phosphorus waste.
-
-**Important limitation:** This is a model-based design study, not a field demonstration of a commercial farm. Its value is in exposing constraints, trade-offs and candidate architectures; real systems would still need empirical validation, economics, reliability analysis and operational testing.
+<small><strong>Editor's note:</strong> The paper models tilapia, hydroponic lettuce and anaerobic digestion as one optimised system. Climate seasonality makes water and nutrient matching harder, particularly for phosphorus; manure co-digestion helps in the model. This is a design study, not a commercial field demonstration.</small>
 
 ---
 
@@ -78,9 +66,7 @@ A useful tension runs through the South African items. Institutional sources des
 **Type:** manufacturer technical training / video series  
 **Canonical link:** https://www.ti.com/video/series/precision-labs/ti-precision-labs-brushed-dc-motors.html
 
-**Why this made the edition:** This is the shortest coherent bridge from the Arduino-level "make the motor turn" stage to understanding what the motor driver is doing. The four videos cover brushed-DC fundamentals (4:29), the H-bridge (6:39), interfaces and PWM frequencies (8:43), and practical driving (7:16).
-
-**How to read/watch it:** Keep a motor-driver circuit nearby. After each video, identify which physical component or signal in the circuit corresponds to the concept just introduced. The goal is engineering intuition, not merely finishing the series.
+<small><strong>Editor's note:</strong> A concise bridge from making a motor turn to understanding the driver circuit. Watch with a circuit nearby and map each concept to its physical component or signal.</small>
 
 ---
 
@@ -91,9 +77,7 @@ A useful tension runs through the South African items. Institutional sources des
 **Type:** primary economic data  
 **Canonical link:** https://www.statssa.gov.za/?PPN=P3041.2&SCH=74327&page_id=1856
 
-**Why this made the edition:** If the long-run question is South African productive capability, actual manufacturing output deserves more weight than commentary about industrial policy. June manufacturing production was 1.7% lower than a year earlier, and seasonally adjusted production fell 1.5% quarter-on-quarter in Q2. Food and beverages, furniture/other manufacturing, and basic metals/machinery were among the negative contributors.
-
-**Orientation:** Do not over-read one monthly release. Use it as a hard datapoint in a longer series and as a check against claims that policy reform has already translated into broad industrial expansion.
+<small><strong>Editor's note:</strong> June output fell 1.7% year-on-year, while seasonally adjusted Q2 production fell 1.5%. Treat one release as a datapoint, not a trend, and use it to test claims of broad industrial recovery.</small>
 
 ---
 
@@ -104,9 +88,7 @@ A useful tension runs through the South African items. Institutional sources des
 **Type:** primary labour-market data  
 **Canonical link:** https://www.statssa.gov.za/?PPN=P0211&SCH=74512&page_id=1856
 
-**Why this made the edition:** It supplies the labour-market reality that economic-development discussion often abstracts away. The official unemployment rate rose to 33.6% in Q2 2026; the number of unemployed people increased to 8.5 million while employment was broadly flat at 16.7 million.
-
-**Orientation:** Pay attention to the broader labour-underutilisation measures as well as the headline rate. The structure of unemployment matters for judging whether a strategy based on infrastructure reform, industrialisation, entrepreneurship or skills formation is operating on the relevant bottlenecks.
+<small><strong>Editor's note:</strong> Unemployment rose to 33.6%, with 8.5 million people unemployed and employment broadly flat. Look beyond the headline rate to labour underutilisation and the structural bottlenecks behind it.</small>
 
 ---
 
@@ -117,9 +99,7 @@ A useful tension runs through the South African items. Institutional sources des
 **Type:** primary tax guidance  
 **Canonical link:** https://www.sars.gov.za/types-of-tax/turnover-tax/
 
-**Why this made the edition:** Budget 2026 substantially changed the threshold for South Africa's simplified Turnover Tax regime: qualifying annual turnover can now be up to R2.3 million, with the first R600,000 of taxable turnover at 0% under the current table. That makes the regime worth understanding while thinking about the eventual legal/financial shape of a small studio or product business.
-
-**Do not read this as "Cerulean Works should use Turnover Tax."** Tax is levied on turnover rather than profit, eligibility has exclusions, and a physical-product business can have meaningful material and equipment costs. A simpler tax regime is not automatically a lower effective tax burden. The useful task today is just to understand that the option exists and what variables would determine whether it is sensible.
+<small><strong>Editor's note:</strong> The 2026 regime raises the qualifying-turnover ceiling to R2.3 million and taxes the first R600,000 at 0%. Because tax is charged on turnover rather than profit, simplicity does not necessarily mean a lower burden for a materials-heavy business.</small>
 
 ---
 
@@ -132,9 +112,7 @@ A useful tension runs through the South African items. Institutional sources des
 **Type:** intergovernmental analysis / data  
 **Canonical link:** https://www.iea.org/reports/electricity-2026/grids
 
-**Why this made the edition:** It is an unusually good systems-engineering frame for the energy transition. Generation can become cheap and abundant while transmission, interconnection queues, transformers, permitting, workforce and regulation become the actual constraints. The IEA estimates more than 2,500 GW of renewable, large-load and storage projects are sitting in connection queues globally and discusses ways to extract more hosting capacity from existing grids.
-
-**Connection:** Read this beside South Africa's transmission reforms. It helps distinguish "build more generation" from the harder systems problem of moving, balancing and connecting power reliably.
+<small><strong>Editor's note:</strong> Cheap generation is insufficient when transmission, transformers, permitting and grid connections are constrained. Read this beside South Africa's transmission reforms: producing power and moving it reliably are different problems.</small>
 
 ---
 
@@ -145,9 +123,7 @@ A useful tension runs through the South African items. Institutional sources des
 **Type:** reporting / data synthesis  
 **Canonical link:** https://www.reuters.com/business/energy/six-months-into-iran-war-almost-half-global-oil-flows-war-zones-2026-08-25/
 
-**Why this made the edition:** This is the one high-salience geopolitical story that earns space today because it is also an industrial and economic story. Reuters calculates that countries affected by conflict account for more than 43% of global oil production, while major refining capacity is also offline. The transmission channel to South Africa is practical: fuel prices, transport, inflation, interest rates and the cost of operating physical businesses.
-
-**Editorial restraint:** One article is enough for today. The edition does not need a stack of near-identical war updates to understand the relevant economic exposure.
+<small><strong>Editor's note:</strong> The relevant South African exposure is economic: fuel, transport, inflation, interest rates and operating costs. One report is enough to establish the risk without turning the edition into a war-news feed.</small>
 
 ---
 
@@ -160,9 +136,7 @@ A useful tension runs through the South African items. Institutional sources des
 **Type:** primary institutional announcement  
 **Canonical link:** https://aiib.org/en/news-events/news/2026/aiib-first-investment-in-south-africa-usd500-million-strengthen-climate-resilient-urban-services.html
 
-**Why this made the edition:** The useful feature is not the celebratory framing; it is the structure of the programme. The USD500 million loan supports a broader metro trading-services programme covering water, sanitation, electricity and solid waste, with performance-based financing and explicit targets for reducing non-revenue water and electricity losses by 2031.
-
-**Constructive, not triumphant:** These are financing commitments and targets, not completed improvements. It qualifies as constructive because the programme ties money to measurable operating outcomes in municipal infrastructure. Future editions should revisit actual performance against those targets rather than repeatedly covering announcements.
+<small><strong>Editor's note:</strong> The useful detail is the programme design: performance-based funding for water, sanitation, electricity and waste, with loss-reduction targets for 2031. These are commitments, not completed improvements.</small>
 
 ---
 
@@ -175,9 +149,7 @@ A useful tension runs through the South African items. Institutional sources des
 **Type:** long-form argument / technological stagnation  
 **Canonical link:** https://www.nationalreview.com/2011/10/end-future-peter-thiel/
 
-**Why this made the edition:** This is a compact early statement of the technological-stagnation thesis: that progress outside computing and finance had fallen short of mid-century expectations, constraining growth and feeding political and cultural malaise. It complements the edition's practical concern with infrastructure, manufacturing and productive capacity by asking a broader question: what kinds of progress can society still reliably build?
-
-**Read critically:** Written in 2011, the essay predates major advances in AI, batteries, renewable energy and commercial spaceflight. Its historical examples support an explicitly political argument; treat them as claims to test and update rather than a settled diagnosis.
+<small><strong>Editor's note:</strong> An early statement of the technological-stagnation thesis, asking why progress outside computing fell short of earlier expectations. Written in 2011 and politically argued, it should be tested against subsequent advances rather than read as a settled diagnosis.</small>
 
 ---
 
@@ -189,12 +161,6 @@ A useful tension runs through the South African items. Institutional sources des
 **Canonical link:** https://x.com/WillManidis/status/2057094527236665598  
 **Local reading copy:** ../test.html
 
-**Why this made the edition:** Manidis draws a useful distinction between demanding work in service of an external result and “grindslop,” where the display of effort and suffering becomes the product. The essay connects startup mythology, status, surplus and responsibility, making it an apt counterweight to an edition otherwise preoccupied with building, growth and productive capacity.
-
-**Read critically:** The essay is deliberately provocative and moves between cultural observation, religious language and broad historical analogy. Read it for the distinction it proposes—not as neutral sociology—and keep its empirical claims separate from its rhetoric.
+<small><strong>Editor's note:</strong> The useful distinction is between difficult work directed at an external result and “grindslop,” where displaying effort becomes the product. The essay is deliberately provocative; separate that idea from its rhetoric and broader claims.</small>
 
 ---
-
-# Stop here
-
-This is a finite edition, not a queue. The remaining candidate pool exists to make selection better, not to create homework. If only half of this edition gets read, the design target has been met.

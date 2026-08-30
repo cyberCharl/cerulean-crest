@@ -29,14 +29,14 @@ h6 {
 h1 {
   font-size: 1.6em;
   letter-spacing: 0.02em;
-  margin: 1.7em 0 0.8em;
+  margin: 0.75em 0 0.55em;
   padding-bottom: 0.28em;
   border-bottom: 0.08em solid #4f7180;
 }
 
 h2 {
   font-size: 1.45em;
-  margin: 1.1em 0 0.35em;
+  margin: 0.8em 0 0.3em;
 }
 
 h3 {
@@ -99,14 +99,22 @@ td {
   vertical-align: top;
 }
 
-.masthead {
-  text-align: center;
-  margin: 18% auto 0;
+.frontmatter {
+  margin: 0;
+  max-width: 38em;
+}
+
+.frontmatter-name {
+  font-family: Arial, sans-serif;
+  font-size: 0.78em;
+  font-weight: bold;
+  letter-spacing: 0.1em;
+  margin: 0 0 0.7em;
+  text-transform: uppercase;
 }
 
 .masthead-kicker,
 .section-kicker,
-.item-number,
 .format-label {
   font-family: Arial, sans-serif;
   font-size: 0.72em;
@@ -138,19 +146,51 @@ td {
 }
 
 .edition-deck {
-  font-size: 1.05em;
+  font-size: 1em;
   font-style: italic;
-  text-align: center;
-  margin: 0 auto;
-  max-width: 28em;
+  text-align: left;
+  margin: 0 0 0.75em;
+  max-width: 34em;
 }
 
-.byline {
+.section-kicker {
+  margin: 0 0 0.55em;
+}
+
+.article-subhead {
   font-family: Arial, sans-serif;
-  font-size: 0.86em;
+  font-size: 0.92em;
+  font-weight: bold;
   line-height: 1.35;
+  color: #343434;
+  margin: 0 0 0.5em;
+}
+
+.content-status {
+  display: inline-block;
+  font-family: Arial, sans-serif;
+  font-size: 0.7em;
+  font-weight: bold;
+  letter-spacing: 0.09em;
+  line-height: 1.2;
+  margin: 0 0 0.55em;
+  padding: 0.32em 0.48em;
+  text-transform: uppercase;
+  page-break-after: avoid;
+}
+
+.content-status p {
+  margin: 0;
+}
+
+.content-status-original {
+  color: #174f66;
+  border: 0.1em solid #4f7180;
+}
+
+.content-status-summary {
   color: #4a4a4a;
-  margin: 0 0 0.28em;
+  border: 0.1em dashed #777;
 }
 
 .reading-meta {
@@ -165,8 +205,8 @@ td {
   font-size: 0.84em;
   line-height: 1.42;
   color: #444;
-  margin: 1.05em 0 1.3em;
-  padding: 0.68em 0.8em;
+  margin: 0.75em 0 0.9em;
+  padding: 0.55em 0.7em;
   border-left: 0.18em solid #6f8993;
   background: #f2f2f2;
 }
@@ -242,6 +282,65 @@ pre,
 
 pre {
   white-space: pre-wrap;
+}
+
+figure {
+  margin: 1em 0;
+}
+
+figcaption,
+.post-author {
+  font-family: Arial, sans-serif;
+  font-size: 0.76em;
+  line-height: 1.35;
+  color: #555;
+}
+
+.hero img {
+  max-height: 55vh;
+  width: auto;
+}
+
+.embedded-post {
+  margin: 1em 0;
+  padding: 0.65em 0.75em;
+  border-left: 0.18em solid #6f8993;
+  background: #f2f2f2;
+}
+
+.embedded-post blockquote {
+  margin: 0.45em 0 0;
+  padding-left: 0;
+  border-left: 0;
+}
+
+.embedded-post blockquote p,
+.post-author {
+  margin-bottom: 0.45em;
+}
+
+.post-media {
+  margin-top: 0.65em;
+}
+
+.post-image {
+  margin: 0.6em 0;
+}
+
+.grindslop-article .article-image {
+  margin: 1.15em 0;
+}
+
+/* Keep section dividers with their first article, while every later article
+   begins on a fresh Kindle page. */
+section.level1 > section.level2 {
+  break-before: page;
+  page-break-before: always;
+}
+
+section.level1 > section.level2:first-of-type {
+  break-before: auto;
+  page-break-before: auto;
 }
 
 @media amzn-kf8 {
