@@ -56,19 +56,90 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .site-header nav a::after { content: ""; position: absolute; left: 0; right: 100%; bottom: -0.45rem; height: 2px; background: var(--signal); transition: right 180ms ease; }
 .site-header nav a:hover::after, .site-header nav a:focus-visible::after { right: 0; }
 
-.issue-hero { width: min(100% - 3rem, 88rem); margin: 4.5rem auto 0; }
-.issue-kicker { display: grid; grid-template-columns: auto 1fr; gap: 1.2rem; align-items: center; }
-.issue-kicker span, .edition-number {
+.issue-hero {
+  width: min(100% - 3rem, 88rem);
+  margin: 3.5rem auto 0;
+}
+.edition-number {
   color: var(--cerulean-dark);
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.19em;
   text-transform: uppercase;
 }
-.issue-kicker i { display: block; height: 1px; background: var(--cerulean); }
-.issue-title-grid { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(18rem, 0.55fr); align-items: end; gap: 4rem; padding: 3rem 0 4rem; }
+.issue-cover {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  border-top: 1px solid var(--ink);
+  border-bottom: 5px solid var(--ink);
+  padding: 1rem 0 2.5rem;
+}
+.issue-day {
+  grid-column: 1;
+  color: var(--signal);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  margin: 0;
+  text-transform: uppercase;
+}
+.issue-date {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: clamp(2rem, 6vw, 6rem);
+  font-family: var(--font-body);
+  margin: clamp(4rem, 9vh, 7rem) 0 clamp(3rem, 7vh, 5.5rem);
+}
+.issue-date-main {
+  font-size: clamp(5.5rem, 12vw, 11rem);
+  font-weight: 500;
+  letter-spacing: -0.07em;
+  line-height: 0.72;
+  white-space: nowrap;
+}
+.issue-date-main b {
+  display: inline-block;
+  color: var(--ink);
+  font-family: var(--font-sans), sans-serif;
+  font-size: 0.62em;
+  font-weight: 500;
+  letter-spacing: -0.05em;
+  margin-right: 0.2em;
+  vertical-align: 0.08em;
+}
+.issue-date-main em {
+  color: var(--cerulean);
+  font-weight: 400;
+}
+.issue-date-year {
+  color: var(--muted);
+  font-family: var(--font-sans), sans-serif;
+  font-size: clamp(1rem, 1.5vw, 1.35rem);
+  font-weight: 600;
+  letter-spacing: 0.18em;
+}
+.issue-metrics {
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  color: var(--muted);
+  border-top: 1px solid var(--hairline);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  margin: 0;
+  min-width: clamp(18rem, 28vw, 25rem);
+  padding: 1rem 0 0;
+  text-transform: uppercase;
+}
+.issue-metrics span + span { display: inline-flex; align-items: center; gap: 1.25rem; }
+.issue-metrics span + span::before { content: ""; width: 0.28rem; height: 0.28rem; background: var(--signal); }
 .edition-number { margin: 0 0 1.2rem; }
-.issue-title-grid h1, .archive-header h1, .not-found h1 {
+.archive-header h1, .not-found h1 {
   font-family: var(--font-body);
   font-size: clamp(5.5rem, 10.5vw, 10rem);
   font-weight: 500;
@@ -76,27 +147,30 @@ button, a { -webkit-tap-highlight-color: transparent; }
   line-height: 0.67;
   margin: 0;
 }
-.issue-title-grid h1 em, .archive-header h1 em, .not-found h1 em { color: var(--cerulean); font-weight: 400; }
-.issue-date-block { border-top: 5px solid var(--ink); padding-top: 1.2rem; margin-bottom: 0.2rem; }
-.issue-date-block > span { color: var(--signal); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; }
-.issue-date-block strong { display: block; font-family: var(--font-body); font-size: 2.1rem; font-weight: 600; line-height: 1.05; margin: 0.65rem 0 1rem; }
-.issue-date-block p { color: var(--muted); font-size: 0.8rem; letter-spacing: 0.05em; margin: 0; text-transform: uppercase; }
-.issue-date-block i { color: var(--signal); font-style: normal; margin: 0 0.35rem; }
+.archive-header h1 em, .not-found h1 em { color: var(--cerulean); font-weight: 400; }
 
 .editor-note {
-  display: grid;
-  grid-template-columns: minmax(8rem, 0.27fr) minmax(20rem, 1.05fr) minmax(18rem, 0.68fr);
-  border: 1px solid var(--ink);
-  background: rgba(255, 255, 255, 0.24);
+  position: relative;
+  border-bottom: 1px solid var(--hairline);
+  padding: 2.6rem 0 2.8rem;
 }
-.note-label { background: var(--ink); color: var(--paper); display: flex; align-items: center; justify-content: center; min-height: 11rem; }
-.note-label span { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.17em; text-transform: uppercase; transform: rotate(-90deg); white-space: nowrap; }
-.editor-note > p { font-family: var(--font-body); font-size: clamp(1.45rem, 2.4vw, 2.15rem); line-height: 1.18; margin: 0; padding: 2.1rem 2.6rem; }
-.editor-note dl { border-left: 1px solid var(--hairline); margin: 0; padding: 1.7rem 2rem; display: grid; align-content: center; gap: 0.8rem; }
-.editor-note dl div { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; border-bottom: 1px dotted var(--hairline); padding-bottom: 0.6rem; }
-.editor-note dt { color: var(--muted); font-size: 0.68rem; font-weight: 600; letter-spacing: 0.13em; text-transform: uppercase; }
-.editor-note dd { font-family: var(--font-body); font-size: 1.25rem; font-weight: 600; margin: 0; white-space: nowrap; }
-.coverage-note { margin-left: 27%; padding: 1.2rem 0; border-bottom: 1px solid var(--hairline); }
+.editor-note::before {
+  content: "";
+  position: absolute;
+  top: -5px;
+  left: 0;
+  width: clamp(4rem, 10vw, 9rem);
+  height: 5px;
+  background: var(--cerulean);
+}
+.editor-note > p {
+  max-width: 70rem;
+  font-family: var(--font-body);
+  font-size: clamp(1.4rem, 2vw, 1.9rem);
+  line-height: 1.3;
+  margin: 0 0 0 auto;
+}
+.coverage-note { padding: 1.2rem 0; border-bottom: 1px solid var(--hairline); }
 .coverage-note summary { cursor: pointer; color: var(--muted); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; }
 .coverage-note p { max-width: 56rem; font-family: var(--font-body); font-size: 1.05rem; line-height: 1.45; margin: 0.8rem 0 0; }
 
@@ -169,11 +243,6 @@ button, a { -webkit-tap-highlight-color: transparent; }
 :focus-visible { outline: 3px solid var(--signal); outline-offset: 4px; }
 
 @media (max-width: 900px) {
-  .issue-title-grid { grid-template-columns: 1fr; gap: 3rem; }
-  .issue-date-block { max-width: 26rem; }
-  .editor-note { grid-template-columns: 5rem 1fr; }
-  .editor-note dl { grid-column: 2; border-left: 0; border-top: 1px solid var(--hairline); }
-  .coverage-note { margin-left: 5rem; }
   .issue-body { grid-template-columns: 1fr; }
   .progress-rail { border: 1px solid var(--hairline); padding: 1rem; }
   .progress-sticky { position: static; grid-template-columns: auto auto 1fr; align-items: center; gap: 0.7rem; }
@@ -193,16 +262,15 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .brand-name { font-size: 1.25rem; }
   .site-header nav { gap: 1rem; }
   .issue-hero, .issue-body, .archive-page, .not-found, .site-footer { width: min(100% - 2rem, 88rem); }
-  .issue-hero { margin-top: 2.5rem; }
-  .issue-title-grid { padding: 2rem 0 3rem; }
-  .issue-title-grid h1 { font-size: clamp(4.5rem, 24vw, 7rem); }
-  .issue-date-block strong { font-size: 1.7rem; }
-  .editor-note { grid-template-columns: 1fr; }
-  .note-label { min-height: auto; justify-content: flex-start; padding: 0.8rem 1rem; }
-  .note-label span { transform: none; }
-  .editor-note > p { padding: 1.5rem; }
-  .editor-note dl { grid-column: 1; padding: 1.2rem 1.5rem; }
-  .coverage-note { margin-left: 0; }
+  .issue-hero { margin-top: 2rem; }
+  .issue-cover { padding-bottom: 1.5rem; }
+  .issue-day { grid-column: 1 / -1; }
+  .issue-date { grid-template-columns: 1fr; gap: 1.25rem; margin: 4.5rem 0 4rem; }
+  .issue-date-main { font-size: clamp(4.4rem, 21vw, 5.5rem); }
+  .issue-date-year { font-size: 1rem; }
+  .issue-metrics { grid-column: 1 / -1; }
+  .editor-note { padding: 2.2rem 0 2.4rem; }
+  .editor-note > p { margin: 0; }
   .issue-body { margin-top: 4.5rem; gap: 4rem; }
   .issue-section { margin-bottom: 5rem; }
   .section-heading { grid-template-columns: 2.4rem auto 1fr; }

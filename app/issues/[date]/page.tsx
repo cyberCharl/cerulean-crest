@@ -24,31 +24,27 @@ export default async function IssuePage({ params }: PageProps) {
 
   const neighbors = await neighboringIssues(date);
   const itemCount = issue.sections.reduce((sum, section) => sum + section.items.length, 0);
+  const [dayOfMonth, month, year] = longDate(issue.date).split(" ");
 
   return (
     <main>
       <article>
         <header className="issue-hero">
-          <div className="issue-kicker"><span>Personal daily edition</span><i /></div>
-          <div className="issue-title-grid">
-            <div>
-              <p className="edition-number">Edition / {issue.date.replaceAll("-", ".")}</p>
-              <h1>Cerulean<br /><em>Crest</em></h1>
-            </div>
-            <div className="issue-date-block">
-              <span>{weekday(issue.date)}</span>
-              <strong>{longDate(issue.date)}</strong>
-              <p>{itemCount} pieces <i>·</i> {issue.availableMinutes} minutes</p>
-            </div>
+          <div className="issue-cover">
+            <p className="issue-day">{weekday(issue.date)}</p>
+            <h1 className="issue-date" aria-label={longDate(issue.date)}>
+              <span className="issue-date-main">
+                <b>{dayOfMonth}</b><em>{month}</em>
+              </span>
+              <span className="issue-date-year">{year}</span>
+            </h1>
+            <p className="issue-metrics">
+              <span>{itemCount} pieces</span>
+              <span>{issue.availableMinutes} minutes</span>
+            </p>
           </div>
           <div className="editor-note">
-            <div className="note-label"><span>From the desk</span></div>
             <p>{issue.editorNote}</p>
-            <dl>
-              <div><dt>Available</dt><dd>~{issue.availableMinutes} min</dd></div>
-              <div><dt>Expected</dt><dd>~{issue.expectedMinutes} min</dd></div>
-              <div><dt>Completion</dt><dd>50% target</dd></div>
-            </dl>
           </div>
           {issue.coverageGap ? (
             <details className="coverage-note">
