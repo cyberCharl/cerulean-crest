@@ -1,0 +1,9 @@
+node_modules/
+.next/
+.data/
+.env
+*.log
+*.tsbuildinfo
+output/cerulean-crest-desktop.png
+output/cerulean-crest-mobile.png
+!.env.example
