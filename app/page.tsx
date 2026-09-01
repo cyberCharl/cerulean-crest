@@ -4,9 +4,9 @@ import { getIssue, latestIssueDate } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
-export default function HomePage() {
+export default async function HomePage() {
   const today = todayDate();
-  const date = getIssue(today) ? today : latestIssueDate();
+  const date = await getIssue(today) ? today : await latestIssueDate();
   if (!date) redirect("/archive");
   redirect(`/issues/${date}`);
 }

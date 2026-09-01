@@ -33,7 +33,7 @@ export async function PUT(request: Request, { params }: RouteContext) {
     return Response.json({ error: "Body date must match the URL date" }, { status: 409 });
   }
 
-  const result = replaceIssue(parsed.data);
+  const result = await replaceIssue(parsed.data);
   return Response.json(
     { ok: true, date, url: `/issues/${date}` },
     { status: result.created ? 201 : 200 },
@@ -43,6 +43,6 @@ export async function PUT(request: Request, { params }: RouteContext) {
 export async function GET(request: Request, { params }: RouteContext) {
   if (!isAuthorized(request.headers.get("authorization"))) return unauthorizedResponse();
   const { date } = await params;
-  const issue = getIssue(date);
+  const issue = await getIssue(date);
   return issue ? Response.json(issue) : Response.json({ error: "Issue not found" }, { status: 404 });
 }

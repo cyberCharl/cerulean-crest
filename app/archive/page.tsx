@@ -6,8 +6,8 @@ export const dynamic = "force-dynamic";
 
 export const metadata = { title: "Archive" };
 
-export default function ArchivePage() {
-  const issues = listIssues();
+export default async function ArchivePage() {
+  const issues = await listIssues();
   return (
     <main className="archive-page">
       <header className="archive-header">

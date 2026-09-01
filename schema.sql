@@ -1,4 +1,4 @@
--- MVP schema. SQLite today; column types and relationships migrate directly to Postgres.
+-- Local-development SQLite schema. The app creates this automatically.
 CREATE TABLE issues (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   issue_date TEXT NOT NULL UNIQUE,

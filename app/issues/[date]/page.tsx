@@ -11,7 +11,7 @@ type PageProps = { params: Promise<{ date: string }> };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { date } = await params;
-  const issue = getIssue(date);
+  const issue = await getIssue(date);
   return issue
     ? { title: longDate(issue.date), description: issue.editorNote }
     : { title: "Issue not found" };
@@ -19,10 +19,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function IssuePage({ params }: PageProps) {
   const { date } = await params;
-  const issue = getIssue(date);
+  const issue = await getIssue(date);
   if (!issue) notFound();
 
-  const neighbors = neighboringIssues(date);
+  const neighbors = await neighboringIssues(date);
   const itemCount = issue.sections.reduce((sum, section) => sum + section.items.length, 0);
 
   return (
