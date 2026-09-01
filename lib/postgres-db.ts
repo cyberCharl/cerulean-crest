@@ -6,6 +6,7 @@ const connectionString = process.env.DATABASE_URL;
 if (!connectionString) throw new Error("DATABASE_URL is required for the Postgres backend");
 
 const sql = neon(connectionString);
+const migrationSql = neon(process.env.DATABASE_URL_UNPOOLED ?? connectionString);
 let initialization: Promise<void> | undefined;
 
 type IssueRow = {
@@ -81,8 +82,8 @@ async function replaceIssueInternal(input: IssueInput): Promise<{ issueId: numbe
 }
 
 async function initialize(): Promise<void> {
-  await sql.transaction([
-    sql`
+  await migrationSql.transaction([
+    migrationSql`
       CREATE TABLE IF NOT EXISTS issues (
         id SERIAL PRIMARY KEY,
         issue_date DATE NOT NULL UNIQUE,
@@ -95,7 +96,7 @@ async function initialize(): Promise<void> {
         updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
       )
     `,
-    sql`
+    migrationSql`
       CREATE TABLE IF NOT EXISTS sections (
         id SERIAL PRIMARY KEY,
         issue_id INTEGER NOT NULL REFERENCES issues(id) ON DELETE CASCADE,
@@ -104,7 +105,7 @@ async function initialize(): Promise<void> {
         UNIQUE(issue_id, position)
       )
     `,
-    sql`
+    migrationSql`
       CREATE TABLE IF NOT EXISTS items (
         id SERIAL PRIMARY KEY,
         section_id INTEGER NOT NULL REFERENCES sections(id) ON DELETE CASCADE,
@@ -120,8 +121,8 @@ async function initialize(): Promise<void> {
         UNIQUE(section_id, position)
       )
     `,
-    sql`CREATE INDEX IF NOT EXISTS idx_sections_issue ON sections(issue_id, position)`,
-    sql`CREATE INDEX IF NOT EXISTS idx_items_section ON items(section_id, position)`,
+    migrationSql`CREATE INDEX IF NOT EXISTS idx_sections_issue ON sections(issue_id, position)`,
+    migrationSql`CREATE INDEX IF NOT EXISTS idx_items_section ON items(section_id, position)`,
   ]);
 
   const rows = await sql`SELECT COUNT(*)::integer AS count FROM issues` as Array<{ count: number }>;
@@ -140,7 +141,17 @@ export async function replaceIssue(input: IssueInput): Promise<{ issueId: number
 
 export async function getIssue(date: string): Promise<Issue | null> {
   await ready();
-  const issueRows = await sql.query("SELECT * FROM issues WHERE issue_date = $1", [date]) as IssueRow[];
+  const issueRows = await sql.query(
+    `
+      SELECT
+        id, issue_date::text AS issue_date, title, editor_note, coverage_gap,
+        available_minutes, expected_minutes, created_at::text AS created_at,
+        updated_at::text AS updated_at
+      FROM issues
+      WHERE issue_date = $1
+    `,
+    [date],
+  ) as IssueRow[];
   const row = issueRows[0];
   if (!row) return null;
 

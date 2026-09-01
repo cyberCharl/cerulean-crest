@@ -6,4 +6,7 @@ node_modules/
 *.tsbuildinfo
 output/cerulean-crest-desktop.png
 output/cerulean-crest-mobile.png
+output/cerulean-crest-live.png
 !.env.example
+.vercel
+.env*

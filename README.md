@@ -2,6 +2,8 @@
 
 Cerulean Crest is a finite, personal daily magazine. A scheduled curator publishes a complete issue through an authenticated API; the site opens on today’s issue (or the latest available issue) and keeps a calm archive of past editions.
 
+Production: [cerulean-crest.vercel.app](https://cerulean-crest.vercel.app)
+
 ## Start here
 
 - [Publishing an edition](docs/PUBLISHING.md) — the short runbook for a person or another agent.
@@ -37,6 +39,7 @@ npm run build
 | `CERULEAN_API_PASSWORD` | For publishing | Long, random HTTP Basic Auth password. |
 | `APP_TIME_ZONE` | No | Time zone used to decide what “today” means. Defaults to `Africa/Johannesburg`. |
 | `DATABASE_URL` | Production | Neon/Postgres connection string. When absent, the app uses local SQLite. |
+| `DATABASE_URL_UNPOOLED` | Production | Direct Neon connection used for initial schema setup. |
 | `DATABASE_PATH` | No | Override the local SQLite file path. Ignored when `DATABASE_URL` is present. |
 
 Never commit real credentials. Basic Auth is safe here only behind HTTPS; production Vercel URLs provide HTTPS automatically.

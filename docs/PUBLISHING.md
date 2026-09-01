@@ -2,9 +2,28 @@
 
 This is the handoff for a person, scheduled job or another agent that has already generated an issue.
 
+Production site: `https://cerulean-crest.vercel.app`
+
 ## Agent instruction
 
 > Publish one **complete** Cerulean Crest edition. Read `CERULEAN_SITE_URL`, `CERULEAN_API_USER` and `CERULEAN_API_PASSWORD` from secrets. Produce JSON matching the contract below, confirm that `availableMinutes` is within two minutes of the sum of all item `readingMinutes`, then PUT it to `${CERULEAN_SITE_URL}/api/issues/YYYY-MM-DD` using HTTP Basic Auth. Never print credentials. A PUT for an existing date replaces the whole edition, so never send a partial issue. After publishing, GET the same authenticated endpoint and confirm the date and item count, then check that the public issue URL returns successfully.
+
+The current values are:
+
+```text
+CERULEAN_SITE_URL=https://cerulean-crest.vercel.app
+CERULEAN_API_USER=cerulean
+CERULEAN_API_PASSWORD=<secret>
+```
+
+On the deployment owner’s Mac, the production password is stored in Keychain under service `cerulean-crest-publisher`. Load it without placing it in shell history:
+
+```bash
+export CERULEAN_API_PASSWORD="$(security find-generic-password \
+  -a cerulean -s cerulean-crest-publisher -w)"
+```
+
+For a hosted scheduler, copy the password into its secret configuration; do not include it in the agent prompt.
 
 ## Request
 
