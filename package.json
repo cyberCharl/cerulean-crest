@@ -3,18 +3,26 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": "24.x"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "test": "node --test --experimental-strip-types tests/*.test.ts"
+    "test": "node --test --experimental-strip-types tests/*.test.ts",
+    "db:migrate": "node --env-file-if-exists=.env.local --experimental-strip-types scripts/migrate.ts",
+    "db:seed": "node --env-file-if-exists=.env.local --experimental-strip-types scripts/seed.ts",
+    "test:integration": "node --experimental-strip-types --test tests/integration/*.test.ts"
   },
   "dependencies": {
     "@fontsource-variable/cormorant-garamond": "^5.3.0",
     "@fontsource/ibm-plex-sans-condensed": "^5.3.0",
+    "@modelcontextprotocol/sdk": "^1.30.0",
     "@neondatabase/serverless": "^1.1.0",
     "better-sqlite3": "13.0.3",
+    "jose": "^6.2.12",
     "next": "16.3.4",
     "react": "19.2.8",
     "react-dom": "19.2.8",
@@ -23,8 +31,10 @@
   "devDependencies": {
     "@types/better-sqlite3": "9.6.0",
     "@types/node": "^25.0.0",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "pg": "^8.23.0",
     "typescript": "7.0.2"
   }
 }

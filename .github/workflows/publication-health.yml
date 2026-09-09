@@ -1,0 +1,14 @@
+name: Daily publication health
+on:
+  workflow_dispatch:
+  schedule:
+    # 09:15 Africa/Johannesburg, after the default 09:00 delivery deadline.
+    - cron: '15 7 * * *'
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check edition delivery
+        run: curl --fail-with-body --max-time 30 --retry 2 --retry-delay 10 https://cerulean-crest.vercel.app/api/health

@@ -1,0 +1,10 @@
+.data/
+.env*
+!.env.example
+.DS_Store
+**/.DS_Store
+deliverables/
+output/
+test_assets/
+.playwright-cli/
+*.tsbuildinfo

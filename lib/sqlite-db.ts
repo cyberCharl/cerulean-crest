@@ -1,8 +1,9 @@
 import Database from "better-sqlite3";
 import fs from "node:fs";
 import path from "node:path";
-import type { Issue, IssueInput, IssueSummary } from "./schema";
-import { seedIssue } from "./seed";
+import type { Issue, IssueInput, IssueSummary } from "./schema.ts";
+import { seedIssue } from "./seed.ts";
+import { isIssueDate } from "./date.ts";
 
 const databasePath = process.env.DATABASE_PATH || path.join(process.cwd(), ".data", "cerulean-crest.db");
 fs.mkdirSync(path.dirname(databasePath), { recursive: true });
@@ -77,11 +78,36 @@ const replaceIssueTransaction = db.transaction((input: IssueInput) => {
   return { issueId, created: !existing };
 });
 
+const createIssueTransaction = db.transaction((input: IssueInput) => {
+  const existing = db.prepare("SELECT id FROM issues WHERE issue_date = ?").get(input.date) as { id: number } | undefined;
+  if (existing) return { issueId: existing.id, created: false };
+
+  const result = db.prepare(`INSERT INTO issues (issue_date, title, editor_note, coverage_gap, available_minutes, expected_minutes) VALUES (?, ?, ?, ?, ?, ?)`)
+    .run(input.date, input.title, input.editorNote, input.coverageGap ?? null, input.availableMinutes, input.expectedMinutes);
+  const issueId = Number(result.lastInsertRowid);
+  const insertSection = db.prepare("INSERT INTO sections (issue_id, title, position) VALUES (?, ?, ?)");
+  const insertItem = db.prepare(`INSERT INTO items (section_id, position, title, author, publication, published_at, reading_minutes, content_type, url, summary) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+
+  input.sections.forEach((section, sectionIndex) => {
+    const sectionResult = insertSection.run(issueId, section.title, sectionIndex);
+    const sectionId = Number(sectionResult.lastInsertRowid);
+    section.items.forEach((item, itemIndex) => {
+      insertItem.run(sectionId, itemIndex, item.title, item.author, item.publication, item.publishedAt, item.readingMinutes, item.type, item.url, item.summary);
+    });
+  });
+
+  return { issueId, created: true };
+});
+
 export function replaceIssue(input: IssueInput): { issueId: number; created: boolean } {
   return replaceIssueTransaction(input);
 }
 
-if ((db.prepare("SELECT COUNT(*) AS count FROM issues").get() as { count: number }).count === 0) {
+export function createIssue(input: IssueInput): { issueId: number; created: boolean } {
+  return createIssueTransaction(input);
+}
+
+if (process.env.SEED_DEMO === "true" && (db.prepare("SELECT COUNT(*) AS count FROM issues").get() as { count: number }).count === 0) {
   replaceIssue(seedIssue);
 }
 
@@ -91,6 +117,7 @@ type IssueRow = {
 };
 
 export function getIssue(date: string): Issue | null {
+  if (!isIssueDate(date)) return null;
   const row = db.prepare("SELECT * FROM issues WHERE issue_date = ?").get(date) as IssueRow | undefined;
   if (!row) return null;
 

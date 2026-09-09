@@ -1,6 +1,5 @@
 import { z } from "zod";
-
-const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+import { isIssueDate } from "./date.ts";
 
 export const issueItemSchema = z.object({
   title: z.string().trim().min(1).max(300),
@@ -9,7 +8,7 @@ export const issueItemSchema = z.object({
   publishedAt: z.string().trim().min(1).max(80),
   readingMinutes: z.number().int().min(1).max(240),
   type: z.string().trim().min(1).max(160),
-  url: z.url(),
+  url: z.url({ protocol: /^https?$/ }).max(2048),
   summary: z.string().trim().min(1).max(2000),
 });
 
@@ -19,7 +18,7 @@ export const issueSectionSchema = z.object({
 });
 
 export const issueInputSchema = z.object({
-  date: z.string().regex(datePattern, "date must be YYYY-MM-DD"),
+  date: z.string().refine(isIssueDate, "date must be a real calendar date in YYYY-MM-DD form"),
   title: z.string().trim().min(1).max(120).default("Cerulean Crest"),
   editorNote: z.string().trim().min(1).max(4000),
   coverageGap: z.string().trim().max(2000).nullable().optional(),

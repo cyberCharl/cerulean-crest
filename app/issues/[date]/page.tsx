@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { IssueContent } from "@/components/issue-content";
-import { longDate, weekday } from "@/lib/date";
-import { getIssue, neighboringIssues } from "@/lib/db";
+import { longDate, weekday, todayDate } from "@/lib/date";
+import { getIssue, neighboringIssues, latestIssueDate } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +22,8 @@ export default async function IssuePage({ params }: PageProps) {
   const issue = await getIssue(date);
   if (!issue) notFound();
 
-  const neighbors = await neighboringIssues(date);
+  const [neighbors, latest] = await Promise.all([neighboringIssues(date), latestIssueDate()]);
+  const isLatestAvailable = date === latest && date < todayDate();
   const itemCount = issue.sections.reduce((sum, section) => sum + section.items.length, 0);
   const [dayOfMonth, month, year] = longDate(issue.date).split(" ");
 
@@ -30,6 +31,7 @@ export default async function IssuePage({ params }: PageProps) {
     <main>
       <article>
         <header className="issue-hero">
+          {isLatestAvailable ? <p className="edition-notice" role="status">Today’s edition has not arrived yet. This is the latest available edition.</p> : null}
           <div className="issue-cover">
             <p className="issue-day">{weekday(issue.date)}</p>
             <h1 className="issue-date" aria-label={longDate(issue.date)}>
@@ -54,7 +56,7 @@ export default async function IssuePage({ params }: PageProps) {
           ) : null}
         </header>
 
-        <IssueContent issue={issue} />
+        <IssueContent key={issue.date} issue={issue} />
 
         <nav className="issue-navigation" aria-label="Issue navigation">
           {neighbors.previous ? <Link href={`/issues/${neighbors.previous}`}>← {longDate(neighbors.previous)}</Link> : <span />}

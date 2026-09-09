@@ -1,4 +1,4 @@
--- Schema reference. Apply versioned migrations with npm run db:migrate.
+-- Baseline migration; safe to adopt the existing production tables.
 CREATE TABLE IF NOT EXISTS issues (
   id SERIAL PRIMARY KEY,
   issue_date DATE NOT NULL UNIQUE,

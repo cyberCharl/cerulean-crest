@@ -1,6 +1,8 @@
-import type { Issue, IssueInput, IssueSummary } from "./schema";
+import type { Issue, IssueInput, IssueSummary } from "./schema.ts";
+import { isIssueDate } from "./date.ts";
 
 type DatabaseBackend = {
+  createIssue(input: IssueInput): { issueId: number; created: boolean } | Promise<{ issueId: number; created: boolean }>;
   getIssue(date: string): Issue | null | Promise<Issue | null>;
   listIssues(): IssueSummary[] | Promise<IssueSummary[]>;
   latestIssueDate(): string | null | Promise<string | null>;
@@ -21,7 +23,12 @@ function backend(): Promise<DatabaseBackend> {
 }
 
 export async function getIssue(date: string): Promise<Issue | null> {
+  if (!isIssueDate(date)) return null;
   return (await backend()).getIssue(date);
+}
+
+export async function createIssue(input: IssueInput): Promise<{ issueId: number; created: boolean }> {
+  return (await backend()).createIssue(input);
 }
 
 export async function listIssues(): Promise<IssueSummary[]> {
@@ -33,6 +40,7 @@ export async function latestIssueDate(): Promise<string | null> {
 }
 
 export async function neighboringIssues(date: string): Promise<{ previous: string | null; next: string | null }> {
+  if (!isIssueDate(date)) return { previous: null, next: null };
   return (await backend()).neighboringIssues(date);
 }
 

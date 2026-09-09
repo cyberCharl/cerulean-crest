@@ -38,3 +38,18 @@ test("rejects malformed URLs", () => {
   invalid.sections[0].items[0].url = "not a URL";
   assert.equal(issueInputSchema.safeParse(invalid).success, false);
 });
+
+test("rejects impossible dates and accepts leap days only in leap years", () => {
+  for (const date of ["2026-02-29", "2026-02-31", "2026-13-01", "2026-00-00", "0000-01-01", "not-a-date"]) {
+    assert.equal(issueInputSchema.safeParse({ ...validIssue, date }).success, false, date);
+  }
+  assert.equal(issueInputSchema.safeParse({ ...validIssue, date: "2028-02-29" }).success, true);
+});
+
+test("source links only allow HTTP and HTTPS", () => {
+  for (const url of ["javascript:alert(1)", "data:text/html,example", "ftp://example.com/file"]) {
+    const issue = structuredClone(validIssue);
+    issue.sections[0].items[0].url = url;
+    assert.equal(issueInputSchema.safeParse(issue).success, false, url);
+  }
+});

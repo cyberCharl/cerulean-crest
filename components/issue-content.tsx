@@ -2,43 +2,48 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { Issue } from "@/lib/schema";
+import { parseReadingProgress, serializeReadingProgress } from "@/lib/reading-progress";
 
 function storageKey(date: string) {
   return `cerulean-crest:${date}:read`;
 }
 
 export function IssueContent({ issue }: { issue: Issue }) {
-  const [readItems, setReadItems] = useState<Set<number>>(() => new Set());
+  const [readItems, setReadItems] = useState<Set<string>>(() => new Set());
   const items = useMemo(() => issue.sections.flatMap((section) => section.items), [issue.sections]);
 
   useEffect(() => {
     try {
-      const stored = JSON.parse(localStorage.getItem(storageKey(issue.date)) || "[]") as number[];
-      setReadItems(new Set(stored));
+      const stored = parseReadingProgress(localStorage.getItem(storageKey(issue.date)), items);
+      setReadItems(stored);
+      try {
+        localStorage.setItem(storageKey(issue.date), serializeReadingProgress(stored));
+      } catch { /* Keep loaded progress even when writes are unavailable. */ }
     } catch {
       setReadItems(new Set());
     }
-  }, [issue.date]);
+  }, [issue.date, items]);
 
-  function toggleRead(id: number) {
-    setReadItems((current) => {
-      const next = new Set(current);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      localStorage.setItem(storageKey(issue.date), JSON.stringify([...next]));
-      return next;
-    });
+  function toggleRead(url: string) {
+    const next = new Set(readItems);
+    if (next.has(url)) next.delete(url);
+    else next.add(url);
+    setReadItems(next);
+    try {
+      localStorage.setItem(storageKey(issue.date), serializeReadingProgress(next));
+    } catch { /* Reading remains usable when browser storage is disabled/full. */ }
   }
 
-  const readMinutes = items.reduce((total, item) => total + (readItems.has(item.id) ? item.readingMinutes : 0), 0);
-  const percent = items.length === 0 ? 0 : Math.round((readItems.size / items.length) * 100);
+  const readCount = items.filter((item) => readItems.has(item.url)).length;
+  const readMinutes = items.reduce((total, item) => total + (readItems.has(item.url) ? item.readingMinutes : 0), 0);
+  const percent = items.length === 0 ? 0 : Math.round((readCount / items.length) * 100);
 
   return (
     <div className="issue-body">
       <aside className="progress-rail" aria-label="Reading progress">
         <div className="progress-sticky">
           <span className="progress-eyebrow">Your edition</span>
-          <strong>{readItems.size}<i>/</i>{items.length}</strong>
+          <strong>{readCount}<i>/</i>{items.length}</strong>
           <span className="progress-label">pieces read</span>
           <div className="progress-track" aria-hidden="true"><span style={{ "--progress": `${percent}%` } as React.CSSProperties} /></div>
           <span className="progress-time">{readMinutes} min complete</span>
@@ -55,7 +60,7 @@ export function IssueContent({ issue }: { issue: Issue }) {
             </header>
             <div className="item-list">
               {section.items.map((item) => {
-                const isRead = readItems.has(item.id);
+                const isRead = readItems.has(item.url);
                 return (
                   <article className={`issue-item${isRead ? " is-read" : ""}`} id={`item-${item.number}`} key={item.id}>
                     <div className="item-number" aria-hidden="true">{String(item.number).padStart(2, "0")}</div>
@@ -75,7 +80,7 @@ export function IssueContent({ issue }: { issue: Issue }) {
                           className="read-toggle"
                           type="button"
                           aria-pressed={isRead}
-                          onClick={() => toggleRead(item.id)}
+                          onClick={() => toggleRead(item.url)}
                         >
                           <span aria-hidden="true">{isRead ? "✓" : "+"}</span>
                           {isRead ? "Read" : "Mark as read"}

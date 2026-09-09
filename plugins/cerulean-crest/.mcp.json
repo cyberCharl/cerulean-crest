@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "cerulean-crest": {
+      "type": "http",
+      "url": "https://cerulean-crest.vercel.app/mcp",
+      "headers": {
+        "Authorization": "Bearer ${CERULEAN_MCP_TOKEN}"
+      }
+    }
+  }
+}

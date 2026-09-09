@@ -1,0 +1,19 @@
+{
+  "name": "cerulean-crest",
+  "version": "0.1.0",
+  "description": "Curate and save a finite personal daily reading edition.",
+  "author": {
+    "name": "Cerulean Crest"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Cerulean Crest",
+    "shortDescription": "Create a finite personal daily edition",
+    "longDescription": "Use personal context and careful web research to curate a finite daily reading edition, then save the complete edition to Cerulean Crest.",
+    "developerName": "Cerulean Crest",
+    "category": "Productivity",
+    "capabilities": [],
+    "defaultPrompt": "Create today's finite Cerulean Crest edition and save it with the connected app."
+  },
+  "mcpServers": "./.mcp.json"
+}

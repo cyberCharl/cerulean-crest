@@ -1,0 +1,4 @@
+interface:
+  display_name: "Curate daily edition"
+  short_description: "Create a finite personal reading edition"
+  default_prompt: "Create today’s finite Cerulean Crest edition and save it with the connected app."

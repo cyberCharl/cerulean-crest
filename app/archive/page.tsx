@@ -16,6 +16,7 @@ export default async function ArchivePage() {
         <p>Past editions, kept as a record of what earned your attention.</p>
       </header>
       <div className="archive-list">
+        {issues.length === 0 ? <p>Your first edition has not been published yet.</p> : null}
         {issues.map((issue, index) => (
           <Link className="archive-entry" href={`/issues/${issue.date}`} key={issue.date}>
             <span className="archive-index">{String(issues.length - index).padStart(3, "0")}</span>

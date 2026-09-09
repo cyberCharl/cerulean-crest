@@ -34,6 +34,7 @@ export async function PUT(request: Request, { params }: RouteContext) {
   }
 
   const result = await replaceIssue(parsed.data);
+  console.info(JSON.stringify({ event: "edition_publish", transport: "api", date, created: result.created }));
   return Response.json(
     { ok: true, date, url: `/issues/${date}` },
     { status: result.created ? 201 : 200 },

@@ -241,6 +241,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .footer-rule { display: inline-block; width: 1.5rem; height: 3px; margin-right: 0.7rem; vertical-align: middle; background: var(--signal); }
 
 :focus-visible { outline: 3px solid var(--signal); outline-offset: 4px; }
+.edition-notice { padding: 0.8rem 1rem; border-left: 3px solid var(--signal); color: var(--muted); font-size: 0.9rem; }
 
 @media (max-width: 900px) {
   .issue-body { grid-template-columns: 1fr; }

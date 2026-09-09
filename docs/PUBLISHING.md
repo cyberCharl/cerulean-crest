@@ -2,6 +2,8 @@
 
 This is the handoff for a person, scheduled job or another agent that has already generated an issue.
 
+ChatGPT scheduled publishing is designed to use the MCP integration described in [ADR 0001](adr/0001-publish-scheduled-editions-through-mcp.md). The OAuth connection and three-run pilot must pass before unattended publishing is considered live. This Basic-authenticated API is the manual and recovery path, and intentionally permits complete replacement.
+
 Production site: `https://cerulean-crest.vercel.app`
 
 ## Agent instruction
@@ -78,6 +80,7 @@ Expected response:
 Rules:
 
 - Use an ISO `YYYY-MM-DD` date in both URL and body.
+- The date must exist on the calendar, and source links must use HTTP or HTTPS.
 - Preserve editorial section order and item order in the arrays.
 - Send the canonical source URL, without tracking parameters where possible.
 - Every string must be non-empty; every item needs at least one reading minute.
