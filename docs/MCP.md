@@ -34,7 +34,7 @@ On the deployment owner's Mac, the production pilot token is stored in Keychain 
 
 ## Owner-only OAuth connection to ChatGPT
 
-The resource-server implementation is ready, but a real identity provider must be configured. ChatGPT cannot send the pilot's custom API key. Use an established OAuth provider with authorization-code/PKCE, refresh tokens, and MCP-compatible discovery and client registration. Do not implement a password or authorization server in this app.
+The resource-server implementation is ready. **Auth0 is the selected provider**; account creation and tenant setup are pending. Follow [the Auth0 setup runbook](AUTH0_SETUP.md). ChatGPT cannot send the pilot's custom API key. Auth0 will handle hosted login, authorization-code/PKCE, refresh tokens, and discovery; the app remains the resource server.
 
 Set these production variables from the provider's actual configuration:
 
