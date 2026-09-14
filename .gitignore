@@ -1,12 +1,36 @@
+# Dependencies and build caches
 node_modules/
 .next/
-.data/
-.env
-*.log
+out/
 *.tsbuildinfo
-output/cerulean-crest-desktop.png
-output/cerulean-crest-mobile.png
-output/cerulean-crest-live.png
-!.env.example
-.vercel
+
+# Local credentials and deployment state (keep the documented template)
 .env*
+!.env.example
+.vercel/
+.data/
+
+# Local databases
+*.sqlite
+*.sqlite3
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite3-wal
+*.sqlite3-shm
+
+# Logs, coverage, and generated browser reports
+*.log
+coverage/
+playwright-report/
+test-results/
+.playwright-cli/
+output/
+
+# Operating system and editor scratch files
+.DS_Store
+._*
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo
+*~
