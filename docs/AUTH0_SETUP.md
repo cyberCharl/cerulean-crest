@@ -1,8 +1,14 @@
 # Auth0 setup for Cerulean Crest
 
-Selected on 9 September 2026. As of 14 September, the account and Auth0 CLI 1.35.0 are available. A dedicated Cerulean Crest tenant must still be created and authorized.
+Selected on 9 September 2026. As of 14 September, Auth0 CLI 1.35.0 is authorized for **cerulean-works.eu.auth0.com**, the owner's new European Free-plan tenant, and it is the active CLI tenant.
 
-The owner explicitly requires a new tenant. The CLI's currently authorized `prod-ai-safety-sa.eu.auth0.com` tenant belongs to a different project and must not be used or modified for Cerulean Crest. All configuration commands must specify the new tenant explicitly with `--tenant` after verifying its actual domain.
+Created through the CLI: **Cerulean Crest MCP** API, **Cerulean Crest Owner** role, **Cerulean Crest - ChatGPT** third-party client, and **Cerulean Crest - Owner verification** native client. The API requires explicit user client grants and RBAC, denies machine-to-machine access, signs RS256 access tokens with a one-hour lifetime, and allows refresh access. Both clients are granted only the edition read/write scopes for this API. The hosted password connection is available to these clients. Secrets are stored outside Git with restrictive file permissions.
+
+Discovery verified: issuer `https://cerulean-works.eu.auth0.com/`, signing keys `https://cerulean-works.eu.auth0.com/.well-known/jwks.json`, PKCE S256 support, and issuer identification in authorization responses. The resource-parameter compatibility profile is enabled.
+
+Pending: complete owner hosted login, assign the owner role to that verified identity, confirm the exact ChatGPT callback, and verify OAuth before switching the production MCP environment from pilot mode.
+
+The owner selected a new **cerulean-works** tenant that may also host future apps. Give Cerulean Crest its own API audience, clients, roles, and permissions within that tenant. The previously authorized `prod-ai-safety-sa.eu.auth0.com` tenant belongs to a different project and must not be used or modified for Cerulean Crest. All configuration commands must specify the verified new tenant domain explicitly with `--tenant`.
 
 ## Provider choice
 
@@ -12,11 +18,11 @@ Sources: [Auth0 pricing](https://auth0.com/pricing), [Auth0 MCP overview](https:
 
 ## Account handoff
 
-The owner completes [Auth0 signup](https://auth0.com/signup) using their chosen account, including any verification. Create a dedicated Cerulean Crest tenant; choose an EU region if available. Record its actual domain rather than assuming the requested tenant name was available. Dashboard administration and the magazine's end-user identity are separate: signing into the Auth0 dashboard does not create the owner user inside the tenant.
+Account signup and creation of the `cerulean-works` tenant are complete. Record its actual domain from CLI authorization rather than assuming its regional suffix. Dashboard administration and the magazine's end-user identity are separate: signing into the Auth0 dashboard does not create the owner user inside the tenant.
 
 After signup, authorize the Auth0 CLI or use the signed-in dashboard to finish the configuration. Do not paste passwords, management tokens, or client secrets into a conversation.
 
-The installed CLI supports listing, selecting, and opening existing tenants, but has no tenant-creation command. Create the tenant once through Auth0's dashboard, requesting `cerulean-crest-prod` in Europe on the Free plan. Then run `auth0 login` again and choose that new tenant to grant the CLI access. Continue API, client, role, and permission configuration through the CLI. See [Auth0 tenant creation](https://auth0.com/docs/get-started/auth0-overview/create-tenants).
+The installed CLI supports listing, selecting, and opening existing tenants, but has no tenant-creation command. That one-time dashboard step and CLI authorization are complete. Use `--tenant cerulean-works.eu.auth0.com` explicitly on further configuration commands. See [Auth0 tenant creation](https://auth0.com/docs/get-started/auth0-overview/create-tenants).
 
 ## Tenant and API configuration
 

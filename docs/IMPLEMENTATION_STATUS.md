@@ -25,7 +25,7 @@ The latest production edition remains **1 September 2026**. On 9 September the h
 
 ## Remaining setup and launch gates
 
-1. **ChatGPT OAuth:** Auth0 has been selected; owner signup is pending. Follow `AUTH0_SETUP.md` to configure the tenant, client, resource/audience, JWKS URL, and owner subject; then switch the environment from `pilot` to `oauth` and redeploy. The bearer pilot cannot establish the ChatGPT connection by itself.
+1. **ChatGPT OAuth (updated 14 September):** Auth0 CLI is authorized for `cerulean-works.eu.auth0.com`; the Cerulean Crest API, clients, and owner role are created. Owner hosted login, role assignment, and the exact ChatGPT callback remain pending. Follow `AUTH0_SETUP.md`, verify OAuth, then switch the environment from `pilot` to `oauth` and redeploy. The bearer pilot cannot establish the ChatGPT connection by itself.
 2. **Real publishing pilot:** complete an authenticated ChatGPT curation and publish, followed by three unattended scheduled runs. Check source quality, dates, retries, persistence, and notification delivery. These runs have not been completed.
 3. **Git automation:** Vercel's project has no Git connection. The CLI connection attempt failed even though the local GitHub account has repository admin access. Repair the Vercel GitHub installation's access to `cyberCharl/cerulean-crest` in project settings. This release was deployed directly from the local checkout. The new CI and daily-health workflows become active only after their commit is pushed to GitHub (the schedule requires the default branch).
 4. **Recovery rehearsal:** rollback and restore instructions are documented; a full database restore rehearsal remains outstanding.
