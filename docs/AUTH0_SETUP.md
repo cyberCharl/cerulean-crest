@@ -1,6 +1,8 @@
 # Auth0 setup for Cerulean Crest
 
-Selected on 9 September 2026. Account creation and tenant configuration are pending.
+Selected on 9 September 2026. As of 14 September, the account and Auth0 CLI 1.35.0 are available. A dedicated Cerulean Crest tenant must still be created and authorized.
+
+The owner explicitly requires a new tenant. The CLI's currently authorized `prod-ai-safety-sa.eu.auth0.com` tenant belongs to a different project and must not be used or modified for Cerulean Crest. All configuration commands must specify the new tenant explicitly with `--tenant` after verifying its actual domain.
 
 ## Provider choice
 
@@ -13,6 +15,8 @@ Sources: [Auth0 pricing](https://auth0.com/pricing), [Auth0 MCP overview](https:
 The owner completes [Auth0 signup](https://auth0.com/signup) using their chosen account, including any verification. Create a dedicated Cerulean Crest tenant; choose an EU region if available. Record its actual domain rather than assuming the requested tenant name was available. Dashboard administration and the magazine's end-user identity are separate: signing into the Auth0 dashboard does not create the owner user inside the tenant.
 
 After signup, authorize the Auth0 CLI or use the signed-in dashboard to finish the configuration. Do not paste passwords, management tokens, or client secrets into a conversation.
+
+The installed CLI supports listing, selecting, and opening existing tenants, but has no tenant-creation command. Create the tenant once through Auth0's dashboard, requesting `cerulean-crest-prod` in Europe on the Free plan. Then run `auth0 login` again and choose that new tenant to grant the CLI access. Continue API, client, role, and permission configuration through the CLI. See [Auth0 tenant creation](https://auth0.com/docs/get-started/auth0-overview/create-tenants).
 
 ## Tenant and API configuration
 
