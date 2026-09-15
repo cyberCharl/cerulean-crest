@@ -10,7 +10,7 @@ The initial MCP implementation is a single-user technical pilot for proving that
 
 The server uses stateless MCP Streamable HTTP at `/mcp`. Tool inputs use the same validation contract as the manual publishing API.
 
-## Pilot authentication
+## Local and preview pilot authentication
 
 Generate a dedicated secret and configure it as the server-only `CERULEAN_MCP_TOKEN` environment variable. Do not reuse `CERULEAN_API_PASSWORD` and do not place the token in a task prompt.
 
@@ -28,13 +28,13 @@ npx @modelcontextprotocol/inspector
 
 Select Streamable HTTP, enter `http://localhost:3000/mcp`, and set the `Authorization` header to `Bearer local-development-secret`. Verify initialization, list all three tools, call the editorial brief, create a test edition, and repeat the call to confirm it reports `already_exists` without replacing the first result.
 
-The repository plugin config reads `CERULEAN_MCP_TOKEN` from the local environment. The checked-in production URL is `https://cerulean-crest.vercel.app/mcp`.
+The repository plugin config reads `CERULEAN_MCP_TOKEN` from the local environment and points to `http://localhost:3000/mcp`. It is local pilot packaging; production uses the separate OAuth connection below.
 
-On the deployment owner's Mac, the production pilot token is stored in Keychain under service `cerulean-crest-mcp-pilot`, account `cerulean`. Retrieve it into the client environment without printing it. The development token in `.env.local` is different and must only be used against development.
+The former production pilot token is retired and rejected by the current production endpoint. The development token in `.env.local` must only be used against development. Historical Vercel deployments retain their old configuration; use the current production alias when checking authentication.
 
 ## Owner-only OAuth connection to ChatGPT
 
-The resource-server implementation is ready. **Auth0 is configured in `cerulean-works.eu.auth0.com`** with the API, OAuth clients, and owner role. Owner identity verification and the ChatGPT connection are pending. Follow [the Auth0 setup runbook](AUTH0_SETUP.md). ChatGPT cannot send the pilot's custom API key. Auth0 handles hosted login, authorization-code/PKCE, refresh tokens, and discovery; the app remains the resource server.
+**Production uses Auth0 OAuth as of 15 September 2026.** The tenant is `cerulean-works.eu.auth0.com`; the owner is verified and has both edition permissions. Signed-token validation, refresh rotation, production discovery, and authenticated reads passed. The actual ChatGPT connection and publishing test remain pending. Follow [the Auth0 setup runbook](AUTH0_SETUP.md). Auth0 handles hosted login, authorization-code/PKCE, refresh tokens, and discovery; the app remains the resource server.
 
 Set these production variables from the provider's actual configuration:
 

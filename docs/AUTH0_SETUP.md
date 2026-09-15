@@ -1,12 +1,16 @@
 # Auth0 setup for Cerulean Crest
 
-Selected on 9 September 2026. As of 14 September, Auth0 CLI 1.35.0 is authorized for **cerulean-works.eu.auth0.com**, the owner's new European Free-plan tenant, and it is the active CLI tenant.
+Selected on 9 September 2026. As of 15 September, Auth0 CLI 1.35.0 is authorized for **cerulean-works.eu.auth0.com**, the owner's new European Free-plan tenant, and production MCP uses OAuth.
 
 Created through the CLI: **Cerulean Crest MCP** API, **Cerulean Crest Owner** role, **Cerulean Crest - ChatGPT** third-party client, and **Cerulean Crest - Owner verification** native client. The API requires explicit user client grants and RBAC, denies machine-to-machine access, signs RS256 access tokens with a one-hour lifetime, and allows refresh access. Both clients are granted only the edition read/write scopes for this API. The hosted password connection is available to these clients. Secrets are stored outside Git with restrictive file permissions.
 
 Discovery verified: issuer `https://cerulean-works.eu.auth0.com/`, signing keys `https://cerulean-works.eu.auth0.com/.well-known/jwks.json`, PKCE S256 support, and issuer identification in authorization responses. The resource-parameter compatibility profile is enabled.
 
-Pending: complete owner hosted login, assign the owner role to that verified identity, confirm the exact ChatGPT callback, and verify OAuth before switching the production MCP environment from pilot mode.
+The owner completed hosted login and consent, received the app-specific owner role, and obtained signed access tokens with both edition permissions. Refresh-token rotation and live production MCP initialization, tool discovery, brief retrieval, and recent-edition retrieval passed. The deployed production endpoint rejects the retired pilot token; its Vercel production variable has been removed. Basic recovery access remains available.
+
+The ChatGPT client allows `https://chatgpt.com/connector_platform_oauth_redirect`, OpenAI's documented stable callback for providers advertising issuer identification. Its strict third-party client uses `client_secret_post`, authorization-code and rotating refresh-token grants. Complete the actual ChatGPT connection and compare its displayed callback with this allowlist before claiming the ChatGPT flow verified. Dynamic registration remains disabled.
+
+The separate native verification client uses a localhost callback for the Auth0 CLI. A localhost page during that test is unrelated to the production website or ChatGPT callback. If a CLI consent flow must be repeated, let the CLI receive the actual callback; probing its callback listener with a browser or HTTP request can consume the one-shot listener and invalidate the test.
 
 The owner selected a new **cerulean-works** tenant that may also host future apps. Give Cerulean Crest its own API audience, clients, roles, and permissions within that tenant. The previously authorized `prod-ai-safety-sa.eu.auth0.com` tenant belongs to a different project and must not be used or modified for Cerulean Crest. All configuration commands must specify the verified new tenant domain explicitly with `--tenant`.
 
@@ -39,7 +43,9 @@ Source: [Auth0's MCP setup guide](https://auth0.com/ai/docs/mcp/get-started/auth
 
 Start with a predefined OAuth client for the owner pilot. OpenAI supports predefined clients, so open dynamic registration is unnecessary for this setup. Create a dedicated Auth0 client for **Cerulean Crest — ChatGPT**, configure its API grant for the two edition scopes, and enter its client credentials in ChatGPT's OAuth configuration.
 
-Copy the **exact redirect URI shown by ChatGPT's MCP management page** into the client's callback allowlist. Do not guess the callback or add wildcards. The URI can depend on the authorization server's issuer-identification support. Use authorization code with PKCE S256 and the token-endpoint authentication method supported by both the client and provider. Keep consent enabled.
+The stable callback above is configured from OpenAI's documented issuer-identification behavior and this tenant's discovery metadata. Compare the **exact redirect URI shown by ChatGPT's MCP management page** with the client's callback allowlist; update it if ChatGPT shows a different URI. Do not add wildcards. Use authorization code with PKCE S256 and the token-endpoint authentication method supported by both the client and provider. Keep consent enabled.
+
+On the owner's checkout, `.data/auth0/chatgpt-connection.txt` contains the connection URL, client ID, and secret with owner-only file permissions. It is ignored by Git and Vercel uploads. Copy these values into ChatGPT's OAuth configuration, never into a conversation. In ChatGPT, enable Developer mode under Settings → Security and login, then add the public MCP endpoint from [Plugins](https://chatgpt.com/plugins). See [OpenAI's connection instructions](https://developers.openai.com/plugins/deploy/connect-chatgpt).
 
 If moving to CIMD later, use the exact client metadata URL supplied by ChatGPT and Auth0's supported registration workflow. This is a later configuration choice, not a reason to enable open DCR for the owner pilot.
 
@@ -59,4 +65,6 @@ Fetch the actual tenant's discovery metadata and use its exact `issuer` and `jwk
 
 Use a separate API audience and client for an isolated preview verification; never reuse production audience/credentials for Preview or Development. Verify signed owner tokens, wrong-user rejection, scope enforcement, refresh, and MCP discovery before the production switch. Redeploy after updating Vercel variables. Remove the obsolete production pilot token once OAuth is verified.
 
-Then connect ChatGPT, retrieve the brief and recent editions, publish one real edition, and confirm the reader and delivery health. The subsequent three unattended scheduled runs remain a separate acceptance gate. No OAuth connection has been claimed successful merely by choosing this provider.
+Production OAuth was activated on 15 September in deployment `dpl_HTv8x2oca4tbcESWX8RWhPKgU9Kz`. Live signed-token checks passed; wrong-owner and wrong-audience rejection also passed using the application's verifier. Native-client login and refresh do not establish that ChatGPT's separate PKCE/client-secret flow works.
+
+Next connect ChatGPT, retrieve the brief and recent editions, publish one real edition, and confirm the reader and delivery health. The subsequent three unattended scheduled runs remain a separate acceptance gate. No test edition was written to Production during OAuth verification.

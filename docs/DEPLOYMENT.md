@@ -10,7 +10,7 @@ Current production: [cerulean-crest.vercel.app](https://cerulean-crest.vercel.ap
 | Preview | `cerulean-crest-preview-db` | `curly-sky-25679111` |
 | Development | `cerulean-crest-development-db` | `fragrant-bar-24987248` |
 
-Production's database and Basic publishing credential were preserved during isolation. Preview and development have independent publishing passwords and MCP tokens. The developer checkout's `.env.local` points to Development.
+Production's database and Basic publishing credential were preserved during isolation. Production MCP uses owner-only Auth0 OAuth; its temporary pilot token has been removed. Preview and development have independent publishing passwords and MCP tokens. The developer checkout's `.env.local` points to Development.
 
 ## One-time account setup
 
@@ -29,13 +29,13 @@ Create separate resources for Preview and Development, using `-e preview` and `-
 CERULEAN_API_USER
 CERULEAN_API_PASSWORD
 CERULEAN_MCP_TOKEN           # pilot only; use a different generated bearer secret
-CERULEAN_MCP_AUTH_MODE=pilot  # switch to oauth after configuring the provider
+CERULEAN_MCP_AUTH_MODE        # oauth in Production; pilot in Preview/Development
 APP_TIME_ZONE=Africa/Johannesburg
 DATABASE_URL                 # supplied by the Neon integration
 DATABASE_URL_UNPOOLED        # supplied by Neon; used only for explicit migrations
 ```
 
-Use a generated, high-entropy API password. Do not prefix either credential with `NEXT_PUBLIC_`.
+Use a generated, high-entropy API password. Do not prefix either credential with `NEXT_PUBLIC_`. Production additionally requires `CERULEAN_OAUTH_ISSUER`, `CERULEAN_OAUTH_JWKS_URL`, `CERULEAN_MCP_RESOURCE`, and `CERULEAN_OWNER_SUBJECT`; use the verified values described in [Auth0 setup](AUTH0_SETUP.md).
 
 ## Validate and deploy
 

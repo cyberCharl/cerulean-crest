@@ -2,7 +2,7 @@
   "mcpServers": {
     "cerulean-crest": {
       "type": "http",
-      "url": "https://cerulean-crest.vercel.app/mcp",
+      "url": "http://localhost:3000/mcp",
       "headers": {
         "Authorization": "Bearer ${CERULEAN_MCP_TOKEN}"
       }
