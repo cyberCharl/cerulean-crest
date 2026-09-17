@@ -1,6 +1,6 @@
 # Cerulean Crest
 
-Cerulean Crest is a finite, personal daily magazine. A scheduled curator publishes a complete issue through an authenticated API; the site opens on today’s issue (or the latest available issue) and keeps a calm archive of past editions.
+Cerulean Crest is a finite, personal daily magazine. Readers sign in to private editions and configure their reading volume and editorial guidelines in the app. An externally scheduled ChatGPT curator retrieves that brief and publishes complete editions through authenticated MCP tools.
 
 Production: [cerulean-crest.vercel.app](https://cerulean-crest.vercel.app)
 
@@ -11,6 +11,7 @@ Production: [cerulean-crest.vercel.app](https://cerulean-crest.vercel.app)
 - [ADR 0001](docs/adr/0001-publish-scheduled-editions-through-mcp.md) — why scheduled editions use an MCP app instead of GitHub or email transport.
 - [Deployment](docs/DEPLOYMENT.md) — production setup and required secrets.
 - [Roadmap](docs/ROADMAP.md) — MVP, multi-user product, then agent platform.
+- [User accounts](docs/USER_ACCOUNTS.md) — browser authentication, ownership migration, settings, and current onboarding limits.
 - [SQLite schema](schema.sql) and [Postgres schema](schema.postgres.sql) — the current data model.
 
 ## Local development
@@ -55,10 +56,11 @@ Never commit real credentials. Basic Auth is safe here only behind HTTPS; produc
 ## Architecture
 
 - Next.js App Router renders the reader, archive and API.
-- The public site reads directly from the database in Server Components.
+- The public homepage is a landing page; `/today`, dated editions, archive, and settings require a browser session.
+- Server Components read only the authenticated user's database rows. Edition dates are unique per user.
 - `PUT /api/issues/:date` validates and atomically replaces one complete issue.
 - `GET /api/issues/:date` returns a stored issue for authenticated verification.
-- Local reading progress lives in the browser, keyed by source URL so it survives replacement of database item IDs. It intentionally requires no account in the MVP.
+- Reading progress remains browser-local, scoped by account and keyed by source URL so it survives replacement of database item IDs. Server feedback and resurfacing requests are later work.
 - Storage selects itself at runtime: SQLite locally, Neon Postgres when `DATABASE_URL` exists.
 
 The relational hierarchy is intentionally small:
@@ -69,7 +71,7 @@ issue (one date)
     └── items (ordered)
 ```
 
-This keeps today’s payload usable in later versions. Multi-user support adds ownership and feedback without changing the editorial issue structure.
+Ownership scopes this hierarchy without changing the editorial payload structure. Per-user settings are returned by `get_editorial_brief`; scheduling remains external.
 
 ## API behaviour
 

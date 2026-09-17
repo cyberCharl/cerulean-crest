@@ -1,3 +1,4 @@
+import { requireOwner } from "./ownership.ts";
 import Database from "better-sqlite3";
 import fs from "node:fs";
 import path from "node:path";
@@ -15,14 +16,16 @@ db.pragma("foreign_keys = ON");
 db.exec(`
   CREATE TABLE IF NOT EXISTS issues (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    issue_date TEXT NOT NULL UNIQUE,
+    owner_subject TEXT,
+    issue_date TEXT NOT NULL,
     title TEXT NOT NULL,
     editor_note TEXT NOT NULL,
     coverage_gap TEXT,
     available_minutes INTEGER NOT NULL,
     expected_minutes INTEGER NOT NULL,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(owner_subject, issue_date)
   );
   CREATE TABLE IF NOT EXISTS sections (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -49,8 +52,28 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_items_section ON items(section_id, position);
 `);
 
-const replaceIssueTransaction = db.transaction((input: IssueInput) => {
-  const existing = db.prepare("SELECT id FROM issues WHERE issue_date = ?").get(input.date) as { id: number } | undefined;
+// Rebuild the original globally-unique date table without losing IDs or children.
+if (!(db.prepare("PRAGMA table_info(issues)").all() as Array<{name: string}>).some(column => column.name === "owner_subject")) {
+  db.pragma("foreign_keys = OFF");
+  db.transaction(() => {
+    db.exec(`CREATE TABLE issues_owned (
+      id INTEGER PRIMARY KEY AUTOINCREMENT, owner_subject TEXT, issue_date TEXT NOT NULL,
+      title TEXT NOT NULL, editor_note TEXT NOT NULL, coverage_gap TEXT,
+      available_minutes INTEGER NOT NULL, expected_minutes INTEGER NOT NULL,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(owner_subject, issue_date));
+      INSERT INTO issues_owned SELECT id, NULL, issue_date, title, editor_note, coverage_gap, available_minutes, expected_minutes, created_at, updated_at FROM issues;
+      DROP TABLE issues;
+      ALTER TABLE issues_owned RENAME TO issues;`);
+  })();
+  db.pragma("foreign_keys = ON");
+}
+// Unassigned legacy editions stay inaccessible unless an operator specifies their owner.
+if (process.env.CERULEAN_OWNER_SUBJECT) db.prepare("UPDATE issues SET owner_subject = ? WHERE owner_subject IS NULL").run(process.env.CERULEAN_OWNER_SUBJECT);
+db.exec("CREATE TABLE IF NOT EXISTS editorial_settings (owner_subject TEXT PRIMARY KEY, settings TEXT NOT NULL)");
+
+const replaceIssueTransaction = db.transaction((owner: string, input: IssueInput) => {
+  const existing = db.prepare("SELECT id FROM issues WHERE owner_subject = ? AND issue_date = ?").get(owner, input.date) as { id: number } | undefined;
   let issueId: number;
 
   if (existing) {
@@ -59,8 +82,8 @@ const replaceIssueTransaction = db.transaction((input: IssueInput) => {
       .run(input.title, input.editorNote, input.coverageGap ?? null, input.availableMinutes, input.expectedMinutes, issueId);
     db.prepare("DELETE FROM sections WHERE issue_id = ?").run(issueId);
   } else {
-    const result = db.prepare(`INSERT INTO issues (issue_date, title, editor_note, coverage_gap, available_minutes, expected_minutes) VALUES (?, ?, ?, ?, ?, ?)`)
-      .run(input.date, input.title, input.editorNote, input.coverageGap ?? null, input.availableMinutes, input.expectedMinutes);
+    const result = db.prepare(`INSERT INTO issues (owner_subject, issue_date, title, editor_note, coverage_gap, available_minutes, expected_minutes) VALUES (?, ?, ?, ?, ?, ?, ?)`)
+      .run(owner, input.date, input.title, input.editorNote, input.coverageGap ?? null, input.availableMinutes, input.expectedMinutes);
     issueId = Number(result.lastInsertRowid);
   }
 
@@ -78,12 +101,12 @@ const replaceIssueTransaction = db.transaction((input: IssueInput) => {
   return { issueId, created: !existing };
 });
 
-const createIssueTransaction = db.transaction((input: IssueInput) => {
-  const existing = db.prepare("SELECT id FROM issues WHERE issue_date = ?").get(input.date) as { id: number } | undefined;
+const createIssueTransaction = db.transaction((owner: string, input: IssueInput) => {
+  const existing = db.prepare("SELECT id FROM issues WHERE owner_subject = ? AND issue_date = ?").get(owner, input.date) as { id: number } | undefined;
   if (existing) return { issueId: existing.id, created: false };
 
-  const result = db.prepare(`INSERT INTO issues (issue_date, title, editor_note, coverage_gap, available_minutes, expected_minutes) VALUES (?, ?, ?, ?, ?, ?)`)
-    .run(input.date, input.title, input.editorNote, input.coverageGap ?? null, input.availableMinutes, input.expectedMinutes);
+  const result = db.prepare(`INSERT INTO issues (owner_subject, issue_date, title, editor_note, coverage_gap, available_minutes, expected_minutes) VALUES (?, ?, ?, ?, ?, ?, ?)`)
+    .run(owner, input.date, input.title, input.editorNote, input.coverageGap ?? null, input.availableMinutes, input.expectedMinutes);
   const issueId = Number(result.lastInsertRowid);
   const insertSection = db.prepare("INSERT INTO sections (issue_id, title, position) VALUES (?, ?, ?)");
   const insertItem = db.prepare(`INSERT INTO items (section_id, position, title, author, publication, published_at, reading_minutes, content_type, url, summary) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
@@ -99,16 +122,16 @@ const createIssueTransaction = db.transaction((input: IssueInput) => {
   return { issueId, created: true };
 });
 
-export function replaceIssue(input: IssueInput): { issueId: number; created: boolean } {
-  return replaceIssueTransaction(input);
+export function replaceIssue(owner: string, input: IssueInput): { issueId: number; created: boolean } {
+  return replaceIssueTransaction(requireOwner(owner), input);
 }
 
-export function createIssue(input: IssueInput): { issueId: number; created: boolean } {
-  return createIssueTransaction(input);
+export function createIssue(owner: string, input: IssueInput): { issueId: number; created: boolean } {
+  return createIssueTransaction(requireOwner(owner), input);
 }
 
 if (process.env.SEED_DEMO === "true" && (db.prepare("SELECT COUNT(*) AS count FROM issues").get() as { count: number }).count === 0) {
-  replaceIssue(seedIssue);
+  replaceIssue(process.env.CERULEAN_OWNER_SUBJECT || "demo", seedIssue);
 }
 
 type IssueRow = {
@@ -116,9 +139,9 @@ type IssueRow = {
   available_minutes: number; expected_minutes: number; created_at: string; updated_at: string;
 };
 
-export function getIssue(date: string): Issue | null {
+export function getIssue(owner: string, date: string): Issue | null {
   if (!isIssueDate(date)) return null;
-  const row = db.prepare("SELECT * FROM issues WHERE issue_date = ?").get(date) as IssueRow | undefined;
+  const row = db.prepare("SELECT * FROM issues WHERE owner_subject = ? AND issue_date = ?").get(requireOwner(owner), date) as IssueRow | undefined;
   if (!row) return null;
 
   const sectionRows = db.prepare("SELECT id, title FROM sections WHERE issue_id = ? ORDER BY position").all(row.id) as Array<{ id: number; title: string }>;
@@ -153,15 +176,16 @@ export function getIssue(date: string): Issue | null {
   };
 }
 
-export function listIssues(): IssueSummary[] {
+export function listIssues(owner: string): IssueSummary[] {
   return (db.prepare(`
     SELECT i.issue_date, i.title, i.available_minutes, i.expected_minutes, COUNT(it.id) AS item_count
     FROM issues i
     LEFT JOIN sections s ON s.issue_id = i.id
     LEFT JOIN items it ON it.section_id = s.id
+    WHERE i.owner_subject = ?
     GROUP BY i.id
     ORDER BY i.issue_date DESC
-  `).all() as Array<Record<string, string | number>>).map((row) => ({
+  `).all(requireOwner(owner)) as Array<Record<string, string | number>>).map((row) => ({
     date: row.issue_date as string,
     title: row.title as string,
     availableMinutes: row.available_minutes as number,
@@ -170,13 +194,21 @@ export function listIssues(): IssueSummary[] {
   }));
 }
 
-export function latestIssueDate(): string | null {
-  const row = db.prepare("SELECT issue_date FROM issues ORDER BY issue_date DESC LIMIT 1").get() as { issue_date: string } | undefined;
+export function latestIssueDate(owner: string): string | null {
+  const row = db.prepare("SELECT issue_date FROM issues WHERE owner_subject = ? ORDER BY issue_date DESC LIMIT 1").get(requireOwner(owner)) as { issue_date: string } | undefined;
   return row?.issue_date ?? null;
 }
 
-export function neighboringIssues(date: string): { previous: string | null; next: string | null } {
-  const previous = db.prepare("SELECT issue_date FROM issues WHERE issue_date < ? ORDER BY issue_date DESC LIMIT 1").get(date) as { issue_date: string } | undefined;
-  const next = db.prepare("SELECT issue_date FROM issues WHERE issue_date > ? ORDER BY issue_date ASC LIMIT 1").get(date) as { issue_date: string } | undefined;
+export function neighboringIssues(owner: string, date: string): { previous: string | null; next: string | null } {
+  const previous = db.prepare("SELECT issue_date FROM issues WHERE owner_subject = ? AND issue_date < ? ORDER BY issue_date DESC LIMIT 1").get(requireOwner(owner), date) as { issue_date: string } | undefined;
+  const next = db.prepare("SELECT issue_date FROM issues WHERE owner_subject = ? AND issue_date > ? ORDER BY issue_date ASC LIMIT 1").get(requireOwner(owner), date) as { issue_date: string } | undefined;
   return { previous: previous?.issue_date ?? null, next: next?.issue_date ?? null };
+}
+
+export function getSettings(owner: string): unknown {
+  const row = db.prepare("SELECT settings FROM editorial_settings WHERE owner_subject = ?").get(requireOwner(owner)) as {settings: string} | undefined;
+  return row ? JSON.parse(row.settings) : null;
+}
+export function saveSettings(owner: string, settings: unknown): void {
+  db.prepare("INSERT INTO editorial_settings(owner_subject, settings) VALUES (?, ?) ON CONFLICT(owner_subject) DO UPDATE SET settings = excluded.settings").run(requireOwner(owner), JSON.stringify(settings));
 }

@@ -9,8 +9,8 @@ test("invalid read dates return not-found without initializing storage", async (
   delete process.env.DATABASE_URL;
   try {
     for (const date of ["not-a-date", "2026-02-31", "2026-99-99"]) {
-      assert.equal(await getIssue(date), null);
-      assert.deepEqual(await neighboringIssues(date), { previous: null, next: null });
+      assert.equal(await getIssue("test-owner", date), null);
+      assert.deepEqual(await neighboringIssues("test-owner", date), { previous: null, next: null });
     }
   } finally {
     if (oldVercel === undefined) delete process.env.VERCEL; else process.env.VERCEL = oldVercel;

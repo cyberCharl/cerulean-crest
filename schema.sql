@@ -1,14 +1,16 @@
 -- Local-development SQLite schema. The app creates this automatically.
 CREATE TABLE issues (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  issue_date TEXT NOT NULL UNIQUE,
+  owner_subject TEXT,
+  issue_date TEXT NOT NULL,
   title TEXT NOT NULL,
   editor_note TEXT NOT NULL,
   coverage_gap TEXT,
   available_minutes INTEGER NOT NULL,
   expected_minutes INTEGER NOT NULL,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(owner_subject, issue_date)
 );
 
 CREATE TABLE sections (
@@ -38,3 +40,5 @@ CREATE TABLE items (
 -- 1. Add users/workspaces.
 -- 2. Add owner_id to issues and change UNIQUE(issue_date) to UNIQUE(owner_id, issue_date).
 -- 3. Persist read/feedback state in an item_feedback(user_id, item_id, state) table.
+
+CREATE TABLE editorial_settings (owner_subject TEXT PRIMARY KEY, settings TEXT NOT NULL);

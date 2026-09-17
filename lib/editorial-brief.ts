@@ -9,6 +9,9 @@ export const editorialBrief = {
     maximumTopicFraction: 0.25,
   },
   selectionRules: [
+    "Treat selected interests as starting points, not exclusive filters. When none are selected, offer a broad mix; always leave room for worthwhile discovery outside familiar topics.",
+    "Before candidate discovery, call get_recent_editions to check previously included URLs. Avoid repeating recommendations.",
+    "Reading time is an invitation, not a completion target. Extra material offers choice: unread pieces do not constitute debt and must not automatically be carried forward.",
     "Use the user's explicit goals, preferences, trusted people, memory, and current priorities as the strongest personalization signals.",
     "Prefer canonical primary sources and original human work over summaries, reposts, commentary chains, and engagement bait.",
     "Deduplicate multiple treatments of the same event, paper, source, or argument.",

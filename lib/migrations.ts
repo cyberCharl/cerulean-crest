@@ -33,6 +33,10 @@ export async function migrate(connectionString: string): Promise<string[]> {
         throw error;
       }
     }
+    // Explicit configured identity only; never claim legacy content on first signup.
+    if (process.env.CERULEAN_OWNER_SUBJECT) {
+      await client.query("UPDATE issues SET owner_subject = $1 WHERE owner_subject IS NULL", [process.env.CERULEAN_OWNER_SUBJECT]);
+    }
     return applied;
   } finally {
     // Closing the connection also releases the advisory lock after failures.

@@ -11,4 +11,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check edition delivery
-        run: curl --fail-with-body --max-time 30 --retry 2 --retry-delay 10 https://cerulean-crest.vercel.app/api/health
+        env:
+          CERULEAN_API_USER: ${{ secrets.CERULEAN_API_USER }}
+          CERULEAN_API_PASSWORD: ${{ secrets.CERULEAN_API_PASSWORD }}
+        run: |
+          test -n "$CERULEAN_API_USER" && test -n "$CERULEAN_API_PASSWORD"
+          curl --fail-with-body --max-time 30 --retry 2 --retry-delay 10 \
+            --user "$CERULEAN_API_USER:$CERULEAN_API_PASSWORD" \
+            https://cerulean-crest.vercel.app/api/health

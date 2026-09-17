@@ -1,13 +1,16 @@
+import { isAuthorized } from "@/lib/auth";
 import { getIssue, latestIssueDate } from "@/lib/db";
 import { APP_TIME_ZONE, todayDate } from "@/lib/date";
 import { publicationHealth } from "@/lib/publication-health";
 
 export const dynamic = "force-dynamic";
-export async function GET(): Promise<Response> {
+export async function GET(request: Request): Promise<Response> {
+  if (!request.headers.has("authorization")) return Response.json({ status: "ok" }, { headers: { "Cache-Control": "no-store" } });
+  if (!process.env.CERULEAN_OWNER_SUBJECT || !isAuthorized(request.headers.get("authorization"))) return Response.json({ error: "Unauthorized" }, { status: 401, headers: { "Cache-Control": "no-store" } });
   const headers = { "Cache-Control": "no-store" };
   try {
     const today = todayDate();
-    const [issue, latest] = await Promise.all([getIssue(today), latestIssueDate()]);
+    const [issue, latest] = await Promise.all([getIssue(process.env.CERULEAN_OWNER_SUBJECT, today), latestIssueDate(process.env.CERULEAN_OWNER_SUBJECT)]);
     const configuredHour = Number(process.env.EDITION_DEADLINE_HOUR ?? 9);
     if (!Number.isInteger(configuredHour) || configuredHour < 0 || configuredHour > 23) throw new Error("Invalid edition deadline");
     const status = publicationHealth(Boolean(issue), new Date(), APP_TIME_ZONE, configuredHour);

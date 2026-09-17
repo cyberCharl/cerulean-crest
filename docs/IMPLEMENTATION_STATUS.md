@@ -1,4 +1,24 @@
-# Implementation status — 15 September 2026
+# Implementation status — 17 September 2026
+
+## Multi-user release
+
+The live application now includes the Cerulean Crest landing page, Auth0 browser signup/sign-in, private reader/archive/settings routes, and owner-scoped SQLite/Postgres and MCP access. The original 16 editions, 116 sections, and 203 items were preserved and assigned to the configured original owner's subject. New accounts have independent editions and settings.
+
+Production deployment: `dpl_HuWYTESqBtoNKuUQtFUgZjRMDmie`, Ready, Next.js 16.3.4 / Node 24, deployed directly from the current uncommitted workspace. The GitHub workflow edits still require a commit and push to become active.
+
+- Reading time, total edition volume, timezone, and editorial guidelines are editable in `/settings` and returned by the authenticated editorial brief. Scheduling remains external in ChatGPT.
+- Separate Auth0 browser clients and secrets were configured for Development and Production. The app's MCP API no longer requires the original owner's role; approved client grants, user consent and machine-token denial remain. The app derives ownership from authenticated subjects.
+- One Vercel project supports configurable marketing/application origins. The proposed custom domains have not been acquired or attached; the existing `cerulean-crest.vercel.app` URL serves the landing page and `/today` opens the reader.
+- Node 24: 23 unit tests, TypeScript, production build, and HTTP integration passed. HTTP checks exercise real SDK session decryption, private rendering, a second reader's denial, signed-out redirects, and altered-cookie rejection.
+- Isolated Development Postgres and a production-copy branch passed migration, two-owner isolation, concurrent create, rollback, and replacement tests. Full production-copy and live content comparisons confirmed migration preservation.
+- Recovery branch `before-user-accounts-20260917` remains on production project `flat-tooth-73377286`. The separate `rehearse-user-accounts-20260917` branch was used for migration verification and removed afterward. Never roll back to the old public, globally scoped reader after multi-user data exists.
+- Browser checks covered desktop/mobile landing layout and the hosted signup form. Live HTTP checks confirmed protected routes, OAuth redirects, unauthenticated MCP denial, and original-owner authenticated edition readback. The owner also completed live hosted sign-in and confirmed their editions appear. New-user ChatGPT publishing remains a separate acceptance check.
+
+Reading progress is still browser-local and now scoped by account. Persisted feedback, resurfacing requests, public plugin distribution, and a verified unattended new-user publishing loop remain follow-on work. The settings page explains the developer-mode connector setup requirement.
+
+See [user accounts and setup](USER_ACCOUNTS.md) and [domain configuration](DEPLOYMENT.md#custom-domain).
+
+## Previous owner-pilot release — 15 September 2026
 
 The hardened owner pilot is deployed with OAuth at [cerulean-crest.vercel.app](https://cerulean-crest.vercel.app). Production deployment `dpl_HTv8x2oca4tbcESWX8RWhPKgU9Kz` is Ready, built from application commit `f90146c`. This report supersedes the observed state in the 7 September launch review; that review remains the historical record and longer-term roadmap.
 

@@ -1,15 +1,16 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { createIssue, getIssue, listIssues } from "./db.ts";
+import { createIssue, getIssue, listIssues, getSettings } from "./db.ts";
 import { editorialBrief } from "./editorial-brief.ts";
 import { issueInputSchema, type IssueInput } from "./schema.ts";
-import { APP_TIME_ZONE, todayDate } from "./date.ts";
+import { todayDate } from "./date.ts";
 import { mcpChallenge } from "./mcp-auth.ts";
 
 type CreateEdition = (input: IssueInput) => Promise<{ issueId: number; created: boolean }>;
 
 type ServerDependencies = {
   baseUrl: string;
+  subject: string;
   scopes: readonly string[];
   createEdition?: CreateEdition;
 };
@@ -21,7 +22,7 @@ const editionResultSchema = {
   url: z.string().url(),
 };
 
-export function createCeruleanMcpServer({ baseUrl, scopes, createEdition = createIssue }: ServerDependencies): McpServer {
+export function createCeruleanMcpServer({ baseUrl, scopes, subject, createEdition = (input) => createIssue(subject, input) }: ServerDependencies): McpServer {
   function denied(scope: string) {
     return { isError: true, content: [{ type: "text" as const, text: "This operation requires additional authorization." }],
       _meta: { "mcp/www_authenticate": [mcpChallenge(baseUrl, scope)] } };
@@ -49,8 +50,27 @@ export function createCeruleanMcpServer({ baseUrl, scopes, createEdition = creat
     },
     async () => {
       if (!scopes.includes("editions:read")) return denied("editions:read");
+      const settings = await getSettings(subject);
+      const personalizedBrief = {
+        ...editorialBrief,
+        defaults: {
+          ...editorialBrief.defaults,
+          expectedMinutes: settings.readingMinutes,
+          availableMinutes: settings.editionMinutes,
+          acceptableAvailableMinutes: {
+            minimum: Math.max(5, Math.round(settings.editionMinutes * .875)),
+            maximum: Math.round(settings.editionMinutes * 1.125),
+          },
+          itemCount: {
+            minimum: Math.max(1, Math.min(10, Math.floor(settings.editionMinutes / 12))),
+            maximum: Math.max(1, Math.min(20, Math.floor(settings.editionMinutes / 6))),
+          },
+        },
+        editorialGuidelines: settings.guidelines,
+        interests: settings.interests ?? [],
+      };
       const rules = [...editorialBrief.selectionRules, ...editorialBrief.publishingRules];
-      const brief = JSON.stringify({ ...editorialBrief, localDate: todayDate(), timeZone: APP_TIME_ZONE });
+      const brief = JSON.stringify({ ...personalizedBrief, localDate: todayDate(settings.timeZone), timeZone: settings.timeZone });
       return {
         structuredContent: { brief, rules },
         content: [{ type: "text", text: brief }],
@@ -69,8 +89,8 @@ export function createCeruleanMcpServer({ baseUrl, scopes, createEdition = creat
     },
     async ({ limit }) => {
       if (!scopes.includes("editions:read")) return denied("editions:read");
-      const summaries = (await listIssues()).slice(0, limit);
-      const issues = await Promise.all(summaries.map((summary) => getIssue(summary.date)));
+      const summaries = (await listIssues(subject)).slice(0, limit);
+      const issues = await Promise.all(summaries.map((summary) => getIssue(subject, summary.date)));
       const editions = issues.filter((issue) => issue !== null).map((issue) => ({ date: issue.date,
         url: new URL(`/issues/${issue.date}`, baseUrl).toString(),
         items: issue.sections.flatMap((section) => section.items.map((item) => ({ title: item.title, url: item.url }))) }));

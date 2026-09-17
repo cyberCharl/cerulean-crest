@@ -1,12 +1,11 @@
 import { redirect } from "next/navigation";
-import { todayDate } from "@/lib/date";
-import { getIssue, latestIssueDate } from "@/lib/db";
+import { headers } from "next/headers";
+import { LandingPage } from "@/components/landing-page";
+import { appUrl, isSeparateAppHost } from "@/lib/site-config";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const today = todayDate();
-  const date = await getIssue(today) ? today : await latestIssueDate();
-  if (!date) redirect("/archive");
-  redirect(`/issues/${date}`);
+  if (isSeparateAppHost((await headers()).get("host"))) redirect("/today");
+  return <LandingPage signupUrl={appUrl("/auth/login?screen_hint=signup")} signinUrl={appUrl("/auth/login")} />;
 }

@@ -12,7 +12,7 @@ function unauthorizedResponse() {
 }
 
 export async function PUT(request: Request, { params }: RouteContext) {
-  if (!isAuthorized(request.headers.get("authorization"))) return unauthorizedResponse();
+  if (!process.env.CERULEAN_OWNER_SUBJECT || !isAuthorized(request.headers.get("authorization"))) return unauthorizedResponse();
 
   let input: unknown;
   try {
@@ -33,7 +33,7 @@ export async function PUT(request: Request, { params }: RouteContext) {
     return Response.json({ error: "Body date must match the URL date" }, { status: 409 });
   }
 
-  const result = await replaceIssue(parsed.data);
+  const result = await replaceIssue(process.env.CERULEAN_OWNER_SUBJECT!, parsed.data);
   console.info(JSON.stringify({ event: "edition_publish", transport: "api", date, created: result.created }));
   return Response.json(
     { ok: true, date, url: `/issues/${date}` },
@@ -42,8 +42,9 @@ export async function PUT(request: Request, { params }: RouteContext) {
 }
 
 export async function GET(request: Request, { params }: RouteContext) {
-  if (!isAuthorized(request.headers.get("authorization"))) return unauthorizedResponse();
+  if (!process.env.CERULEAN_OWNER_SUBJECT || !isAuthorized(request.headers.get("authorization"))) return unauthorizedResponse();
   const { date } = await params;
-  const issue = await getIssue(date);
-  return issue ? Response.json(issue) : Response.json({ error: "Issue not found" }, { status: 404 });
+  const issue = await getIssue(process.env.CERULEAN_OWNER_SUBJECT!, date);
+  const headers = { "Cache-Control": "private, no-store" };
+  return issue ? Response.json(issue, { headers }) : Response.json({ error: "Issue not found" }, { status: 404, headers });
 }

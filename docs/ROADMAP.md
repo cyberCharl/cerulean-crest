@@ -2,6 +2,8 @@
 
 The direction is provisional and should follow actual use by the owner and early friends.
 
+The [announcement readiness plan](ANNOUNCEMENT_PLAN.md) proposes the next launch scope: private user editions, signup, configurable editorial settings, history-aware curation, intentional discovery, and a manageable reading rhythm. Branding changes remain deferred.
+
 ## v1 — Personal magazine (current)
 
 - Publish complete daily issues through one authenticated API.

@@ -4,25 +4,28 @@ import { useEffect, useMemo, useState } from "react";
 import type { Issue } from "@/lib/schema";
 import { parseReadingProgress, serializeReadingProgress } from "@/lib/reading-progress";
 
-function storageKey(date: string) {
-  return `cerulean-crest:${date}:read`;
+function storageKey(owner: string, date: string) {
+  return `cerulean-crest:${encodeURIComponent(owner)}:${date}:read`;
 }
 
-export function IssueContent({ issue }: { issue: Issue }) {
+export function IssueContent({ issue, owner, canImportLegacyProgress = false }: { issue: Issue; owner: string; canImportLegacyProgress?: boolean }) {
   const [readItems, setReadItems] = useState<Set<string>>(() => new Set());
   const items = useMemo(() => issue.sections.flatMap((section) => section.items), [issue.sections]);
 
   useEffect(() => {
     try {
-      const stored = parseReadingProgress(localStorage.getItem(storageKey(issue.date)), items);
+      const current = localStorage.getItem(storageKey(owner, issue.date));
+      // Only the explicitly assigned legacy owner may inherit pre-account progress.
+      const value = current ?? (canImportLegacyProgress ? localStorage.getItem(`cerulean-crest:${issue.date}:read`) : null);
+      const stored = parseReadingProgress(value, items);
       setReadItems(stored);
       try {
-        localStorage.setItem(storageKey(issue.date), serializeReadingProgress(stored));
+        localStorage.setItem(storageKey(owner, issue.date), serializeReadingProgress(stored));
       } catch { /* Keep loaded progress even when writes are unavailable. */ }
     } catch {
       setReadItems(new Set());
     }
-  }, [issue.date, items]);
+  }, [owner, issue.date, items, canImportLegacyProgress]);
 
   function toggleRead(url: string) {
     const next = new Set(readItems);
@@ -30,7 +33,7 @@ export function IssueContent({ issue }: { issue: Issue }) {
     else next.add(url);
     setReadItems(next);
     try {
-      localStorage.setItem(storageKey(issue.date), serializeReadingProgress(next));
+      localStorage.setItem(storageKey(owner, issue.date), serializeReadingProgress(next));
     } catch { /* Reading remains usable when browser storage is disabled/full. */ }
   }
 

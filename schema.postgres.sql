@@ -1,14 +1,16 @@
 -- Schema reference. Apply versioned migrations with npm run db:migrate.
 CREATE TABLE IF NOT EXISTS issues (
   id SERIAL PRIMARY KEY,
-  issue_date DATE NOT NULL UNIQUE,
+  owner_subject TEXT,
+  issue_date DATE NOT NULL,
   title TEXT NOT NULL,
   editor_note TEXT NOT NULL,
   coverage_gap TEXT,
   available_minutes INTEGER NOT NULL,
   expected_minutes INTEGER NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(owner_subject, issue_date)
 );
 
 CREATE TABLE IF NOT EXISTS sections (
@@ -39,3 +41,5 @@ CREATE INDEX IF NOT EXISTS idx_items_section ON items(section_id, position);
 
 -- v2: add owners, change the issue uniqueness constraint to
 -- UNIQUE(owner_id, issue_date), and add item_feedback(user_id, item_id, state).
+
+CREATE TABLE editorial_settings (owner_subject TEXT PRIMARY KEY, settings JSONB NOT NULL);

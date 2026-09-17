@@ -6,9 +6,9 @@ export function isIssueDate(value: string): boolean {
   return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value;
 }
 
-export function todayDate(): string {
+export function todayDate(timeZone = APP_TIME_ZONE): string {
   return new Intl.DateTimeFormat("en-CA", {
-    timeZone: APP_TIME_ZONE,
+    timeZone,
     year: "numeric",
     month: "2-digit",
     day: "2-digit",

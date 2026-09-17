@@ -1,3 +1,4 @@
+import { configuredAppOrigin } from "@/lib/site-config";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { authorizeMcpRequest, mcpAuthConfigured, mcpChallenge } from "@/lib/mcp-auth";
 import { createCeruleanMcpServer } from "@/lib/mcp-server";
@@ -38,11 +39,12 @@ async function handleMcpRequest(request: Request): Promise<Response> {
   }
 
   const transport = new WebStandardStreamableHTTPServerTransport({ enableJsonResponse: true });
-  const server = createCeruleanMcpServer({ baseUrl: process.env.CERULEAN_SITE_URL || new URL(request.url).origin, scopes: authInfo.scopes });
+  const server = createCeruleanMcpServer({ baseUrl: configuredAppOrigin() || new URL(request.url).origin, scopes: authInfo.scopes, subject: String(authInfo.extra?.subject || "") });
   await server.connect(transport);
   const response = await transport.handleRequest(request, { authInfo });
 
   const headers = new Headers(response.headers);
+  headers.set("Cache-Control", "private, no-store");
   for (const [name, value] of Object.entries(corsHeaders())) headers.set(name, value);
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }

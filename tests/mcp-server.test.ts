@@ -1,3 +1,7 @@
+import { mkdtempSync } from "node:fs";
+import { tmpdir } from "node:os";
+process.env.DATABASE_PATH = `${mkdtempSync(`${tmpdir()}/cerulean-mcp-`)}/test.db`;
+delete process.env.DATABASE_URL;
 import assert from "node:assert/strict";
 import test from "node:test";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
@@ -29,7 +33,7 @@ const issue: IssueInput = {
 
 async function connectedClient(createEdition: (input: IssueInput) => Promise<{ issueId: number; created: boolean }>, scopes = ["editions:read", "editions:write"]) {
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
-  const server = createCeruleanMcpServer({ baseUrl: "https://cerulean.example", scopes, createEdition });
+  const server = createCeruleanMcpServer({ baseUrl: "https://cerulean.example", scopes, subject: "mcp-test-owner", createEdition });
   const client = new Client({ name: "cerulean-test", version: "1.0.0" });
   await server.connect(serverTransport);
   await client.connect(clientTransport);
@@ -105,4 +109,55 @@ test("read-only authorization cannot publish, and the brief specifies date and t
   const parsed = JSON.parse(String((brief.structuredContent as Record<string, unknown>)?.brief));
   assert.match(parsed.localDate, /^\d{4}-\d{2}-\d{2}$/);
   assert.equal(typeof parsed.timeZone, "string");
+});
+
+test("MCP editorial brief reads only the authenticated reader's preferences", async (context) => {
+  const { saveSettings } = await import("../lib/db.ts");
+  await saveSettings("mcp-test-owner", { readingMinutes: 15, editionMinutes: 35, guidelines: "Find original astronomy work", interests: ["Science & nature"], timeZone: "Pacific/Auckland" });
+  await saveSettings("another-reader", { readingMinutes: 90, editionMinutes: 180, guidelines: "Private interests", timeZone: "UTC" });
+  const { client, server } = await connectedClient(async () => ({ issueId: 1, created: true }));
+  context.after(async () => { await client.close(); await server.close(); });
+  const result = await client.callTool({ name: "get_editorial_brief", arguments: {} });
+  const brief = JSON.parse(String((result.structuredContent as Record<string, unknown>).brief));
+  assert.equal(brief.defaults.expectedMinutes, 15);
+  assert.equal(brief.defaults.availableMinutes, 35);
+  assert.equal(brief.editorialGuidelines, "Find original astronomy work");
+  assert.deepEqual(brief.interests, ["Science & nature"]);
+  assert.equal(brief.timeZone, "Pacific/Auckland");
+});
+
+test("MCP create and recent-history tools isolate two authenticated readers on the same date", async (context) => {
+  async function reader(subject: string) {
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+    const server = createCeruleanMcpServer({ baseUrl: "https://cerulean.example", scopes: ["editions:read", "editions:write"], subject });
+    const client = new Client({ name: "isolation-test", version: "1" });
+    await server.connect(serverTransport);
+    await client.connect(clientTransport);
+    context.after(async () => { await client.close(); await server.close(); });
+    return client;
+  }
+  const [alice, bob] = await Promise.all([reader("alice"), reader("bob")]);
+  const aliceIssue = { ...issue, editorNote: "Alice's private note" };
+  const bobIssue = structuredClone(issue);
+  bobIssue.sections[0].items[0].url = "https://example.com/bob-private";
+  for (const [client, input] of [[alice, aliceIssue], [bob, bobIssue]] as const) {
+    const result = await client.callTool({ name: "create_daily_edition", arguments: input });
+    assert.equal((result.structuredContent as Record<string, unknown>).created, true);
+  }
+  const result = await alice.callTool({ name: "get_recent_editions", arguments: { limit: 7 } });
+  const data = JSON.stringify(result.structuredContent);
+  assert.ok(data.includes("https://example.com/piece"));
+  assert.ok(!data.includes("bob-private"));
+});
+
+test("a short edition's item count fits its configured reading volume", async (context) => {
+  const { saveSettings } = await import("../lib/db.ts");
+  await saveSettings("mcp-test-owner", { readingMinutes: 5, editionMinutes: 5, guidelines: "", timeZone: "UTC" });
+  const { client, server } = await connectedClient(async () => ({ issueId: 1, created: true }));
+  context.after(async () => { await client.close(); await server.close(); });
+  const result = await client.callTool({ name: "get_editorial_brief", arguments: {} });
+  const brief = JSON.parse(String((result.structuredContent as Record<string, unknown>).brief));
+  assert.equal(brief.defaults.availableMinutes, 5);
+  assert.equal(brief.defaults.itemCount.minimum, 1);
+  assert.ok(brief.defaults.itemCount.maximum <= brief.defaults.availableMinutes);
 });

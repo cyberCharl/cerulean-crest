@@ -34,12 +34,31 @@ const issue: IssueInput = {
 };
 
 test("createIssue is idempotent and never replaces an existing date", () => {
-  const first = createIssue(issue);
-  const second = createIssue({ ...issue, title: "Replacement title" });
-  const stored = getIssue(issue.date);
+  const first = createIssue("test-owner", issue);
+  const second = createIssue("test-owner", { ...issue, title: "Replacement title" });
+  const stored = getIssue("test-owner", issue.date);
 
   assert.equal(first.created, true);
   assert.equal(second.created, false);
   assert.equal(second.issueId, first.issueId);
   assert.equal(stored?.title, "Original title");
+});
+
+test("each owner has independent editions, neighbors and settings", async () => {
+  const { listIssues, latestIssueDate, neighboringIssues, replaceIssue, getSettings, saveSettings } = await import("../lib/sqlite-db.ts");
+  const other = createIssue("other-owner", { ...issue, title: "Other reader" });
+  assert.equal(other.created, true);
+  assert.notEqual(other.issueId, getIssue("test-owner", issue.date)?.id);
+  createIssue("other-owner", { ...issue, date: "2031-01-16" });
+  assert.equal(getIssue("test-owner", "2031-01-16"), null);
+  assert.equal(listIssues("test-owner").length, 1);
+  assert.equal(latestIssueDate("test-owner"), issue.date);
+  assert.deepEqual(neighboringIssues("test-owner", issue.date), { previous: null, next: null });
+  replaceIssue("other-owner", { ...issue, title: "Changed other reader" });
+  assert.equal(getIssue("test-owner", issue.date)?.title, "Original title");
+  saveSettings("other-owner", { readingMinutes: 15 });
+  assert.equal(getSettings("test-owner"), null);
+  assert.deepEqual(getSettings("other-owner"), { readingMinutes: 15 });
+  assert.throws(() => listIssues(""), /authenticated owner/);
+  assert.throws(() => createIssue("", issue), /authenticated owner/);
 });

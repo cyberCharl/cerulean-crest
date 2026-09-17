@@ -1,3 +1,4 @@
+import { configuredAppOrigin } from "./site-config.ts";
 import { timingSafeEqual } from "node:crypto";
 import { createRemoteJWKSet, jwtVerify, type JWTVerifyGetKey } from "jose";
 import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
@@ -10,7 +11,7 @@ function safeEqual(left: string, right: string): boolean {
 }
 
 export const MCP_SCOPES = ["editions:read", "editions:write"] as const;
-export type OAuthConfig = { issuer: string; resource: string; jwksUrl: string; ownerSubject: string };
+export type OAuthConfig = { issuer: string; resource: string; jwksUrl: string; ownerSubject?: string };
 const keySets = new Map<string, ReturnType<typeof createRemoteJWKSet>>();
 
 export function oauthConfig(): OAuthConfig | null {
@@ -18,7 +19,7 @@ export function oauthConfig(): OAuthConfig | null {
   const resource = process.env.CERULEAN_MCP_RESOURCE;
   const jwksUrl = process.env.CERULEAN_OAUTH_JWKS_URL;
   const ownerSubject = process.env.CERULEAN_OWNER_SUBJECT;
-  if (!issuer || !resource || !jwksUrl || !ownerSubject) return null;
+  if (!issuer || !resource || !jwksUrl) return null;
   try {
     if ([issuer, resource, jwksUrl].some((value) => new URL(value).protocol !== "https:")) return null;
   } catch { return null; }
@@ -27,16 +28,16 @@ export function oauthConfig(): OAuthConfig | null {
 
 export function mcpAuthConfigured(): boolean {
   return process.env.CERULEAN_MCP_AUTH_MODE === "pilot"
-    ? Boolean(process.env.CERULEAN_MCP_TOKEN) : Boolean(oauthConfig());
+    ? Boolean(process.env.CERULEAN_MCP_TOKEN && process.env.CERULEAN_OWNER_SUBJECT) : Boolean(oauthConfig());
 }
 
-export async function verifyOwnerToken(token: string, config: OAuthConfig, keys: JWTVerifyGetKey): Promise<AuthInfo | null> {
+export async function verifyUserToken(token: string, config: OAuthConfig, keys: JWTVerifyGetKey): Promise<AuthInfo | null> {
   try {
     const { payload } = await jwtVerify(token, keys, {
       issuer: config.issuer, audience: config.resource,
       algorithms: ["RS256", "ES256"], requiredClaims: ["sub", "exp"],
     });
-    if (payload.sub !== config.ownerSubject) return null;
+    if (!payload.sub || payload.sub.endsWith("@clients")) return null;
     const scopes = typeof payload.scope === "string" ? payload.scope.split(/\s+/) : [];
     if (!MCP_SCOPES.some((scope) => scopes.includes(scope))) return null;
     return { token, clientId: typeof payload.azp === "string" ? payload.azp : "oauth-owner", scopes,
@@ -46,7 +47,7 @@ export async function verifyOwnerToken(token: string, config: OAuthConfig, keys:
 
 export function mcpChallenge(origin: string, scope = MCP_SCOPES.join(" ")): string {
   if (process.env.CERULEAN_MCP_AUTH_MODE === "pilot") return 'Bearer realm="Cerulean Crest MCP"';
-  const metadata = new URL("/.well-known/oauth-protected-resource", process.env.CERULEAN_SITE_URL || origin);
+  const metadata = new URL("/.well-known/oauth-protected-resource", configuredAppOrigin() || origin);
   return `Bearer resource_metadata="${metadata}", scope="${scope}", error="insufficient_scope", error_description="Authorize Cerulean Crest to continue"`;
 }
 
@@ -60,10 +61,10 @@ export async function authorizeMcpRequest(authorization: string | null): Promise
       keys = createRemoteJWKSet(new URL(config.jwksUrl), { timeoutDuration: 5_000 });
       keySets.set(config.jwksUrl, keys);
     }
-    return verifyOwnerToken(authorization.slice(7), config, keys);
+    return verifyUserToken(authorization.slice(7), config, keys);
   }
   const expectedToken = process.env.CERULEAN_MCP_TOKEN;
-  if (!expectedToken || !authorization?.startsWith("Bearer ")) return null;
+  if (!expectedToken || !process.env.CERULEAN_OWNER_SUBJECT || !authorization?.startsWith("Bearer ")) return null;
 
   const token = authorization.slice("Bearer ".length);
   if (!safeEqual(token, expectedToken)) return null;
@@ -72,6 +73,6 @@ export async function authorizeMcpRequest(authorization: string | null): Promise
     token,
     clientId: "cerulean-crest-pilot",
     scopes: ["editions:read", "editions:write"],
-    extra: { subject: "pilot" },
+    extra: { subject: process.env.CERULEAN_OWNER_SUBJECT },
   };
 }

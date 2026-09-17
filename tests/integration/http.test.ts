@@ -9,6 +9,8 @@ import { setTimeout as delay } from "node:timers/promises";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { seedIssue } from "../../lib/seed.ts";
+import { hkdfSync } from "node:crypto";
+import { EncryptJWT } from "jose";
 
 test("HTTP publishing, duplicate protection, authentication and public validation", { timeout: 60_000 }, async (context) => {
   const directory = await mkdtemp(`${tmpdir()}/cerulean-http-`);
@@ -19,7 +21,9 @@ test("HTTP publishing, duplicate protection, authentication and public validatio
   const base = `http://127.0.0.1:${port}`;
   const server = spawn(process.execPath, ["node_modules/next/dist/bin/next", "start", "-p", String(port)], {
     env: { ...process.env, VERCEL: "", DATABASE_URL: "", DATABASE_URL_UNPOOLED: "", DATABASE_PATH: `${directory}/test.db`, SEED_DEMO: "false",
-      CERULEAN_SITE_URL: base, CERULEAN_API_USER: "test", CERULEAN_API_PASSWORD: "local-test-only", CERULEAN_MCP_AUTH_MODE: "pilot", CERULEAN_MCP_TOKEN: "local-mcp-only" },
+      AUTH0_DOMAIN: "test.example.com", AUTH0_CLIENT_ID: "http-test", AUTH0_CLIENT_SECRET: "test-only", AUTH0_SECRET: "a".repeat(64),
+      CERULEAN_APP_URL: base, CERULEAN_MARKETING_URL: base, APP_BASE_URL: base,
+      CERULEAN_OWNER_SUBJECT: "http-test-owner", CERULEAN_SITE_URL: base, CERULEAN_API_USER: "test", CERULEAN_API_PASSWORD: "local-test-only", CERULEAN_MCP_AUTH_MODE: "pilot", CERULEAN_MCP_TOKEN: "local-mcp-only" },
     stdio: "ignore",
   });
   let client: Client | undefined;
@@ -36,7 +40,7 @@ test("HTTP publishing, duplicate protection, authentication and public validatio
   });
   let ready = false;
   for (let attempt = 0; attempt < 100; attempt++) {
-    try { ready = (await fetch(`${base}/archive`)).status === 200; } catch { /* Server is starting. */ }
+    try { ready = (await fetch(`${base}/`)).status === 200; } catch { /* Server is starting. */ }
     if (ready) break;
     if (server.exitCode !== null) throw new Error("Next.js server exited before becoming ready");
     await delay(100);
@@ -45,7 +49,7 @@ test("HTTP publishing, duplicate protection, authentication and public validatio
   assert.equal((await fetch(`${base}/mcp`)).status, 401);
   const headers = { Authorization: `Basic ${Buffer.from("test:local-test-only").toString("base64")}`, "Content-Type": "application/json" };
   for (const date of ["not-a-date", "2026-02-31"]) {
-    assert.equal((await fetch(`${base}/issues/${date}`)).status, 404);
+    assert.equal((await fetch(`${base}/issues/${date}`, { redirect: "manual" })).status, 307);
     assert.equal((await fetch(`${base}/api/issues/${date}`, { headers })).status, 404);
   }
   const issue = { ...seedIssue, date: "2031-01-15", title: "Original HTTP edition" };
@@ -58,7 +62,38 @@ test("HTTP publishing, duplicate protection, authentication and public validatio
   const duplicate = await client.callTool({ name: "create_daily_edition", arguments: { ...issue, title: "Must not replace" } });
   assert.equal((duplicate.structuredContent as Record<string, unknown>)?.status, "already_exists");
   assert.equal((await (await fetch(`${base}/api/issues/${issue.date}`, { headers })).json()).title, issue.title);
-  assert.equal((await fetch(`${base}/issues/${issue.date}`)).status, 200);
+  assert.equal((await fetch(`${base}/issues/${issue.date}`, { redirect: "manual" })).status, 307);
+  // Exercise the real SDK session decoder with test-only encrypted cookies.
+  // No authentication bypass is added to the application.
+  async function session(subject: string) {
+    const now = Math.floor(Date.now() / 1000);
+    const key = new Uint8Array(hkdfSync("sha256", "a".repeat(64), "", "JWE CEK", 32));
+    const token = await new EncryptJWT({ user: { sub: subject }, internal: { sid: subject, createdAt: now }, tokenSet: { expiresAt: now + 3600 } })
+      .setProtectedHeader({ alg: "dir", enc: "A256GCM" }).setExpirationTime(now + 3600).encrypt(key);
+    return { Cookie: `__session=${token}` };
+  }
+  const ownerSession = await session("http-test-owner");
+  const otherSession = await session("other-reader");
+  const privatePage = await fetch(`${base}/issues/${issue.date}`, { headers: ownerSession });
+  assert.equal(privatePage.status, 200);
+  assert.match(privatePage.headers.get("cache-control") || "", /private/);
+  assert.match(await privatePage.text(), /Original HTTP edition|A focused|issue-hero/);
+  assert.equal((await fetch(`${base}/issues/${issue.date}`, { headers: otherSession })).status, 404);
+  const otherArchive = await (await fetch(`${base}/archive`, { headers: otherSession })).text();
+  assert.ok(!otherArchive.includes(issue.title));
+  assert.ok(otherArchive.includes("Your first edition has not been published"));
+  assert.equal((await fetch(`${base}/onboarding`, { redirect: "manual" })).status, 307);
+  const newReaderToday = await fetch(`${base}/today`, { headers: otherSession, redirect: "manual" });
+  assert.equal(newReaderToday.headers.get("location"), "/onboarding");
+  const onboarding = await fetch(`${base}/onboarding`, { headers: otherSession });
+  assert.equal(onboarding.status, 200);
+  assert.match(await onboarding.text(), /Make room for reading/);
+  const interests = await fetch(`${base}/onboarding?step=interests`, { headers: otherSession });
+  assert.match(await interests.text(), /Science &amp; nature/);
+  const privateSettings = await fetch(`${base}/settings`, { headers: otherSession });
+  assert.equal(privateSettings.status, 200);
+  assert.equal((await fetch(`${base}/settings`, { redirect: "manual" })).status, 307);
+  assert.equal((await fetch(`${base}/issues/${issue.date}`, { headers: { Cookie: "__session=tampered" }, redirect: "manual" })).status, 307);
   for (const [date, payload, expected] of [
     ["2031-01-16", { ...issue, date: "2031-01-16" }, 201],
     [issue.date, { ...issue, title: "Explicit replacement" }, 200],

@@ -259,7 +259,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 }
 
 @media (max-width: 600px) {
-  .site-header { width: min(100% - 2rem, 88rem); height: 5rem; }
+  .site-header { width: min(100% - 2rem, 88rem); min-height: 5rem; height: auto; flex-wrap: wrap; gap: 1rem; padding-block: 1rem; }
   .brand-name { font-size: 1.25rem; }
   .site-header nav { gap: 1rem; }
   .issue-hero, .issue-body, .archive-page, .not-found, .site-footer { width: min(100% - 2rem, 88rem); }

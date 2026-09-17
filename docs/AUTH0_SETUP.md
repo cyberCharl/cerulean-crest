@@ -1,5 +1,7 @@
 # Auth0 setup for Cerulean Crest
 
+The owner-pilot history below describes the 15 September release. The new [user accounts setup](USER_ACCOUNTS.md) supersedes the owner-only access model for the multi-user release, adds separate browser clients, and explains the app-specific MCP permission change.
+
 Selected on 9 September 2026. As of 15 September, Auth0 CLI 1.35.0 is authorized for **cerulean-works.eu.auth0.com**, the owner's new European Free-plan tenant, and production MCP uses OAuth.
 
 Created through the CLI: **Cerulean Crest MCP** API, **Cerulean Crest Owner** role, **Cerulean Crest - ChatGPT** third-party client, and **Cerulean Crest - Owner verification** native client. The API requires explicit user client grants and RBAC, denies machine-to-machine access, signs RS256 access tokens with a one-hour lifetime, and allows refresh access. Both clients are granted only the edition read/write scopes for this API. The hosted password connection is available to these clients. Secrets are stored outside Git with restrictive file permissions.

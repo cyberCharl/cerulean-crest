@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getUser } from "@/lib/browser-auth";
+import { appUrl, marketingUrl } from "@/lib/site-config";
 import "@fontsource-variable/cormorant-garamond/wght.css";
 import "@fontsource-variable/cormorant-garamond/wght-italic.css";
 import "@fontsource/ibm-plex-sans-condensed/latin-400.css";
@@ -23,18 +25,26 @@ function CrestMark() {
   );
 }
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const user = await getUser();
   return (
     <html lang="en">
       <body>
         <header className="site-header">
-          <Link className="brand" href="/" aria-label="Cerulean Crest — today’s issue">
+          <Link className="brand" href={marketingUrl()} aria-label="Cerulean Crest — home">
             <CrestMark />
             <span className="brand-name">Cerulean Crest</span>
           </Link>
           <nav aria-label="Primary navigation">
-            <Link href="/">Today</Link>
-            <Link href="/archive">Archive</Link>
+            {user ? <>
+              <Link href={appUrl("/today")}>Today</Link>
+              <Link href={appUrl("/archive")}>Archive</Link>
+              <Link href={appUrl("/settings")}>Settings</Link>
+              <a href={appUrl("/auth/logout")}>Sign out</a>
+            </> : <>
+              <a href={appUrl("/auth/login")}>Sign in</a>
+              <a href={appUrl("/auth/login?screen_hint=signup")}>Get started</a>
+            </>}
           </nav>
         </header>
         {children}

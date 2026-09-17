@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">Cerulean Crest</title>
+  <desc id="desc">A blue crest with two wave lines on a warm ivory background.</desc>
+  <rect width="64" height="64" rx="14" fill="#f3f0e9"/>
+  <path d="M8 8h48v22c0 14.5-9.2 23.3-24 27C17.2 53.3 8 44.5 8 30V8Z" fill="#0b6d92"/>
+  <path d="M14 14h36v16c0 10.2-6.7 16.8-18 20-11.3-3.2-18-9.8-18-20V14Z" fill="#f3f0e9"/>
+  <path d="M14 31c5-5 10-5 15 0s10 5 15 0 10-5 15 0" fill="none" stroke="#0b6d92" stroke-width="3" stroke-linecap="round"/>
+  <path d="M14 39c5-5 10-5 15 0s10 5 15 0" fill="none" stroke="#0b6d92" stroke-width="2" stroke-linecap="round"/>
+  <path d="M32 17v8M28 21h8" fill="none" stroke="#0b6d92" stroke-width="2.5" stroke-linecap="round"/>
+</svg>
