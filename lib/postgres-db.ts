@@ -1,3 +1,5 @@
+import { articleFeedbackUpdateSchema, articleFeedbackListSchema, articleUrlSchema, articleFeedbackFromRow, ArticleNotFoundError, type ArticleFeedbackRow, type ArticleFeedbackUpdate, type ArticleFeedbackListOptions } from "./article-feedback.ts";
+import { editorialSettingsSchema, defaultSettings, type EditorialSettings } from "./editorial-settings.ts";
 import { requireOwner } from "./ownership.ts";
 import { neon } from "@neondatabase/serverless";
 import type { Issue, IssueInput, IssueSummary } from "./schema.ts";
@@ -262,4 +264,54 @@ export async function getSettings(owner: string): Promise<unknown> {
 }
 export async function saveSettings(owner: string, settings: unknown): Promise<void> {
   await sql`INSERT INTO editorial_settings(owner_subject, settings) VALUES (${requireOwner(owner)}, ${JSON.stringify(settings)}::jsonb) ON CONFLICT(owner_subject) DO UPDATE SET settings = excluded.settings`;
+}
+
+export async function getArticleFeedback(owner: string, url: string) {
+  const rows = await sql`SELECT url, title, publication, saved, reaction, note, updated_at::text AS updated_at
+    FROM article_feedback WHERE owner_subject = ${requireOwner(owner)} AND url = ${articleUrlSchema.parse(url)}` as ArticleFeedbackRow[];
+  return rows[0] ? articleFeedbackFromRow(rows[0]) : null;
+}
+export async function listArticleFeedback(owner: string, options: ArticleFeedbackListOptions = {}) {
+  owner = requireOwner(owner);
+  options = articleFeedbackListSchema.parse(options);
+  const rows = await sql`SELECT url, title, publication, saved, reaction, note, updated_at::text AS updated_at
+    FROM article_feedback WHERE owner_subject = ${owner}
+    AND (${!options.savedOnly} OR saved)
+    AND (${!options.feedbackOnly} OR reaction IS NOT NULL OR note <> '')
+    AND (${options.urls === undefined} OR url IN (SELECT jsonb_array_elements_text(${JSON.stringify(options.urls ?? [])}::jsonb)))
+    ORDER BY updated_at DESC, url LIMIT ${options.limit ?? null}` as ArticleFeedbackRow[];
+  return rows.map(articleFeedbackFromRow);
+}
+export async function updateArticleFeedback(owner: string, input: ArticleFeedbackUpdate) {
+  owner = requireOwner(owner);
+  input = articleFeedbackUpdateSchema.parse(input);
+  // Source metadata is always obtained within this owner's editions/feedback.
+  // Field-specific conflict updates merge concurrent saves and editorial notes.
+  const rows = await sql`WITH source_article AS (
+    SELECT title, publication, 0 AS priority FROM article_feedback WHERE owner_subject = ${owner} AND url = ${input.url}
+    UNION ALL
+    SELECT it.title, it.publication, 1 AS priority FROM items it
+    JOIN sections s ON s.id = it.section_id JOIN issues i ON i.id = s.issue_id
+    WHERE i.owner_subject = ${owner} AND it.url = ${input.url}
+  ) INSERT INTO article_feedback(owner_subject, url, title, publication, saved, reaction, note)
+    SELECT ${owner}, ${input.url}, title, publication, ${input.saved ?? false}, ${input.reaction ?? null}, ${input.note ?? ""}
+    FROM source_article ORDER BY priority, title, publication LIMIT 1
+    ON CONFLICT(owner_subject, url) DO UPDATE SET
+      saved = CASE WHEN ${input.saved !== undefined} THEN excluded.saved ELSE article_feedback.saved END,
+      reaction = CASE WHEN ${input.reaction !== undefined} THEN excluded.reaction ELSE article_feedback.reaction END,
+      note = CASE WHEN ${input.note !== undefined} THEN excluded.note ELSE article_feedback.note END,
+      updated_at = CURRENT_TIMESTAMP
+    RETURNING url, title, publication, saved, reaction, note, updated_at::text AS updated_at` as ArticleFeedbackRow[];
+  if (!rows[0]) throw new ArticleNotFoundError();
+  return articleFeedbackFromRow(rows[0]);
+}
+export async function patchSettings(owner: string, patch: Partial<EditorialSettings>): Promise<EditorialSettings> {
+  owner = requireOwner(owner);
+  const parsed = editorialSettingsSchema.partial().strict().parse(patch);
+  const initial = editorialSettingsSchema.parse({ ...defaultSettings, ...JSON.parse(JSON.stringify(parsed)) });
+  const rows = await sql`INSERT INTO editorial_settings(owner_subject, settings)
+    VALUES (${owner}, ${JSON.stringify(initial)}::jsonb)
+    ON CONFLICT(owner_subject) DO UPDATE SET settings = ${JSON.stringify(defaultSettings)}::jsonb || editorial_settings.settings || ${JSON.stringify(parsed)}::jsonb
+    RETURNING settings`;
+  return editorialSettingsSchema.parse(rows[0].settings);
 }

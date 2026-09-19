@@ -1,3 +1,5 @@
+import { articleFeedbackUpdateSchema, articleFeedbackListSchema, articleUrlSchema, articleFeedbackFromRow, ArticleNotFoundError, type ArticleFeedbackRow, type ArticleFeedbackUpdate, type ArticleFeedbackListOptions } from "./article-feedback.ts";
+import { editorialSettingsSchema, defaultSettings, type EditorialSettings } from "./editorial-settings.ts";
 import { requireOwner } from "./ownership.ts";
 import Database from "better-sqlite3";
 import fs from "node:fs";
@@ -211,4 +213,59 @@ export function getSettings(owner: string): unknown {
 }
 export function saveSettings(owner: string, settings: unknown): void {
   db.prepare("INSERT INTO editorial_settings(owner_subject, settings) VALUES (?, ?) ON CONFLICT(owner_subject) DO UPDATE SET settings = excluded.settings").run(requireOwner(owner), JSON.stringify(settings));
+}
+
+// No edition foreign key: a reader's saved articles survive edition replacement.
+db.exec(`CREATE TABLE IF NOT EXISTS article_feedback (
+  owner_subject TEXT NOT NULL, url TEXT NOT NULL, title TEXT NOT NULL, publication TEXT NOT NULL,
+  saved INTEGER NOT NULL DEFAULT 0 CHECK(saved IN (0, 1)),
+  reaction TEXT CHECK(reaction IN ('more', 'less')), note TEXT NOT NULL DEFAULT '' CHECK(length(note) <= 2000),
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY(owner_subject, url));
+  CREATE INDEX IF NOT EXISTS idx_article_feedback_owner_updated ON article_feedback(owner_subject, updated_at DESC);`);
+
+export function getArticleFeedback(owner: string, url: string) {
+  const row = db.prepare("SELECT * FROM article_feedback WHERE owner_subject = ? AND url = ?")
+    .get(requireOwner(owner), articleUrlSchema.parse(url)) as ArticleFeedbackRow | undefined;
+  return row ? articleFeedbackFromRow(row) : null;
+}
+export function listArticleFeedback(owner: string, options: ArticleFeedbackListOptions = {}) {
+  owner = requireOwner(owner);
+  options = articleFeedbackListSchema.parse(options);
+  if (options.urls?.length === 0) return [];
+  const clauses = ["owner_subject = ?"];
+  const params: Array<string | number> = [owner];
+  if (options.savedOnly) clauses.push("saved = 1");
+  if (options.feedbackOnly) clauses.push("(reaction IS NOT NULL OR note <> '')");
+  if (options.urls) { clauses.push(`url IN (${options.urls.map(() => "?").join(",")})`); params.push(...options.urls); }
+  if (options.limit) params.push(options.limit);
+  return (db.prepare(`SELECT * FROM article_feedback WHERE ${clauses.join(" AND ")} ORDER BY updated_at DESC, url ${options.limit ? "LIMIT ?" : ""}`)
+    .all(...params) as ArticleFeedbackRow[]).map(articleFeedbackFromRow);
+}
+const updateArticleFeedbackTransaction = db.transaction((owner: string, input: ArticleFeedbackUpdate) => {
+  const existing = getArticleFeedback(owner, input.url);
+  const article = existing ?? db.prepare(`SELECT it.title, it.publication FROM items it
+    JOIN sections s ON s.id = it.section_id JOIN issues i ON i.id = s.issue_id
+    WHERE i.owner_subject = ? AND it.url = ? ORDER BY i.issue_date DESC, it.id DESC LIMIT 1`)
+    .get(owner, input.url) as { title: string; publication: string } | undefined;
+  if (!article) throw new ArticleNotFoundError();
+  const updatedAt = new Date().toISOString();
+  db.prepare(`INSERT INTO article_feedback(owner_subject, url, title, publication, saved, reaction, note, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(owner_subject, url) DO UPDATE SET
+    saved = excluded.saved, reaction = excluded.reaction, note = excluded.note, updated_at = excluded.updated_at`)
+    .run(owner, input.url, article.title, article.publication, Number(input.saved ?? existing?.saved ?? false),
+      input.reaction !== undefined ? input.reaction : existing?.reaction ?? null, input.note ?? existing?.note ?? "", updatedAt);
+  return getArticleFeedback(owner, input.url)!;
+});
+export function updateArticleFeedback(owner: string, input: ArticleFeedbackUpdate) {
+  return updateArticleFeedbackTransaction.immediate(requireOwner(owner), articleFeedbackUpdateSchema.parse(input));
+}
+const patchSettingsTransaction = db.transaction((owner: string, patch: Partial<EditorialSettings>) => {
+  const settings = editorialSettingsSchema.parse({ ...defaultSettings, ...(getSettings(owner) as object | null), ...patch });
+  saveSettings(owner, settings);
+  return settings;
+});
+export function patchSettings(owner: string, patch: Partial<EditorialSettings>): EditorialSettings {
+  const parsed = editorialSettingsSchema.partial().strict().parse(patch);
+  const defined = Object.fromEntries(Object.entries(parsed).filter(([, value]) => value !== undefined));
+  return patchSettingsTransaction.immediate(requireOwner(owner), defined);
 }

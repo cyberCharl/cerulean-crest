@@ -10,7 +10,6 @@ The next product direction is friends and sharing, while preserving a quiet solo
 
 These are pending tasks, not claims that social features have shipped.
 
-- [ ] Capture where Sean needed help; fix the most confusing onboarding steps and first-edition handoff.
 - [ ] Define the first social loop: choose a username → add a friend → deliberately share a piece → friend opens it.
 - [ ] Build that small loop: optional unique username, exact-username friend request, accept/decline/remove, and sharing a selected piece with an accepted friend.
 - [ ] Keep social features optional: no mandatory username or friend step in onboarding; a quiet Friends area and a setting to hide it. Define whether hiding also pauses new requests and notifications; recommended default is yes.

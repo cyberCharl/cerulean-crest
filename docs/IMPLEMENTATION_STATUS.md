@@ -1,3 +1,13 @@
+# Editorial feedback release — 18 September 2026
+
+Production deployment `dpl_HfZZjtxjKF4w4z8BQWPh3Jdiejv5` is Ready at https://cerulean-crest.vercel.app, deployed directly from the current workspace. Save article, private Saved collection, Tell the editor reactions/notes, Settings feedback review, and MCP editorial-preference updates are live.
+
+Migration 003 was rehearsed against a fresh copy of production and applied to production; complete before/after record digests confirmed all existing content and settings were preserved. Authenticated MCP discovery and all three reads passed, public/private route smoke checks passed, and the deployment error-log query returned no entries. Browser controls and authenticated writes passed locally before release. See [editorial feedback details](EDITORIAL_FEEDBACK.md).
+
+The [ChatGPT submission packet](submission/README.md) is prepared but not submitted. Final name/domain, publisher/contact, policy decisions and live ChatGPT rehearsal remain open.
+
+---
+
 # Implementation status — 17 September 2026
 
 ## Multi-user release

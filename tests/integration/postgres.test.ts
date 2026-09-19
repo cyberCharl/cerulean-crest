@@ -41,3 +41,50 @@ test("isolated Postgres migration, concurrent create, rollback and replacement",
     await sql`DELETE FROM issues WHERE issue_date = ${date} AND owner_subject IN (${"test-owner"}, ${otherOwner})`;
   }
 });
+
+test("isolated Postgres feedback and settings preserve concurrent independent patches", { skip: !connection, timeout: 90_000 }, async () => {
+  assert.equal(process.env.TEST_DATABASE_ALLOW_WRITES, "true");
+  process.env.DATABASE_URL = connection;
+  await migrate(process.env.TEST_DATABASE_URL_UNPOOLED || connection!);
+  const db = await import("../../lib/postgres-db.ts");
+  const sql = neon(connection!);
+  const owner = `feedback-test-${crypto.randomUUID()}`;
+  const other = `${owner}-other`;
+  const article = seedIssue.sections[0].items[0];
+  try {
+    await db.createIssue(owner, { ...seedIssue, date: "2099-12-29" });
+    await assert.rejects(db.updateArticleFeedback(other, { url: article.url, saved: true }), /Article not found/);
+    await Promise.all([
+      db.updateArticleFeedback(owner, { url: article.url, saved: true }),
+      db.updateArticleFeedback(owner, { url: article.url, note: "More technical depth" }),
+      db.updateArticleFeedback(owner, { url: article.url, reaction: "more" }),
+    ]);
+    const stored = await db.getArticleFeedback(owner, article.url);
+    assert.equal(stored?.saved, true);
+    assert.equal(stored?.note, "More technical depth");
+    assert.equal(stored?.reaction, "more");
+    assert.equal(stored?.title, article.title);
+    assert.equal(await db.getArticleFeedback(other, article.url), null);
+    assert.deepEqual(await db.listArticleFeedback(other), []);
+    assert.equal((await db.listArticleFeedback(owner, { urls: [article.url] })).length, 1);
+    assert.deepEqual(await db.listArticleFeedback(owner, { urls: [] }), []);
+    await db.replaceIssue(owner, { ...seedIssue, date: "2099-12-29", sections: [] });
+    await db.updateArticleFeedback(owner, { url: article.url, note: "", reaction: null });
+    assert.equal((await db.listArticleFeedback(owner, { savedOnly: true })).length, 1);
+    assert.deepEqual(await db.listArticleFeedback(owner, { feedbackOnly: true }), []);
+    await Promise.all([
+      db.patchSettings(owner, { guidelines: "Explicit instruction" }),
+      db.patchSettings(owner, { readingMinutes: 25 }),
+    ]);
+    const settings = await db.getSettings(owner) as { guidelines: string; readingMinutes: number };
+    assert.equal(settings.guidelines, "Explicit instruction");
+    assert.equal(settings.readingMinutes, 25);
+    assert.equal(await db.getSettings(other), null);
+    await assert.rejects(db.patchSettings(owner, { readingMinutes: 0 }));
+    assert.deepEqual(await db.getSettings(owner), settings);
+  } finally {
+    await sql`DELETE FROM article_feedback WHERE owner_subject = ${owner}`;
+    await sql`DELETE FROM editorial_settings WHERE owner_subject = ${owner}`;
+    await sql`DELETE FROM issues WHERE owner_subject = ${owner}`;
+  }
+});

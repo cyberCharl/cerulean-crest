@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { spawn } from "node:child_process";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, rm, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { createServer } from "node:net";
 import { once } from "node:events";
@@ -93,6 +93,46 @@ test("HTTP publishing, duplicate protection, authentication and public validatio
   const privateSettings = await fetch(`${base}/settings`, { headers: otherSession });
   assert.equal(privateSettings.status, 200);
   assert.equal((await fetch(`${base}/settings`, { redirect: "manual" })).status, 307);
+  // Exercise the actual compiled server action through Next's HTTP boundary.
+  const actionManifest = JSON.parse(await readFile(".next/server/server-reference-manifest.json", "utf8"));
+  const actionId = Object.entries(actionManifest.node).find(([, action]) => (action as {exportedName?: string}).exportedName === "changeArticleFeedback")?.[0];
+  assert.ok(actionId, "feedback action must be present in the production build");
+  async function feedbackAction(cookie: Record<string, string>, patch: unknown) {
+    const response = await fetch(`${base}/saved`, { method: "POST", headers: { ...cookie, "Next-Action": actionId!, Origin: base, "Content-Type": "text/plain;charset=UTF-8" }, body: JSON.stringify([patch]), redirect: "manual" });
+    return { status: response.status, body: await response.text() };
+  }
+  const articleUrl = issue.sections[0].items[0].url;
+  let action = await feedbackAction(ownerSession, { url: articleUrl, saved: true });
+  assert.equal(action.status, 200);
+  assert.ok(action.body.includes('"saved":true'));
+  const savedPage = await fetch(`${base}/saved`, { headers: ownerSession });
+  assert.equal(savedPage.status, 200);
+  assert.match(savedPage.headers.get("cache-control") || "", /private/);
+  assert.ok((await savedPage.text()).includes(articleUrl.replaceAll("&", "&amp;")));
+  assert.ok(!(await (await fetch(`${base}/saved`, { headers: otherSession })).text()).includes(articleUrl));
+  assert.equal((await fetch(`${base}/saved`, { redirect: "manual" })).status, 307);
+  assert.ok((await feedbackAction(otherSession, { url: articleUrl, note: "Intrusion" })).body.includes("could not be saved"));
+  assert.ok((await feedbackAction({}, { url: articleUrl, note: "Anonymous" })).body.includes("session has ended"));
+  assert.ok((await feedbackAction(ownerSession, { url: articleUrl, note: "x".repeat(2001) })).body.includes("2,000"));
+  action = await feedbackAction(ownerSession, { url: articleUrl, reaction: "more", note: "HTTP private editorial note" });
+  assert.equal(action.status, 200);
+  assert.ok(action.body.includes('"saved":true'));
+  assert.ok((await (await fetch(`${base}/settings`, { headers: ownerSession })).text()).includes("HTTP private editorial note"));
+  assert.ok(!(await (await fetch(`${base}/settings`, { headers: otherSession })).text()).includes("HTTP private editorial note"));
+  const editorialFeedback = await client.callTool({ name: "get_editorial_feedback", arguments: {} });
+  assert.ok(JSON.stringify(editorialFeedback.structuredContent).includes("HTTP private editorial note"));
+  await client.callTool({ name: "update_editorial_preferences", arguments: { guidelines: "Explicit policy via HTTP MCP" } });
+  assert.ok((await (await fetch(`${base}/settings`, { headers: ownerSession })).text()).includes("Explicit policy via HTTP MCP"));
+  action = await feedbackAction(ownerSession, { url: articleUrl, reaction: null, note: "" });
+  assert.ok(action.body.includes('"saved":true'));
+  const afterClear = await client.callTool({ name: "get_editorial_feedback", arguments: {} });
+  assert.deepEqual((afterClear.structuredContent as {feedback: unknown[]}).feedback, []);
+  const clearedSettings = await (await fetch(`${base}/settings`, { headers: ownerSession })).text();
+  assert.ok(!clearedSettings.includes("HTTP private editorial note"));
+  assert.ok(clearedSettings.includes("Explicit policy via HTTP MCP"));
+  await feedbackAction(ownerSession, { url: articleUrl, saved: false });
+  assert.ok(!(await (await fetch(`${base}/saved`, { headers: ownerSession })).text()).includes(articleUrl));
+
   assert.equal((await fetch(`${base}/issues/${issue.date}`, { headers: { Cookie: "__session=tampered" }, redirect: "manual" })).status, 307);
   for (const [date, payload, expected] of [
     ["2031-01-16", { ...issue, date: "2031-01-16" }, 201],

@@ -1,9 +1,14 @@
+import { articleFeedbackUpdateSchema, articleFeedbackListSchema, articleUrlSchema, type ArticleFeedback, type ArticleFeedbackUpdate, type ArticleFeedbackListOptions } from "./article-feedback.ts";
 import { requireOwner } from "./ownership.ts";
 import { editorialSettingsSchema, defaultSettings, type EditorialSettings } from "./editorial-settings.ts";
 import type { Issue, IssueInput, IssueSummary } from "./schema.ts";
 import { isIssueDate } from "./date.ts";
 
 type DatabaseBackend = {
+  getArticleFeedback(owner: string, url: string): ArticleFeedback | null | Promise<ArticleFeedback | null>;
+  listArticleFeedback(owner: string, options: ArticleFeedbackListOptions): ArticleFeedback[] | Promise<ArticleFeedback[]>;
+  updateArticleFeedback(owner: string, input: ArticleFeedbackUpdate): ArticleFeedback | Promise<ArticleFeedback>;
+  patchSettings(owner: string, patch: Partial<EditorialSettings>): EditorialSettings | Promise<EditorialSettings>;
   getSettings(owner: string): unknown | Promise<unknown>;
   saveSettings(owner: string, settings: unknown): void | Promise<void>;
   createIssue(owner: string, input: IssueInput): { issueId: number; created: boolean } | Promise<{ issueId: number; created: boolean }>;
@@ -61,4 +66,17 @@ export async function getSettingsState(owner: string) {
 }
 export async function saveSettings(owner: string, settings: EditorialSettings): Promise<void> {
   await (await backend()).saveSettings(requireOwner(owner), editorialSettingsSchema.parse(settings));
+}
+
+export async function getArticleFeedback(owner: string, url: string): Promise<ArticleFeedback | null> {
+  return (await backend()).getArticleFeedback(requireOwner(owner), articleUrlSchema.parse(url));
+}
+export async function listArticleFeedback(owner: string, options: ArticleFeedbackListOptions = {}): Promise<ArticleFeedback[]> {
+  return (await backend()).listArticleFeedback(requireOwner(owner), articleFeedbackListSchema.parse(options));
+}
+export async function updateArticleFeedback(owner: string, input: ArticleFeedbackUpdate): Promise<ArticleFeedback> {
+  return (await backend()).updateArticleFeedback(requireOwner(owner), articleFeedbackUpdateSchema.parse(input));
+}
+export async function patchSettings(owner: string, patch: Partial<EditorialSettings>): Promise<EditorialSettings> {
+  return (await backend()).patchSettings(requireOwner(owner), editorialSettingsSchema.partial().strict().parse(patch));
 }

@@ -39,6 +39,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
             {user ? <>
               <Link href={appUrl("/today")}>Today</Link>
               <Link href={appUrl("/archive")}>Archive</Link>
+              <Link href={appUrl("/saved")}>Saved</Link>
               <Link href={appUrl("/settings")}>Settings</Link>
               <a href={appUrl("/auth/logout")}>Sign out</a>
             </> : <>

@@ -1,10 +1,16 @@
 # Publishing Cerulean Crest for ChatGPT
 
-Research checked 17 September 2026 against current official OpenAI documentation and this repository. This is a preparation plan, not a submitted or approved listing. No provider configuration or publication was changed during this review.
+Research checked 18 September 2026 against current official OpenAI documentation and this repository. This is a preparation plan, not a submitted or approved listing. No provider configuration or publication was changed during this review.
+
+## Prepared submission materials
+
+The [submission packet](submission/README.md) now contains listing copy, release notes, public-policy/support drafts, reviewer account setup and seven positive plus five negative review scenarios. The policy drafts remain internal until operator, contact, retention/deletion and regional details are resolved. No live review case is recorded as passed.
+
+The domain challenge route is implemented at `/.well-known/openai-apps-challenge`: set `OPENAI_APPS_CHALLENGE` to the exact portal token in the intended deployment and redeploy. It returns 404 until configured. Name/domain selection, verified publisher identity, public policy pages, reviewer credentials and production rehearsal remain outstanding.
 
 ## Recommended route
 
-Publish a **plugin with the existing remote MCP server and the curation skill**. Current OpenAI documentation uses “plugins” for the shared ChatGPT/Codex directory; this is not the old ChatGPT plugin manifest system. The existing three tools cover the first useful workflow. We do not need to rebuild the reader inside ChatGPT. [Plugin overview](https://developers.openai.com/plugins)
+Publish a **plugin with the existing remote MCP server and the curation skill**. Current OpenAI documentation uses “plugins” for the shared ChatGPT/Codex directory; this is not the old ChatGPT plugin manifest system. The initial tools cover the core curation workflow; the current implementation work adds explicit preference updates and editorial-feedback retrieval. Scan the final deployed tool set before submission. We do not need to rebuild the reader inside ChatGPT. [Plugin overview](https://developers.openai.com/plugins)
 
 The submission portal accepts remote MCP alone or MCP plus skills; custom UI is optional. Use **With MCP**, a **Universal** endpoint, and upload the tested curation skill. Prepare a verified individual/business identity, Apps Management write access, name/descriptions/logo/category, website/support/privacy/terms URLs, countries, release notes, starter prompts, and at least five positive plus three negative test cases. Verify the server domain with the portal's token at `/.well-known/openai-apps-challenge`. [Submission procedure](https://developers.openai.com/plugins/deploy/submission)
 
@@ -30,7 +36,8 @@ Repository evidence, rather than a claim that the public installation flow has p
 | Resource discovery | `app/.well-known/oauth-protected-resource/route.ts`: resource, issuer, read/write scopes; 401 responses advertise it. Live unauthenticated metadata retrieval passed during this research. |
 | User authorization | `lib/mcp-auth.ts`: verifies signature, issuer, audience, expiry and subject; rejects machine subjects; tools enforce edition scopes. Production OAuth does not fall back to the development bearer. |
 | Private data | Edition and settings operations use the verified subject. Browser and MCP clients must remain on the same Auth0 tenant. |
-| Editorial preferences | `get_editorial_brief` fetches the reader's current reading minutes, edition minutes, guidelines and timezone. Reading volume belongs here; schedule management remains external. |
+| Editorial preferences | `get_editorial_brief` fetches the reader's current reading minutes, edition minutes, guidelines, interests and timezone, including structured preferences. `update_editorial_preferences` changes only explicitly supplied supported fields for the authenticated reader, reflected in Settings. |
+| Article feedback | `get_editorial_feedback` retrieves bounded recent reactions/private notes for the authenticated reader. Saved-only articles are excluded; these soft signals do not rewrite explicit policy. |
 | History | `get_recent_editions` returns source titles/URLs from up to fourteen recent editions for that reader. It does not return persisted reading status or a resurfacing queue. |
 | Publication | `create_daily_edition` validates a complete edition and is idempotent for each reader/date; it does not replace an existing edition. |
 | Curation instructions | `plugins/cerulean-crest/skills/curate-daily-edition/SKILL.md` already tells the agent to retrieve brief/history, research, deduplicate, curate and publish. |
@@ -47,10 +54,10 @@ Repository evidence, rather than a claim that the public installation flow has p
 | Production OAuth in submission | Reuse the dedicated ChatGPT client or configure its public-listing equivalent. Enter credentials only into the portal's OAuth fields. Compare its exact redirect URI to Auth0's allowlist. |
 | Fresh-user authorization | A new reader can consent to both edition scopes without an owner role or maintainer intervention; browser and MCP resolve to the same account. The multi-user runbook specifies removing the former API owner-role restriction; verify actual configuration and behavior. |
 | Renewal and disconnection | Verify expiry/refresh and reconnection through the actual ChatGPT integration, plus rejection when authorization is no longer valid. Native-client tests do not establish ChatGPT behavior. |
-| Tool scan | Scan the live authenticated endpoint using the review account, confirm all three tools, schemas and security metadata are accepted. Correct any errors on the server before rescanning. |
-| Tool annotations | Reconsider `create_daily_edition.openWorldHint`, currently `true`: it writes only to the reader's private account and does not fetch sources or publicly publish. Proposed value is `false`, subject to checking all side effects. Keep `readOnlyHint: false`, `destructiveHint: false`, and `idempotentHint: true` for its current non-replacing behavior. |
-| Verification endpoint | Add a publicly readable plain-text challenge route returning the exact portal-generated token; absent in the current route tree. |
-| Public policies/support | Add real support, privacy and terms pages. Decide operator/contact, retention and deletion practices first; do not publish invented operational promises. No such routes were found. |
+| Tool scan | Scan the live authenticated endpoint using the review account, confirm the full deployed tool set, schemas and security metadata are accepted. Correct any errors on the server before rescanning. |
+| Tool annotations | The implementation now marks account-bounded edition creation `openWorldHint: false`, `readOnlyHint: false`, `destructiveHint: false`, `idempotentHint: true`. Preference updates are write/destructive because they overwrite specified values. Confirm these annotations in the final live scan. |
+| Verification endpoint | Route implemented; set `OPENAI_APPS_CHALLENGE` to the portal-generated token, deploy, and verify the exact anonymous response on the selected origin. |
+| Public policies/support | Drafts prepared in `docs/submission/policy-drafts.md`. Resolve operator/contact, retention, deletion and region details, then publish real pages. No public policy/support routes have been added. |
 | Review account | Prepare isolated sample editions and preferences, with reviewer login that works without private-network access or interactive MFA/email challenges. Never provide the owner's account. |
 | Review scenarios | Run the cases below in the actual supported ChatGPT surface and record expected/actual results. Existing unit tests alone are insufficient evidence. |
 | Public package | Provide the production MCP URL through the submission flow and upload the curation skill; remove development-only assumptions from any distributed package. |
@@ -63,14 +70,14 @@ Privacy materials should cover account identity, reading preferences, edition co
 
 ## MCP expansion: necessary versus optional
 
-**No additional tool is established as a publication requirement.** Finish and verify the existing contract first.
+**No additional tool is established as a publication requirement.** The user has separately authorized saving, article feedback and explicit preference edits as product features for this release. Verify the final implemented contract.
 
-Recommended product improvements, separate from the directory gate:
+Product scope and remaining options:
 
-- Return a structured preferences object alongside the textual editorial brief, so the agent can reliably explain the saved choices. Current JSON-in-string output works but is less convenient.
-- Add an explicit `update_editorial_preferences` tool later if we want ChatGPT to propose and save interests after user approval. Treat it as a scoped write, validate fields, and never accept arbitrary account IDs. This avoids forcing users to compose an elaborate editorial prompt while keeping the app's brief authoritative.
+- Structured preferences now accompany the textual editorial brief, allowing the agent to explain saved choices without parsing the prose brief.
+- Implement `update_editorial_preferences` as an explicit-request, scoped write, reflected in Settings. Validate fields, preserve omitted values and never accept arbitrary account IDs. `get_editorial_feedback` separately returns reactions/article notes for conservative curation adjustments. Save is not an editorial reaction; feedback must not silently rewrite explicit settings.
 - If connection verification is needed in the wizard, design an explicit, account-bound handshake. A user checkbox or a successful browser session proves neither installation nor MCP connection. A past tool request establishes only past access, not a currently valid link. Do not silently turn the existing read-only brief tool into a connection-state mutation.
-- Persist explicit “include in a future edition” feedback and expose it with history when that feature is built. Unread or unmarked articles must not automatically become a queue. This is editorial functionality, not a prerequisite for publishing the initial three tools.
+- Persist explicit “include in a future edition” feedback and expose it with history when that feature is built. Unread or unmarked articles must not automatically become a queue. This future resurfacing queue is separate from the currently authorized saving and feedback features and is not a submission prerequisite.
 - Custom embedded UI, `search`/`fetch` tools for a separate retrieval use case, and an in-app scheduler are not needed for this initial curation workflow.
 
 ## Scheduling and personalization boundaries
@@ -80,6 +87,8 @@ Current official documentation supports web scheduled tasks using plugins, conne
 Publication does not prove unattended Cerulean writes, token refresh or available research context. Our acceptance gate remains three real unattended runs for a fresh reader with correct ownership, current preferences, source research, private links and no unexpected approval interruption. We have not performed those runs here. Do not promise that arbitrary historical chats or memory will be available: saved app preferences are the reliable starting point, supplemented only by context the host actually supplies.
 
 ## Proposed review cases
+
+Use the expanded [reviewer guide](submission/reviewer-guide.md) for this release, including explicit preference changes, Saved and Tell the editor. The baseline cases below remain useful but do not cover all newly added features.
 
 These are repository-specific test designs to prepare, not completed test results. Use disposable review fixtures and record exact prompts, fixture dates and observed output.
 

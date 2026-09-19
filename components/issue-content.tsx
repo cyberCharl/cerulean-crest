@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { ArticleActions } from "@/components/article-actions";
+import type { ArticleFeedback } from "@/lib/article-feedback";
 import type { Issue } from "@/lib/schema";
 import { parseReadingProgress, serializeReadingProgress } from "@/lib/reading-progress";
 
@@ -8,7 +11,7 @@ function storageKey(owner: string, date: string) {
   return `cerulean-crest:${encodeURIComponent(owner)}:${date}:read`;
 }
 
-export function IssueContent({ issue, owner, canImportLegacyProgress = false }: { issue: Issue; owner: string; canImportLegacyProgress?: boolean }) {
+export function IssueContent({ issue, owner, canImportLegacyProgress = false, articleFeedback = [] }: { issue: Issue; owner: string; canImportLegacyProgress?: boolean; articleFeedback?: ArticleFeedback[] }) {
   const [readItems, setReadItems] = useState<Set<string>>(() => new Set());
   const items = useMemo(() => issue.sections.flatMap((section) => section.items), [issue.sections]);
 
@@ -37,6 +40,7 @@ export function IssueContent({ issue, owner, canImportLegacyProgress = false }: 
     } catch { /* Reading remains usable when browser storage is disabled/full. */ }
   }
 
+  const feedbackByUrl = new Map(articleFeedback.map((feedback) => [feedback.url, feedback]));
   const readCount = items.filter((item) => readItems.has(item.url)).length;
   const readMinutes = items.reduce((total, item) => total + (readItems.has(item.url) ? item.readingMinutes : 0), 0);
   const percent = items.length === 0 ? 0 : Math.round((readCount / items.length) * 100);
@@ -50,6 +54,7 @@ export function IssueContent({ issue, owner, canImportLegacyProgress = false }: 
           <span className="progress-label">pieces read</span>
           <div className="progress-track" aria-hidden="true"><span style={{ "--progress": `${percent}%` } as React.CSSProperties} /></div>
           <span className="progress-time">{readMinutes} min complete</span>
+          <Link className="saved-collection-link" href="/saved">Your saved articles →</Link>
         </div>
       </aside>
 
@@ -89,6 +94,7 @@ export function IssueContent({ issue, owner, canImportLegacyProgress = false }: 
                           {isRead ? "Read" : "Mark as read"}
                         </button>
                       </div>
+                      <ArticleActions url={item.url} initialFeedback={feedbackByUrl.get(item.url)} />
                     </div>
                   </article>
                 );

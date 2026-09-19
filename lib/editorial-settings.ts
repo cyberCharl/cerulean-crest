@@ -13,4 +13,9 @@ export const editorialSettingsSchema = z.object({
   onboardingStep: z.enum(["interests", "connect"]).optional(),
 });
 export type EditorialSettings = z.infer<typeof editorialSettingsSchema>;
+// Deliberately omit onboarding state: the curator can change editorial choices,
+// not the reader's progress through setup. Omitted fields remain unchanged.
+export const editorialPreferencesPatchSchema = editorialSettingsSchema
+  .omit({ onboardingStep: true }).partial().strict()
+  .refine(value => Object.values(value).some(field => field !== undefined), "Provide at least one preference to update");
 export const defaultSettings: EditorialSettings = { readingMinutes: 60, editionMinutes: 120, guidelines: "", timeZone: "Africa/Johannesburg" };

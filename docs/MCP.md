@@ -1,5 +1,13 @@
 # Cerulean Crest MCP integration
 
+## Current workspace update — 18 September 2026
+
+The current implementation is multi-user and owner-scoped. The owner-only and public-reader descriptions below are historical pilot instructions; use [user accounts](USER_ACCOUNTS.md), [editorial feedback](EDITORIAL_FEEDBACK.md) and [submission preparation](submission/README.md) for current behavior.
+
+The server now exposes five tools: `get_editorial_brief`, `get_recent_editions`, `get_editorial_feedback`, `update_editorial_preferences` and `create_daily_edition`. The three readers require `editions:read`; both writers require `editions:write`. Explicit preference updates are reflected in Settings, while article reactions and notes remain separate soft signals. Creation writes only to a private account (`openWorldHint: false`). Migration 003 and these five tools were deployed on 18 September 2026 (`dpl_HfZZjtxjKF4w4z8BQWPh3Jdiejv5`); authenticated discovery and reads passed. Public directory availability and actual ChatGPT rehearsal remain separate.
+
+## Historical pilot runbook
+
 The initial MCP implementation is a single-user technical pilot for proving that a connected agent can create a complete daily edition without arbitrary shell or network access. The architectural decision and rollout requirements are recorded in [ADR 0001](adr/0001-publish-scheduled-editions-through-mcp.md).
 
 ## Tools

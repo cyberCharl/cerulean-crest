@@ -8,7 +8,7 @@ export async function proxy(request: NextRequest) {
     return response;
   }
   const response = await auth0().middleware(request);
-  if (/^\/(today|archive|issues|settings|api|mcp|auth)(\/|$)/.test(request.nextUrl.pathname)) {
+  if (/^\/(today|archive|issues|saved|settings|onboarding|api|mcp|auth)(\/|$)/.test(request.nextUrl.pathname)) {
     response.headers.set("Cache-Control", "private, no-store");
     response.headers.set("X-Robots-Tag", "noindex, nofollow");
   }

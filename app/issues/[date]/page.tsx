@@ -4,7 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { IssueContent } from "@/components/issue-content";
 import { longDate, weekday, todayDate } from "@/lib/date";
-import { getIssue, neighboringIssues, latestIssueDate, getSettings } from "@/lib/db";
+import { getIssue, neighboringIssues, latestIssueDate, getSettings, listArticleFeedback } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
@@ -25,8 +25,10 @@ export default async function IssuePage({ params }: PageProps) {
   const issue = await getIssue(user.subject, date);
   if (!issue) notFound();
 
-  const [neighbors, latest] = await Promise.all([neighboringIssues(user.subject, date), latestIssueDate(user.subject)]);
-  const settings = await getSettings(user.subject);
+  const [neighbors, latest, settings, articleFeedback] = await Promise.all([
+    neighboringIssues(user.subject, date), latestIssueDate(user.subject), getSettings(user.subject),
+    listArticleFeedback(user.subject, { urls: issue.sections.flatMap((section) => section.items.map((item) => item.url)) }),
+  ]);
   const isLatestAvailable = date === latest && date < todayDate(settings.timeZone);
   const itemCount = issue.sections.reduce((sum, section) => sum + section.items.length, 0);
   const [dayOfMonth, month, year] = longDate(issue.date).split(" ");
@@ -60,7 +62,7 @@ export default async function IssuePage({ params }: PageProps) {
           ) : null}
         </header>
 
-        <IssueContent key={`${user.subject}:${issue.date}`} issue={issue} owner={user.subject} canImportLegacyProgress={user.subject === process.env.CERULEAN_OWNER_SUBJECT} />
+        <IssueContent key={`${user.subject}:${issue.date}`} issue={issue} articleFeedback={articleFeedback} owner={user.subject} canImportLegacyProgress={user.subject === process.env.CERULEAN_OWNER_SUBJECT} />
 
         <nav className="issue-navigation" aria-label="Issue navigation">
           {neighbors.previous ? <Link href={`/issues/${neighbors.previous}`}>← {longDate(neighbors.previous)}</Link> : <span />}

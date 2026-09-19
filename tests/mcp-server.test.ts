@@ -54,7 +54,7 @@ test("advertises the editorial brief and idempotent create tools with accurate h
   assert.equal(brief?.annotations?.readOnlyHint, true);
   assert.equal(create?.annotations?.readOnlyHint, false);
   assert.equal(create?.annotations?.destructiveHint, false);
-  assert.equal(create?.annotations?.openWorldHint, true);
+  assert.equal(create?.annotations?.openWorldHint, false);
 });
 
 test("creates a complete edition and returns its canonical URL", async (context) => {
@@ -160,4 +160,66 @@ test("a short edition's item count fits its configured reading volume", async (c
   assert.equal(brief.defaults.availableMinutes, 5);
   assert.equal(brief.defaults.itemCount.minimum, 1);
   assert.ok(brief.defaults.itemCount.maximum <= brief.defaults.availableMinutes);
+});
+
+
+test("MCP preference writes preserve unrelated fields and isolate readers", async (context) => {
+  const { saveSettings, getSettings } = await import("../lib/db.ts");
+  await saveSettings("mcp-test-owner", { readingMinutes: 25, editionMinutes: 50, guidelines: "Original", interests: ["Technology"], timeZone: "UTC", onboardingStep: "connect" });
+  await saveSettings("unrelated-settings-reader", { readingMinutes: 60, editionMinutes: 120, guidelines: "Private", timeZone: "UTC" });
+  const { client, server } = await connectedClient(async () => ({ issueId: 1, created: true }));
+  context.after(async () => { await client.close(); await server.close(); });
+  const result = await client.callTool({ name: "update_editorial_preferences", arguments: { guidelines: "More original research; avoid daily market news" } });
+  assert.notEqual(result.isError, true);
+  const stored = await getSettings("mcp-test-owner");
+  assert.equal(stored.guidelines, "More original research; avoid daily market news");
+  assert.equal(stored.readingMinutes, 25);
+  assert.equal(stored.editionMinutes, 50);
+  assert.deepEqual(stored.interests, ["Technology"]);
+  assert.equal(stored.onboardingStep, "connect");
+  assert.equal((result.structuredContent as {settingsUrl: string}).settingsUrl, "https://cerulean.example/settings");
+  assert.equal((await getSettings("unrelated-settings-reader")).guidelines, "Private");
+  const brief = await client.callTool({ name: "get_editorial_brief", arguments: {} });
+  assert.equal((brief.structuredContent as {preferences: {guidelines: string}}).preferences.guidelines, stored.guidelines);
+  for (const args of [{}, { readingMinutes: 0 }, { timeZone: "not-a-zone" }, { owner: "unrelated-settings-reader", guidelines: "Hijack" }, { onboardingStep: "interests" }]) {
+    const invalid = await client.callTool({ name: "update_editorial_preferences", arguments: args });
+    assert.equal(invalid.isError, true);
+    assert.deepEqual(await getSettings("mcp-test-owner"), stored);
+  }
+});
+
+test("MCP preference writes and feedback reads enforce scopes", async (context) => {
+  const { getSettings } = await import("../lib/db.ts");
+  const before = await getSettings("mcp-test-owner");
+  const read = await connectedClient(async () => ({ issueId: 1, created: true }), ["editions:read"]);
+  const write = await connectedClient(async () => ({ issueId: 1, created: true }), ["editions:write"]);
+  context.after(async () => { for (const connection of [read, write]) { await connection.client.close(); await connection.server.close(); } });
+  assert.equal((await read.client.callTool({ name: "update_editorial_preferences", arguments: { guidelines: "Forbidden" } })).isError, true);
+  assert.deepEqual(await getSettings("mcp-test-owner"), before);
+  assert.equal((await write.client.callTool({ name: "get_editorial_feedback", arguments: {} })).isError, true);
+});
+
+test("MCP feedback excludes bookmarks and other readers, and never rewrites explicit policy", async (context) => {
+  const { createIssue, updateArticleFeedback, getSettings } = await import("../lib/db.ts");
+  const feedbackIssue = structuredClone(issue);
+  feedbackIssue.date = "2031-05-10";
+  feedbackIssue.sections[0].items.push({ ...feedbackIssue.sections[0].items[0], title: "Bookmark only", url: "https://example.com/bookmark" });
+  await createIssue("mcp-test-owner", feedbackIssue);
+  await createIssue("feedback-other-reader", feedbackIssue);
+  await updateArticleFeedback("mcp-test-owner", { url: issue.sections[0].items[0].url, reaction: "more", note: "Loved the depth, not the daily news angle." });
+  await updateArticleFeedback("mcp-test-owner", { url: "https://example.com/bookmark", saved: true });
+  await updateArticleFeedback("feedback-other-reader", { url: issue.sections[0].items[0].url, note: "Other account private note" });
+  const before = await getSettings("mcp-test-owner");
+  const { client, server } = await connectedClient(async () => ({ issueId: 1, created: true }));
+  context.after(async () => { await client.close(); await server.close(); });
+  const result = await client.callTool({ name: "get_editorial_feedback", arguments: {} });
+  const data = result.structuredContent as { feedback: Array<{url: string; note: string}> };
+  assert.equal(data.feedback.length, 1);
+  assert.equal(data.feedback[0].note, "Loved the depth, not the daily news angle.");
+  assert.ok(!JSON.stringify(data).includes("Other account private note"));
+  assert.ok(!JSON.stringify(data).includes("Bookmark only"));
+  assert.deepEqual(await getSettings("mcp-test-owner"), before);
+  await updateArticleFeedback("mcp-test-owner", { url: issue.sections[0].items[0].url, reaction: null, note: "" });
+  const cleared = await client.callTool({ name: "get_editorial_feedback", arguments: {} });
+  assert.deepEqual((cleared.structuredContent as {feedback: unknown[]}).feedback, []);
 });
