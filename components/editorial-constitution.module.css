@@ -1,0 +1,16 @@
+.constitution { margin: 3rem 0; }
+.eyebrow { font-size: .78rem; letter-spacing: .1em; text-transform: uppercase; }
+.constitution header { margin-bottom: 2rem; }
+.constitution h2 { font-family: var(--font-display), Georgia, serif; font-size: clamp(1.9rem, 5vw, 2.5rem); font-weight: 500; line-height: 1.2; }
+.document { padding: 1rem 0 2rem; border-block: 1px solid var(--hairline); font-family: var(--font-display), Georgia, serif; font-size: 1.04rem; line-height: 1.85; overflow-wrap: anywhere; }
+.document h3 { font-size: 1.2rem; line-height: 1.4; margin: 2.2rem 0 .8rem; }
+.document h3:first-child { margin-top: 1rem; }
+.document p { margin: .8rem 0; }
+.document li { padding-left: .3rem; margin-bottom: .9rem; }
+.document ol, .document ul { padding-left: 1.5rem; }
+.guidelines { white-space: pre-wrap; }
+.empty { font-style: italic; }
+.parameters { font-family: var(--font-body), sans-serif; font-size: .95rem; line-height: 1.5; }
+.parameters div { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; padding: .6rem 0; border-bottom: 1px solid var(--hairline); }
+.parameters dd { margin: 0; }
+@media (max-width: 480px) { .parameters div { grid-template-columns: 1fr; gap: .2rem; } }

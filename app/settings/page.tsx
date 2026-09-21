@@ -1,5 +1,6 @@
 import { requireUser } from "@/lib/browser-auth";
 import { getSettings, patchSettings, listArticleFeedback } from "@/lib/db";
+import { EditorialConstitution } from "@/components/editorial-constitution";
 import { ArticleActions } from "@/components/article-actions";
 import { editorialPreferencesFromForm, interestOptions } from "@/lib/editorial-settings";
 import { readerTheme, readerThemeSchema } from "@/lib/reader-theme";
@@ -46,9 +47,10 @@ export default async function Settings({ searchParams }: { searchParams: Promise
         <button type="submit">Save appearance</button>
       </form>
     </section>
-    <h2>Your editorial brief</h2>
+    <EditorialConstitution settings={settings} />
+    <h2>Edit your preferences</h2>
     <p>Give your curator a sense of your interests and the time you want to spend reading.</p>
-    <p>These are your explicit preferences. Changes you request through ChatGPT are saved here too. Article reactions and notes guide future selections separately and never automatically rewrite this brief.</p>
+    <p>These are your explicit preferences. Changes you request through ChatGPT are saved here too. Article reactions and notes guide future selections separately and never automatically rewrite your constitution.</p>
     {query.saved ? <p role="status">Your preferences are saved. Your curator receives them when it next requests your editorial brief.</p> : null}
     {query.error === "invalid" ? <p role="alert">Please check your reading minutes, edition minutes and timezone, then try again.</p> : null}
     <form action={updateSettings} className={styles.form}>

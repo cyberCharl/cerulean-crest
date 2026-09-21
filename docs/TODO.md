@@ -1,5 +1,13 @@
 # Start here — Friday, 18 September 2026
 
+## Active queue — 21 September 2026
+
+1. **Editorial constitution visibility (implemented; automated verification passed).** Show the complete effective constitution in Settings, using the same policy and database-backed preferences supplied to the curator. Render saved text readably, distinguish defaults from personal instructions, and verify persisted changes and account isolation before starting the next item.
+2. **Usernames, friends, and deliberate article sharing (implementation started after constitution verification).** Implement optional unique usernames; exact-username friend requests with accept, decline, and remove; and sharing an article plus an optional note with an accepted friend. Keep editions, constitutions, and reading activity private.
+3. **Recommend an article for a friend's edition (same follow-on slice).** Let accepted friends explicitly nominate a source for a future edition. Surface pending recommendations to the recipient and their curator with provenance; let the recipient dismiss them. Recommendations are suggestions, not permission to edit an existing edition or override its constitution. Track inclusion so a nomination is not repeatedly resurfaced.
+
+Validate the social slice with two connected accounts and an unrelated third account, including unauthorized access, removed friendships, duplicate requests, and recommendations flowing into the recipient's edition. Keep it optional and quiet. No real friend requests or shares should be sent during development checks.
+
 ## What happened
 
 Sean tried the app with guided setup and onboarding and created his first edition. The founder reports that he was surprised and enthusiastic about it. This is the first reported successful assisted trial with another reader: a useful milestone, though it does not yet demonstrate unaided onboarding or recurring delivery.

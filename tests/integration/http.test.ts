@@ -151,15 +151,32 @@ test("HTTP publishing, duplicate protection, authentication and public validatio
   assert.ok(!(await (await fetch(`${base}/settings`, { headers: otherSession })).text()).includes("HTTP private editorial note"));
   const editorialFeedback = await client.callTool({ name: "get_editorial_feedback", arguments: {} });
   assert.ok(JSON.stringify(editorialFeedback.structuredContent).includes("HTTP private editorial note"));
-  await client.callTool({ name: "update_editorial_preferences", arguments: { guidelines: "Explicit policy via HTTP MCP" } });
-  assert.ok((await (await fetch(`${base}/settings`, { headers: ownerSession })).text()).includes("Explicit policy via HTTP MCP"));
+  const savedGuidelines = "First constitution paragraph.\n\nPreserve this second paragraph. <script>unsafe()</script>";
+  await client.callTool({ name: "update_editorial_preferences", arguments: { guidelines: savedGuidelines, readingMinutes: 25, editionMinutes: 55, interests: ["History & ideas"] } });
+  const activeBriefResponse = await client.callTool({ name: "get_editorial_brief", arguments: {} });
+  const activeBrief = JSON.parse((activeBriefResponse.structuredContent as { brief: string }).brief);
+  const constitutionMarkup = await (await fetch(`${base}/settings`, { headers: ownerSession })).text();
+  const constitutionDocument = constitutionMarkup.match(/<article[^>]*>([\s\S]*?)<\/article>/)?.[1];
+  assert.ok(constitutionDocument, "Settings renders the active constitution as a reading document");
+  const escapeHtml = (value: string) => value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#x27;");
+  for (const text of [activeBrief.purpose, activeBrief.editorialGuidelines, ...activeBrief.selectionRules, ...activeBrief.publishingRules, ...activeBrief.interests]) {
+    assert.ok(constitutionDocument.includes(escapeHtml(text)), `Active constitution missing: ${text}`);
+  }
+  assert.ok(constitutionDocument.includes("25") && constitutionDocument.includes("55"));
+  assert.ok(constitutionDocument.replaceAll("<!-- -->", "").includes(`${activeBrief.defaults.acceptableAvailableMinutes.minimum}–${activeBrief.defaults.acceptableAvailableMinutes.maximum}`));
+  assert.ok(!constitutionDocument.includes("<script>unsafe()"));
+  const otherConstitution = await (await fetch(`${base}/settings`, { headers: otherSession })).text();
+  assert.ok(!otherConstitution.includes("First constitution paragraph"));
+  assert.ok(otherConstitution.includes("You haven’t saved any personal guidelines"));
+  assert.ok(otherConstitution.includes(escapeHtml(activeBrief.purpose)), "Empty personal guidelines do not hide shared constitution");
+  assert.ok((await (await fetch(`${base}/settings`, { headers: ownerSession })).text()).includes(escapeHtml(savedGuidelines)));
   action = await feedbackAction(ownerSession, { url: articleUrl, reaction: null, note: "" });
   assert.ok(action.body.includes('"saved":true'));
   const afterClear = await client.callTool({ name: "get_editorial_feedback", arguments: {} });
   assert.deepEqual((afterClear.structuredContent as {feedback: unknown[]}).feedback, []);
   const clearedSettings = await (await fetch(`${base}/settings`, { headers: ownerSession })).text();
   assert.ok(!clearedSettings.includes("HTTP private editorial note"));
-  assert.ok(clearedSettings.includes("Explicit policy via HTTP MCP"));
+  assert.ok(clearedSettings.includes(escapeHtml(savedGuidelines)));
   await feedbackAction(ownerSession, { url: articleUrl, saved: false });
   assert.ok(!(await (await fetch(`${base}/saved`, { headers: ownerSession })).text()).includes(articleUrl));
 

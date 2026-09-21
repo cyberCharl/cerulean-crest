@@ -1,3 +1,6 @@
+import type { EditorialSettings } from "./editorial-settings.ts";
+import { todayDate } from "./date.ts";
+
 export const editorialBrief = {
   purpose: "Create a finite personal daily newspaper that allocates attention toward useful, truthful, original, humane, and appropriately surprising work.",
   defaults: {
@@ -31,3 +34,27 @@ export const editorialBrief = {
     "If an edition already exists for the date, leave it unchanged and report its existing URL.",
   ],
 } as const;
+
+/** The exact active constitution supplied to the curator and displayed in Settings. */
+export function buildEditorialBrief(settings: EditorialSettings) {
+  return {
+    ...editorialBrief,
+    defaults: {
+      ...editorialBrief.defaults,
+      expectedMinutes: settings.readingMinutes,
+      availableMinutes: settings.editionMinutes,
+      acceptableAvailableMinutes: {
+        minimum: Math.max(5, Math.round(settings.editionMinutes * .875)),
+        maximum: Math.round(settings.editionMinutes * 1.125),
+      },
+      itemCount: {
+        minimum: Math.max(1, Math.min(10, Math.floor(settings.editionMinutes / 12))),
+        maximum: Math.max(1, Math.min(20, Math.floor(settings.editionMinutes / 6))),
+      },
+    },
+    editorialGuidelines: settings.guidelines,
+    interests: settings.interests ?? [],
+    localDate: todayDate(settings.timeZone),
+    timeZone: settings.timeZone,
+  };
+}

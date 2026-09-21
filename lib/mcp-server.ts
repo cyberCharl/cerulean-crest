@@ -2,7 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { createIssue, getIssue, listIssues, getSettings, patchSettings, listArticleFeedback } from "./db.ts";
 import { editorialPreferencesPatchSchema } from "./editorial-settings.ts";
-import { editorialBrief } from "./editorial-brief.ts";
+import { buildEditorialBrief } from "./editorial-brief.ts";
 import { issueInputSchema, type IssueInput } from "./schema.ts";
 import { todayDate } from "./date.ts";
 import { mcpChallenge } from "./mcp-auth.ts";
@@ -52,26 +52,9 @@ export function createCeruleanMcpServer({ baseUrl, scopes, subject, createEditio
     async () => {
       if (!scopes.includes("editions:read")) return denied("editions:read");
       const settings = await getSettings(subject);
-      const personalizedBrief = {
-        ...editorialBrief,
-        defaults: {
-          ...editorialBrief.defaults,
-          expectedMinutes: settings.readingMinutes,
-          availableMinutes: settings.editionMinutes,
-          acceptableAvailableMinutes: {
-            minimum: Math.max(5, Math.round(settings.editionMinutes * .875)),
-            maximum: Math.round(settings.editionMinutes * 1.125),
-          },
-          itemCount: {
-            minimum: Math.max(1, Math.min(10, Math.floor(settings.editionMinutes / 12))),
-            maximum: Math.max(1, Math.min(20, Math.floor(settings.editionMinutes / 6))),
-          },
-        },
-        editorialGuidelines: settings.guidelines,
-        interests: settings.interests ?? [],
-      };
-      const rules = [...editorialBrief.selectionRules, ...editorialBrief.publishingRules];
-      const brief = JSON.stringify({ ...personalizedBrief, localDate: todayDate(settings.timeZone), timeZone: settings.timeZone });
+      const personalizedBrief = buildEditorialBrief(settings);
+      const rules = [...personalizedBrief.selectionRules, ...personalizedBrief.publishingRules];
+      const brief = JSON.stringify(personalizedBrief);
       return {
         structuredContent: { brief, rules, preferences: { readingMinutes: settings.readingMinutes, editionMinutes: settings.editionMinutes, timeZone: settings.timeZone, guidelines: settings.guidelines, interests: settings.interests ?? [] } },
         content: [{ type: "text", text: brief }],
