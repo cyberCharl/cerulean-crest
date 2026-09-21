@@ -8,3 +8,7 @@ output/
 test_assets/
 .playwright-cli/
 *.tsbuildinfo
+
+# Local visual references and browser verification artifacts
+/*.jpg
+test-results/

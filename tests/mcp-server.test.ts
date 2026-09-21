@@ -165,7 +165,7 @@ test("a short edition's item count fits its configured reading volume", async (c
 
 test("MCP preference writes preserve unrelated fields and isolate readers", async (context) => {
   const { saveSettings, getSettings } = await import("../lib/db.ts");
-  await saveSettings("mcp-test-owner", { readingMinutes: 25, editionMinutes: 50, guidelines: "Original", interests: ["Technology"], timeZone: "UTC", onboardingStep: "connect" });
+  await saveSettings("mcp-test-owner", { readingMinutes: 25, editionMinutes: 50, guidelines: "Original", interests: ["Technology"], timeZone: "UTC", onboardingStep: "connect", theme: "tactile-correspondence" });
   await saveSettings("unrelated-settings-reader", { readingMinutes: 60, editionMinutes: 120, guidelines: "Private", timeZone: "UTC" });
   const { client, server } = await connectedClient(async () => ({ issueId: 1, created: true }));
   context.after(async () => { await client.close(); await server.close(); });
@@ -177,11 +177,14 @@ test("MCP preference writes preserve unrelated fields and isolate readers", asyn
   assert.equal(stored.editionMinutes, 50);
   assert.deepEqual(stored.interests, ["Technology"]);
   assert.equal(stored.onboardingStep, "connect");
+  assert.equal(stored.theme, "tactile-correspondence");
+  assert.ok(!("theme" in (result.structuredContent as { preferences: object }).preferences));
   assert.equal((result.structuredContent as {settingsUrl: string}).settingsUrl, "https://cerulean.example/settings");
   assert.equal((await getSettings("unrelated-settings-reader")).guidelines, "Private");
   const brief = await client.callTool({ name: "get_editorial_brief", arguments: {} });
   assert.equal((brief.structuredContent as {preferences: {guidelines: string}}).preferences.guidelines, stored.guidelines);
-  for (const args of [{}, { readingMinutes: 0 }, { timeZone: "not-a-zone" }, { owner: "unrelated-settings-reader", guidelines: "Hijack" }, { onboardingStep: "interests" }]) {
+  assert.ok(!JSON.stringify(brief).includes("tactile-correspondence"));
+  for (const args of [{ theme: "quiet-book" }, {}, { readingMinutes: 0 }, { timeZone: "not-a-zone" }, { owner: "unrelated-settings-reader", guidelines: "Hijack" }, { onboardingStep: "interests" }]) {
     const invalid = await client.callTool({ name: "update_editorial_preferences", arguments: args });
     assert.equal(invalid.isError, true);
     assert.deepEqual(await getSettings("mcp-test-owner"), stored);

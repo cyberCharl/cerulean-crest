@@ -79,6 +79,16 @@ test("HTTP publishing, duplicate protection, authentication and public validatio
   assert.match(privatePage.headers.get("cache-control") || "", /private/);
   assert.match(await privatePage.text(), /Original HTTP edition|A focused|issue-hero/);
   assert.equal((await fetch(`${base}/issues/${issue.date}`, { headers: otherSession })).status, 404);
+  const defaultEdition = await (await fetch(`${base}/issues/${issue.date}`, { headers: ownerSession })).text();
+  assert.ok(defaultEdition.includes('data-reader-theme="quiet-book"'));
+  assert.ok(defaultEdition.includes('class="item-details"'));
+  assert.ok(defaultEdition.includes('class="item-utilities"'));
+  assert.ok(!defaultEdition.includes('Edition appearance'));
+  for (const style of ["quiet-book", "tactile-correspondence"]) {
+    const response = await fetch(`${base}/issues/${issue.date}/${style}`, { headers: ownerSession, redirect: "manual" });
+    assert.equal(response.status, 307);
+    assert.equal(response.headers.get("location"), `/issues/${issue.date}`);
+  }
   const otherArchive = await (await fetch(`${base}/archive`, { headers: otherSession })).text();
   assert.ok(!otherArchive.includes(issue.title));
   assert.ok(otherArchive.includes("Your first edition has not been published"));
@@ -95,6 +105,26 @@ test("HTTP publishing, duplicate protection, authentication and public validatio
   assert.equal((await fetch(`${base}/settings`, { redirect: "manual" })).status, 307);
   // Exercise the actual compiled server action through Next's HTTP boundary.
   const actionManifest = JSON.parse(await readFile(".next/server/server-reference-manifest.json", "utf8"));
+  const settingsMarkup = await privateSettings.text();
+  const themeActionId = settingsMarkup.match(/name="\$ACTION_ID_([^"]+)"/)?.[1];
+  assert.ok(themeActionId, "appearance action must be present in the production build");
+  async function changeTheme(cookie: Record<string, string>, theme: string) {
+    const form = new FormData();
+    form.set(`$ACTION_ID_${themeActionId}`, "");
+    form.set("theme", theme);
+    return fetch(`${base}/settings`, { method: "POST", headers: { ...cookie, Origin: base }, body: form, redirect: "manual" });
+  }
+  const themeSaved = await changeTheme(ownerSession, "tactile-correspondence");
+  assert.equal(themeSaved.status, 303);
+  assert.equal(themeSaved.headers.get("location"), "/settings?appearance=saved");
+  for (const route of [`/issues/${issue.date}`, "/archive", "/settings"]) {
+    assert.ok((await (await fetch(`${base}${route}`, { headers: ownerSession })).text()).includes('data-reader-theme="tactile-correspondence"'));
+  }
+  assert.ok((await (await fetch(`${base}/settings`, { headers: otherSession })).text()).includes('data-reader-theme="quiet-book"'));
+  assert.equal((await changeTheme(ownerSession, "original")).headers.get("location"), "/settings?error=theme");
+  assert.equal((await changeTheme({}, "quiet-book")).status, 303);
+  assert.ok((await (await fetch(`${base}/settings`, { headers: ownerSession })).text()).includes('data-reader-theme="tactile-correspondence"'));
+  await changeTheme(ownerSession, "quiet-book");
   const actionId = Object.entries(actionManifest.node).find(([, action]) => (action as {exportedName?: string}).exportedName === "changeArticleFeedback")?.[0];
   assert.ok(actionId, "feedback action must be present in the production build");
   async function feedbackAction(cookie: Record<string, string>, patch: unknown) {

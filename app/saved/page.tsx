@@ -12,7 +12,7 @@ export default async function SavedPage() {
   return <main className="archive-page saved-page">
     <header className="archive-header">
       <p className="edition-number">Your private collection</p>
-      <h1>Saved<br /><em>Articles</em></h1>
+      <h1>Saved <em>articles</em></h1>
       <p>Pieces to keep and return to whenever you have time.</p>
     </header>
     <p className="saved-explanation">Saving keeps an article here. Tell the editor what you’d like more or less of using the feedback on each piece.</p>

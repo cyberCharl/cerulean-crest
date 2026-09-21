@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getSettings } from "@/lib/db";
+import { readerTheme } from "@/lib/reader-theme";
 import { getUser } from "@/lib/browser-auth";
 import { appUrl, marketingUrl } from "@/lib/site-config";
 import "@fontsource-variable/cormorant-garamond/wght.css";
@@ -8,32 +10,26 @@ import "@fontsource/ibm-plex-sans-condensed/latin-400.css";
 import "@fontsource/ibm-plex-sans-condensed/latin-500.css";
 import "@fontsource/ibm-plex-sans-condensed/latin-600.css";
 import "@fontsource/ibm-plex-sans-condensed/latin-700.css";
+import "@fontsource-variable/literata/wght.css";
+import "@fontsource-variable/literata/wght-italic.css";
 import "./globals.css";
+import "./reader-theme.css";
 
 export const metadata: Metadata = {
-  title: { default: "Cerulean Crest", template: "%s — Cerulean Crest" },
+  title: { default: "Daybook", template: "%s — Daybook" },
   description: "A finite, human-scale edition for a better information diet.",
 };
 
-function CrestMark() {
-  return (
-    <svg aria-hidden="true" className="crest-mark" viewBox="0 0 56 64">
-      <path d="M4 4h48v22c0 16-9.8 28.2-24 34C13.8 54.2 4 42 4 26V4Z" />
-      <path d="m14 20 8 8 7-14 6 14 8-8v17H14V20Z" />
-      <path d="M15 44h26" />
-    </svg>
-  );
-}
-
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const user = await getUser();
+  const theme = readerTheme(user ? await getSettings(user.subject) : {});
   return (
     <html lang="en">
-      <body>
+      <body data-reader-theme={theme}>
         <header className="site-header">
-          <Link className="brand" href={marketingUrl()} aria-label="Cerulean Crest — home">
-            <CrestMark />
-            <span className="brand-name">Cerulean Crest</span>
+          <Link className="brand" href={marketingUrl()}>
+            <img className="study-brand-mark" src="/brand/daybook/daybook-mark.svg" width={36} height={36} alt="" aria-hidden="true" />
+            <span className="study-brand-name">Daybook<span className="study-brand-dot">.</span></span>
           </Link>
           <nav aria-label="Primary navigation">
             {user ? <>

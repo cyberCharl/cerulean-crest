@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">Daybook — Open folio mark</title>
+  <desc id="desc">An open book frames a selected point at the centre of its spine.</desc>
+  <path d="M8 15c9-3 17-2 24 3 7-5 15-6 24-3v34c-9-3-17-2-24 3-7-5-15-6-24-3z" fill="#f2eadb" stroke="#242b28" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M32 18v34" fill="none" stroke="#242b28" stroke-width="3"/>
+  <path d="m32 24 8 8-8 8-8-8z" fill="#9b4c36"/>
+  <circle cx="32" cy="32" r="2.5" fill="#f2eadb"/>
+</svg>

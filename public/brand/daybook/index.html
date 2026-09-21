@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#eee9df">
+  <link rel="icon" href="daybook-mark.svg" type="image/svg+xml">
+  <title>Daybook — logo studies</title>
+  <style>
+    @font-face { font-family: Cormorant; src: url('./cormorant-garamond-latin-wght-normal.woff2') format('woff2'); font-style: normal; font-weight: 300 700; font-display: swap; }
+    @font-face { font-family: Plex; src: url('./ibm-plex-sans-condensed-latin-400-normal.woff2') format('woff2'); font-style: normal; font-weight: 400; font-display: swap; }
+    @font-face { font-family: Plex; src: url('./ibm-plex-sans-condensed-latin-600-normal.woff2') format('woff2'); font-style: normal; font-weight: 600; font-display: swap; }
+    :root { --ground: #eee9df; --paper: #f8f4ec; --ink: #242b28; --rust: #9b4c36; --faint: #746f65; --rule: #c9c0b1; }
+    * { box-sizing: border-box; }
+    html { background: var(--ground); }
+    body { margin: 0; color: var(--ink); font-family: Plex, 'Arial Narrow', sans-serif; }
+    .wrap { width: min(1460px, calc(100% - 48px)); margin: 0 auto; }
+    .masthead { padding: 35px 0 26px; border-bottom: 1px solid var(--ink); display: flex; justify-content: space-between; align-items: center; gap: 30px; }
+    .eyebrow { color: var(--rust); font-size: 12px; line-height: 1.2; font-weight: 600; letter-spacing: .15em; text-transform: uppercase; }
+    .masthead .right { text-align: right; font-size: 13px; letter-spacing: .07em; color: var(--faint); }
+    .intro { padding: 66px 0 65px; max-width: 800px; }
+    h1 { margin: 0 0 16px; font-family: Cormorant, Georgia, serif; font-size: clamp(56px, 7vw, 104px); line-height: .87; font-weight: 500; letter-spacing: -.045em; }
+    .intro p { max-width: 620px; margin: 0; font: 17px/1.55 Plex, sans-serif; color: #474b46; }
+    .round-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 24px; border-top: 1px solid var(--ink); padding: 19px 0 22px; }
+    .round-heading h2 { margin: 0; font-family: Cormorant, Georgia, serif; font-size: 41px; font-weight: 600; }
+    .round-heading p { max-width: 530px; margin: 0; color: #585951; font-size: 14px; line-height: 1.45; }
+    .studies { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; padding-bottom: 75px; }
+    .studies.refinements { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .comparison { display: flex; align-items: center; gap: 12px; margin-top: 20px; color: var(--faint); font-size: 13px; }
+    .comparison img { width: 40px; height: 40px; }
+    .round-heading { scroll-margin-top: 24px; }
+    .study { background: var(--paper); border: 1px solid var(--rule); min-width: 0; }
+    .sample { min-height: 275px; display: grid; place-items: center; padding: 40px 26px 28px; position: relative; border-bottom: 1px solid var(--rule); }
+    .sample::before { content: ''; position: absolute; inset: 10px; border: 1px solid rgba(36,43,40,.06); pointer-events: none; }
+    .lockup { display: flex; align-items: center; gap: 17px; }
+    .lockup img { width: 62px; height: 62px; display: block; }
+    .wordmark { font-family: Cormorant, Georgia, serif; font-size: clamp(39px, 4vw, 58px); font-weight: 600; letter-spacing: -.055em; line-height: .9; }
+    .study-body { padding: 25px 28px 30px; }
+    .number { color: var(--rust); font-size: 11px; font-weight: 600; letter-spacing: .16em; }
+    h2 { margin: 7px 0 8px; font-family: Cormorant, Georgia, serif; font-size: 35px; line-height: 1; font-weight: 600; }
+    .study-body p { color: #585951; font-size: 15px; line-height: 1.5; min-height: 66px; margin: 0 0 21px; }
+    .mini { display: flex; align-items: center; gap: 11px; padding: 13px 0; border-top: 1px solid var(--rule); }
+    .mini img { width: 25px; height: 25px; }
+    .mini .smallword { font: 600 24px/.8 Cormorant, Georgia, serif; letter-spacing: -.04em; }
+    .mini .utility { margin-left: auto; color: var(--faint); font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; }
+    .scale { border-top: 1px solid var(--rule); display: flex; align-items: center; gap: 13px; padding: 15px 0 0; color: var(--faint); font-size: 11px; letter-spacing: .07em; text-transform: uppercase; }
+    .scale img { width: 16px; height: 16px; }
+    .scale span { margin-right: auto; }
+    .swatches { display: flex; gap: 5px; }
+    .swatches i { display: block; width: 14px; height: 14px; border: 1px solid rgba(0,0,0,.08); }
+    .swatches i:nth-child(1) { background: var(--ink); }
+    .swatches i:nth-child(2) { background: var(--rust); }
+    .swatches i:nth-child(3) { background: #f2eadb; }
+    .note { border-top: 1px solid var(--ink); padding: 24px 0 42px; display: flex; gap: 30px; justify-content: space-between; color: #55584f; font-size: 13px; line-height: 1.5; }
+    .note strong { color: var(--ink); }
+    .note p { margin: 0; max-width: 650px; }
+    @media (max-width: 1000px) { .studies, .studies.refinements { grid-template-columns: 1fr; } .sample { min-height: 220px; } .study-body p { min-height: 0; } .wordmark { font-size: 55px; } }
+    @media (max-width: 570px) { .wrap { width: min(100% - 28px, 1460px); } .masthead { padding: 24px 0; } .masthead .right { display: none; } .intro { padding: 55px 0 45px; } .intro p { font-size: 15px; } .round-heading { display: block; } .round-heading h2 { font-size: 36px; } .round-heading p { margin-top: 9px; } .study-body { padding: 23px; } .note { display: block; } .note p + p { margin-top: 9px; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="masthead"><div class="eyebrow">Identity studies / 01—08</div><div class="right">Daybook is a working name<br>Personal discovery feed</div></header>
+    <main>
+      <div class="intro">
+        <h1>A mark for the daily find.</h1>
+        <p>Eight small, original marks for a personal discovery feed. The material cues come from paper, correspondence, and archival tools; the forms stay crisp enough for a digital interface. The wordmark is deliberately provisional while the name is still in motion.</p>
+      </div>
+      <div class="round-heading" id="book-refinements"><h2>Opening &amp; spine, refined</h2><p>The opening leaves the centre fold clear. The spine gains a continuous book cover and visible page edge. Earlier studies remain below.</p></div>
+      <section class="studies refinements" aria-label="Refined opening and spine logos">
+        <article class="study">
+          <div class="sample"><div class="lockup"><img src="open-folio-page-mark.svg" alt="The opening, revised"><span class="wordmark">Daybook</span></div></div>
+          <div class="study-body">
+            <div class="number">07 / CLEAR FOLD</div><h2>The opening, revised</h2><p>The discovery mark sits on the right-hand page, with breathing room around it. The centre fold is uninterrupted.</p>
+            <div class="mini"><img src="open-folio-page-mark.svg" alt=""><span class="smallword">Daybook</span><span class="utility">Today &nbsp; Archive</span></div>
+            <div class="scale"><img src="open-folio-page-mark.svg" alt=""><span>16 px mark</span><div class="swatches" aria-label="Ink, rust, paper"><i></i><i></i><i></i></div></div>
+            <div class="comparison"><img src="open-folio-mark.svg" alt="Previous version"><span>Previous</span><span aria-hidden="true">→</span><img src="open-folio-page-mark.svg" alt="Revised version"><span>Revised</span></div>
+          </div>
+        </article>
+        <article class="study">
+          <div class="sample"><div class="lockup"><img src="bound-aperture-mark.svg" alt="The spine, revised"><span class="wordmark">Daybook</span></div></div>
+          <div class="study-body">
+            <div class="number">08 / SELECTED LOGO</div><h2>The spine — selected</h2><p>A continuous cover, a narrow binding and a lower page edge establish the book silhouette. The separate heavy bar and broken outline are gone.</p>
+            <div class="mini"><img src="bound-aperture-mark.svg" alt=""><span class="smallword">Daybook</span><span class="utility">Today &nbsp; Archive</span></div>
+            <div class="scale"><img src="bound-aperture-mark.svg" alt=""><span>16 px mark</span><div class="swatches" aria-label="Ink, rust, paper"><i></i><i></i><i></i></div></div>
+            <div class="comparison"><img src="spine-aperture-mark.svg" alt="Previous version"><span>Previous</span><span aria-hidden="true">→</span><img src="bound-aperture-mark.svg" alt="Revised version"><span>Revised</span></div>
+          </div>
+        </article>
+      </section>
+      <div class="round-heading"><h2>First studies</h2><p>The original three directions: archival indexing, selection, and correspondence.</p></div>
+      <section class="studies" aria-label="First logo studies">
+        <article class="study">
+          <div class="sample"><div class="lockup"><img src="index-mark.svg" alt="Index mark"><span class="wordmark">Daybook</span></div></div>
+          <div class="study-body">
+            <div class="number">01 / ARCHIVE</div>
+            <h2>The index</h2>
+            <p>A single selected entry on an index slip. The most literal connection to collecting and returning to discoveries.</p>
+            <div class="mini"><img src="index-mark.svg" alt=""><span class="smallword">Daybook</span><span class="utility">Today &nbsp; Archive</span></div>
+            <div class="scale"><img src="index-mark.svg" alt=""><span>16 px mark</span><div class="swatches" aria-label="Ink, rust, paper"><i></i><i></i><i></i></div></div>
+          </div>
+        </article>
+        <article class="study">
+          <div class="sample"><div class="lockup"><img src="aperture-mark.svg" alt="Aperture mark"><span class="wordmark">Daybook</span></div></div>
+          <div class="study-body">
+            <div class="number">02 / DISCOVERY</div>
+            <h2>The aperture</h2>
+            <p>A framed point of attention. It suggests selection from a larger field and can outlive the working name.</p>
+            <div class="mini"><img src="aperture-mark.svg" alt=""><span class="smallword">Daybook</span><span class="utility">Today &nbsp; Archive</span></div>
+            <div class="scale"><img src="aperture-mark.svg" alt=""><span>16 px mark</span><div class="swatches" aria-label="Ink, rust, paper"><i></i><i></i><i></i></div></div>
+          </div>
+        </article>
+        <article class="study">
+          <div class="sample"><div class="lockup"><img src="fold-mark.svg" alt="Fold mark"><span class="wordmark">Daybook</span></div></div>
+          <div class="study-body">
+            <div class="number">03 / CORRESPONDENCE</div>
+            <h2>The fold</h2>
+            <p>A sealed dispatch for a finite edition. It has the most tactile character, with a clear postal reference.</p>
+            <div class="mini"><img src="fold-mark.svg" alt=""><span class="smallword">Daybook</span><span class="utility">Today &nbsp; Archive</span></div>
+            <div class="scale"><img src="fold-mark.svg" alt=""><span>16 px mark</span><div class="swatches" aria-label="Ink, rust, paper"><i></i><i></i><i></i></div></div>
+          </div>
+        </article>
+      </section>
+      <div class="round-heading" id="aperture-opened"><h2>Aperture, opened</h2><p>Three further studies retain the selected point from the aperture and give its frame a clearer relationship to books and pages.</p></div>
+      <section class="studies" aria-label="Aperture book iterations">
+        <article class="study">
+          <div class="sample"><div class="lockup"><img src="open-folio-mark.svg" alt="Open folio mark"><span class="wordmark">Daybook</span></div></div>
+          <div class="study-body">
+            <div class="number">04 / OPEN FOLIO</div>
+            <h2>The opening</h2>
+            <p>Two facing leaves turn the aperture into a book. The chosen point sits at the meeting of the pages.</p>
+            <div class="mini"><img src="open-folio-mark.svg" alt=""><span class="smallword">Daybook</span><span class="utility">Today &nbsp; Archive</span></div>
+            <div class="scale"><img src="open-folio-mark.svg" alt=""><span>16 px mark</span><div class="swatches" aria-label="Ink, rust, paper"><i></i><i></i><i></i></div></div>
+          </div>
+        </article>
+        <article class="study">
+          <div class="sample"><div class="lockup"><img src="spine-aperture-mark.svg" alt="Spine aperture mark"><span class="wordmark">Daybook</span></div></div>
+          <div class="study-body">
+            <div class="number">05 / SPINE + FRAME</div>
+            <h2>The spine</h2>
+            <p>A solid spine gives the open aperture the proportions of a book cover, without losing its clear point of focus.</p>
+            <div class="mini"><img src="spine-aperture-mark.svg" alt=""><span class="smallword">Daybook</span><span class="utility">Today &nbsp; Archive</span></div>
+            <div class="scale"><img src="spine-aperture-mark.svg" alt=""><span>16 px mark</span><div class="swatches" aria-label="Ink, rust, paper"><i></i><i></i><i></i></div></div>
+          </div>
+        </article>
+        <article class="study">
+          <div class="sample"><div class="lockup"><img src="page-turn-mark.svg" alt="Page turn mark"><span class="wordmark">Daybook</span></div></div>
+          <div class="study-body">
+            <div class="number">06 / TURNED CORNER</div>
+            <h2>The page turn</h2>
+            <p>A page corner cuts into the aperture frame. It adds a subtle reading cue while retaining the open corners.</p>
+            <div class="mini"><img src="page-turn-mark.svg" alt=""><span class="smallword">Daybook</span><span class="utility">Today &nbsp; Archive</span></div>
+            <div class="scale"><img src="page-turn-mark.svg" alt=""><span>16 px mark</span><div class="swatches" aria-label="Ink, rust, paper"><i></i><i></i><i></i></div></div>
+          </div>
+        </article>
+      </section>
+    </main>
+    <footer class="note"><p><strong>Reading the set:</strong> The second round moves from a literal open book to a restrained spine and a turned page. Compare the marks at both wordmark and 16 px size before choosing one.</p><p>Original vector studies. Warm ink #242b28 / rust #9b4c36 / paper #f2eadb.</p></footer>
+  </div>
+</body>
+</html>

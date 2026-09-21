@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">Daybook — Fold mark</title>
+  <desc id="desc">A folded letter form with a marked find inside.</desc>
+  <path d="M8 16h48v32H8z" fill="#242b28"/>
+  <path d="M11 19h42v26H11z" fill="#f2eadb"/>
+  <path d="m11 20 21 16 21-16" fill="none" stroke="#242b28" stroke-width="2.5"/>
+  <path d="m11 45 16-13m26 13L37 32" fill="none" stroke="#242b28" stroke-width="2"/>
+  <circle cx="32" cy="36" r="5" fill="#9b4c36"/>
+</svg>

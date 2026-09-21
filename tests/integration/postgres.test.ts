@@ -75,10 +75,12 @@ test("isolated Postgres feedback and settings preserve concurrent independent pa
     await Promise.all([
       db.patchSettings(owner, { guidelines: "Explicit instruction" }),
       db.patchSettings(owner, { readingMinutes: 25 }),
+      db.patchSettings(owner, { theme: "tactile-correspondence" }),
     ]);
-    const settings = await db.getSettings(owner) as { guidelines: string; readingMinutes: number };
+    const settings = await db.getSettings(owner) as { guidelines: string; readingMinutes: number; theme: string };
     assert.equal(settings.guidelines, "Explicit instruction");
     assert.equal(settings.readingMinutes, 25);
+    assert.equal(settings.theme, "tactile-correspondence");
     assert.equal(await db.getSettings(other), null);
     await assert.rejects(db.patchSettings(owner, { readingMinutes: 0 }));
     assert.deepEqual(await db.getSettings(owner), settings);

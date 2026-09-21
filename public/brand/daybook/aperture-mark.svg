@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">Daybook — Aperture mark</title>
+  <desc id="desc">Four open corners frame one selected point.</desc>
+  <path d="M26 10H11v16m27-16h15v16M11 38v16h15m27-16v16H38" fill="none" stroke="#242b28" stroke-width="5" stroke-linecap="square" stroke-linejoin="miter"/>
+  <path d="M32 23 41 32 32 41 23 32z" fill="#9b4c36"/>
+  <circle cx="32" cy="32" r="3" fill="#f2eadb"/>
+</svg>

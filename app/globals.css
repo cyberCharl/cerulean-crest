@@ -332,3 +332,5 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .saved-article h2 span { font-size: 1.1rem; color: var(--cerulean); }
 .saved-empty { padding: 3rem 0; }
 @media print { .article-tools, .saved-collection-link { display: none; } }
+
+.study-brand-name, .study-brand-mark { display: none; }

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">Daybook — Index mark</title>
+  <desc id="desc">An indexed paper slip with one rust-coloured selection mark.</desc>
+  <path fill="#242b28" d="M12 9h31l9 9v37H12z"/>
+  <path fill="#f2eadb" d="M15 12h26v9h8v31H15z"/>
+  <path fill="#c8b99d" d="M41 12v9h8z"/>
+  <path fill="#242b28" d="M21 31h22v2H21zm0 7h22v2H21zm0 7h15v2H21z"/>
+  <rect x="21" y="22" width="7" height="5" rx="1" fill="#9b4c36"/>
+</svg>

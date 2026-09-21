@@ -10,72 +10,79 @@ export function LandingPage({ signupUrl, signinUrl }: LandingPageProps) {
     <main className={styles.page}>
       <section className={styles.hero} aria-labelledby="landing-title">
         <div className={styles.intro}>
-          <p className={styles.eyebrow}>A personal magazine. An experiment in attention.</p>
+          <p className={styles.eyebrow}>Personal discovery, thoughtfully gathered</p>
           <h1 id="landing-title">A wider world.<br />A <em>finite</em> edition.</h1>
           <p className={styles.lede}>
             Good things to read, gathered around your interests—with room for
             something you didn’t know you were looking for.
           </p>
           <p className={styles.description}>
-            Cerulean Crest gives your AI-curated reading a home. Set your editorial
-            direction, open your own edition, and follow what catches your curiosity.
+            Daybook is a personal, AI-curated discovery feed. Give your curator a
+            direction and find a considered selection of articles waiting in each edition.
           </p>
           <div className={styles.actions}>
             <a className={styles.primaryLink} href={signupUrl}>Create your account <span aria-hidden="true">↗</span></a>
-            <a className={styles.secondaryLink} href={signinUrl}>Already a reader? Sign in</a>
+            <a className={styles.secondaryLink} href={signinUrl}>Sign in</a>
           </div>
-          <p className={styles.setupNote}>Bring your ChatGPT curator. Scheduling stays in ChatGPT.</p>
+          <p className={styles.setupNote}>Connect your ChatGPT curator to create editions. Scheduling stays in ChatGPT.</p>
         </div>
-        <aside className={styles.cover} aria-label="The idea behind an edition">
-          <div className={styles.coverTop}><span>Cerulean Crest</span><span aria-hidden="true">✳</span></div>
-          <p className={styles.coverLabel}>Notes on a reading life</p>
-          <p className={styles.coverTitle}>Follow your<br /><em>curiosity.</em><br />Then close<br />the cover.</p>
-          <div className={styles.coverRule} />
-          <p className={styles.coverCopy}>A considered selection.<br />Original voices.<br />Permission to leave things unread.</p>
-          <p className={styles.coverBottom}>An edition has an ending.</p>
+        <aside className={styles.edition} aria-labelledby="sample-title">
+          <div className={styles.editionTop}>
+            <span className={styles.editionBrand}>Daybook<span>.</span></span>
+            <span>Illustrative edition</span>
+          </div>
+          <p className={styles.editionLabel}>A few things worth your attention</p>
+          <h2 id="sample-title">Ideas to spend<br />a little time with.</h2>
+          <p className={styles.editionNote}>Familiar interests. An unexpected connection. Somewhere to begin.</p>
+          <div className={styles.sampleArticle}>
+            <div className={styles.sampleMeta}><span>01</span><span>Design &amp; cities</span></div>
+            <div>
+              <h3>What makes a city feel like home?</h3>
+              <p>The small, everyday places that shape our sense of belonging—and what they reveal about the way we build.</p>
+            </div>
+          </div>
+          <div className={styles.sampleArticle}>
+            <div className={styles.sampleMeta}><span>02</span><span>A little further afield</span></div>
+            <div>
+              <h3>The patient work of noticing</h3>
+              <p>A different perspective on attention, observation, and the things we tend to overlook.</p>
+            </div>
+          </div>
+          <p className={styles.editionEnd}>A selection, with an ending.<span aria-hidden="true">◇</span></p>
         </aside>
       </section>
 
-      <section className={styles.principles} aria-labelledby="principles-title">
-        <div className={styles.sectionHeading}>
-          <p className={styles.eyebrow}>The editorial premise</p>
-          <h2 id="principles-title">Enough to explore.<br /><em>No obligation to finish.</em></h2>
-        </div>
-        <div className={styles.principleCopy}>
-          <p>An edition is an invitation. You can read one piece, follow an unexpected thread, or leave the rest for good. An unread article isn’t a debt.</p>
-          <p>The aim is a small reading ritual: a little context, a fresh perspective, and a natural place to stop.</p>
-        </div>
-      </section>
-
       <section className={styles.process} aria-labelledby="process-title">
-        <p className={styles.eyebrow}>From your brief to your reading chair</p>
-        <h2 id="process-title">Your taste. Your time. <em>Your edition.</em></h2>
+        <div className={styles.sectionHeading}>
+          <p className={styles.eyebrow}>How it works</p>
+          <h2 id="process-title">Your curiosity sets the direction.</h2>
+        </div>
         <ol className={styles.steps}>
           <li>
-            <span className={styles.stepNumber} aria-hidden="true">01</span>
-            <h3>Give it direction</h3>
-            <p>Set your editorial guidelines and reading volume in the app. Make space for your interests and the ideas beyond them.</p>
+            <span className={styles.stepNumber} aria-hidden="true">01 / The brief</span>
+            <h3>Tell it what interests you</h3>
+            <p>Set your editorial guidelines and reading volume. Make space for subjects you love and ideas beyond them.</p>
           </li>
           <li>
-            <span className={styles.stepNumber} aria-hidden="true">02</span>
+            <span className={styles.stepNumber} aria-hidden="true">02 / The discovery</span>
             <h3>Connect your curator</h3>
-            <p>Your ChatGPT agent uses your editorial brief to assemble editions. You arrange the task and its schedule in ChatGPT.</p>
+            <p>Your ChatGPT agent uses your brief to assemble editions. You arrange the task and its schedule in ChatGPT.</p>
           </li>
           <li>
-            <span className={styles.stepNumber} aria-hidden="true">03</span>
-            <h3>Settle in and read</h3>
-            <p>Sign in to your own editions. Read the context, visit the original sources, and choose what deserves your attention today.</p>
+            <span className={styles.stepNumber} aria-hidden="true">03 / The edition</span>
+            <h3>Follow what catches you</h3>
+            <p>Read the context, open the original articles, save a piece for later, and leave feedback to guide future selections.</p>
           </li>
         </ol>
       </section>
 
       <section className={styles.invitation} aria-labelledby="invitation-title">
         <div>
-          <p className={styles.eyebrow}>An open experiment</p>
-          <h2 id="invitation-title">Make a little room<br />for <em>good reading.</em></h2>
-          <p>We’re exploring what a more deliberate information habit can look like. You’re welcome to try it with us.</p>
+          <p className={styles.eyebrow}>Room for curiosity</p>
+          <h2 id="invitation-title">Something worth finding.<br /><em>Somewhere to stop.</em></h2>
+          <p>Read one piece or explore the whole edition. There’s no obligation to finish, and the next discovery can wait.</p>
         </div>
-        <a className={styles.primaryLink} href={signupUrl}>Start your reading ritual <span aria-hidden="true">↗</span></a>
+        <a className={styles.primaryLink} href={signupUrl}>Make room for discovery <span aria-hidden="true">↗</span></a>
       </section>
     </main>
   );

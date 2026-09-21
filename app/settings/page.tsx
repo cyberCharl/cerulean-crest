@@ -1,32 +1,56 @@
 import { requireUser } from "@/lib/browser-auth";
 import { getSettings, patchSettings, listArticleFeedback } from "@/lib/db";
 import { ArticleActions } from "@/components/article-actions";
-import { editorialSettingsSchema, interestOptions } from "@/lib/editorial-settings";
+import { editorialPreferencesFromForm, interestOptions } from "@/lib/editorial-settings";
+import { readerTheme, readerThemeSchema } from "@/lib/reader-theme";
+import { revalidatePath } from "next/cache";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import styles from "./settings.module.css";
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Your editorial brief", robots: { index: false, follow: false } };
+export const metadata = { title: "Settings", robots: { index: false, follow: false } };
 async function updateSettings(form: FormData) {
   "use server";
   const user = await requireUser();
-  const current = await getSettings(user.subject);
-  const parsed = editorialSettingsSchema.safeParse({ ...current, readingMinutes: Number(form.get("readingMinutes")), editionMinutes: Number(form.get("editionMinutes")), guidelines: form.get("guidelines"), timeZone: form.get("timeZone"), interests: form.getAll("interests") });
+  const parsed = editorialPreferencesFromForm(form);
   if (!parsed.success) redirect("/settings?error=invalid");
-  const { onboardingStep: _onboardingStep, ...preferences } = parsed.data;
-  await patchSettings(user.subject, preferences);
+  await patchSettings(user.subject, parsed.data);
   redirect("/settings?saved=1");
 }
-export default async function Settings({ searchParams }: { searchParams: Promise<{ saved?: string; error?: string }> }) {
+async function updateTheme(form: FormData) {
+  "use server";
+  const user = await requireUser();
+  const parsed = readerThemeSchema.safeParse(form.get("theme"));
+  if (!parsed.success) redirect("/settings?error=theme");
+  await patchSettings(user.subject, { theme: parsed.data });
+  revalidatePath("/", "layout");
+  redirect("/settings?appearance=saved");
+}
+export default async function Settings({ searchParams }: { searchParams: Promise<{ saved?: string; error?: string; appearance?: string }> }) {
   const user = await requireUser();
   const [settings, query, feedback] = await Promise.all([getSettings(user.subject), searchParams, listArticleFeedback(user.subject, { feedbackOnly: true, limit: 50 })]);
   return <main className={styles.page}>
     <p className="edition-number">Make room for what matters</p>
-    <h1>Your editorial brief</h1>
+    <h1>Settings</h1>
+    <section aria-labelledby="appearance-heading" className={styles.appearance}>
+      <h2 id="appearance-heading">Appearance</h2>
+      <p>Choose how Daybook looks. Your choice follows you across editions and devices.</p>
+      {query.appearance === "saved" ? <p role="status">Your appearance is saved.</p> : null}
+      {query.error === "theme" ? <p role="alert">Choose one of the two themes, then try again.</p> : null}
+      <form action={updateTheme} className={styles.form}>
+        <fieldset className={styles.themeChoices}>
+          <legend>Reading theme</legend>
+          <label><input type="radio" name="theme" value="quiet-book" defaultChecked={readerTheme(settings) === "quiet-book"} /><span><strong>Quiet book</strong><span>Pale ivory, clear type, and a quiet reading surface.</span></span></label>
+          <label><input type="radio" name="theme" value="tactile-correspondence" defaultChecked={readerTheme(settings) === "tactile-correspondence"} /><span><strong>Tactile correspondence</strong><span>Warmer paper, ink details, and a little texture.</span></span></label>
+        </fieldset>
+        <button type="submit">Save appearance</button>
+      </form>
+    </section>
+    <h2>Your editorial brief</h2>
     <p>Give your curator a sense of your interests and the time you want to spend reading.</p>
     <p>These are your explicit preferences. Changes you request through ChatGPT are saved here too. Article reactions and notes guide future selections separately and never automatically rewrite this brief.</p>
     {query.saved ? <p role="status">Your preferences are saved. Your curator receives them when it next requests your editorial brief.</p> : null}
-    {query.error ? <p role="alert">Please check your reading minutes, edition minutes and timezone, then try again.</p> : null}
+    {query.error === "invalid" ? <p role="alert">Please check your reading minutes, edition minutes and timezone, then try again.</p> : null}
     <form action={updateSettings} className={styles.form}>
       <label>Reading time, in minutes<input name="readingMinutes" type="number" min="5" max="240" required defaultValue={settings.readingMinutes} /><span>The time you would like to spend. It is fine to stop there.</span></label>
       <label>Material in each edition, in minutes<input name="editionMinutes" type="number" min="5" max="480" required defaultValue={settings.editionMinutes} /><span>Extra material gives you choice. You never need to finish every piece.</span></label>

@@ -25,6 +25,19 @@ CERULEAN_MARKETING_URL=https://your-landing-host
 
 Use `http://localhost:3000` for Development. See [deployment domain configuration](DEPLOYMENT.md#custom-domain) for using two domains with one Vercel project. Auth0 connection-client management uses `/connections/{id}/clients`; the legacy `enabled_clients` field is retired on this tenant.
 
+### Signing in locally
+
+The existing **Cerulean Crest - Browser Development** Auth0 application accepts `http://localhost:3000/auth/callback`. The checkout's ignored `.env.local` contains its credentials, a local cookie secret, and both application origins set to `http://localhost:3000`. Use the development client, not the production browser client.
+
+1. Point `.env.local` at an isolated test database before starting the server. A Neon branch copied from production preserves account ownership, so sign in with the same Auth0 account you use on the live site to see your copied editions.
+2. Run `npm run dev -- --port 3000` and open [local sign-in](http://localhost:3000/auth/login). Keep the hostname as `localhost`; `127.0.0.1` and different ports require their own exact Auth0 callback registrations and matching application origins.
+3. Complete the normal hosted Auth0 login. You return to `/today`; use `/archive` to open older editions and their Appearance switcher. Signing in with another account will correctly show that account's editions, which may be empty.
+4. Test saves, feedback, and settings against the isolated database. Reading progress remains in this browser's localhost storage. Restart the server after changing environment variables.
+
+The local application uses real Auth0 authentication and the same ownership checks as production. There is no local authentication bypass. Account/password changes still affect the shared Auth0 identity provider; edition and settings changes use the configured test database.
+
+If Auth0 reports a callback mismatch, check the development client's exact callback above and allowed logout URL `http://localhost:3000`. Management changes use `auth0` CLI with `--tenant cerulean-works.eu.auth0.com`; an expired CLI session requires `auth0 login` before administration, but does not prevent browser sign-in with the existing client.
+
 For new readers to authorize MCP, the app-specific API's scopes represent reading/writing **their own** editions. The former owner-role-only RBAC policy must be removed from this API, while retaining explicit user client grants for approved MCP clients, consent, and denial of machine-to-machine grants. The application enforces tenant ownership in addition to scopes. No Management API scopes belong in reader tokens.
 
 ## Migration and recovery

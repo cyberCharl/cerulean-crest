@@ -91,7 +91,7 @@ export function createCeruleanMcpServer({ baseUrl, scopes, subject, createEditio
     async (patch) => {
       if (!scopes.includes("editions:write")) return denied("editions:write");
       const settings = await patchSettings(subject, patch);
-      const { onboardingStep: _onboardingStep, ...preferences } = settings;
+      const { onboardingStep: _onboardingStep, theme: _theme, ...preferences } = settings;
       const result = { preferences, settingsUrl: new URL("/settings", baseUrl).toString() };
       return { structuredContent: result, content: [{ type: "text", text: JSON.stringify(result) }] };
     },

@@ -14,7 +14,7 @@ export default async function ArchivePage() {
     <main className="archive-page">
       <header className="archive-header">
         <p className="edition-number">The reading room</p>
-        <h1>Edition<br /><em>Archive</em></h1>
+        <h1>Edition <em>archive</em></h1>
         <p>Past editions, kept as a record of what earned your attention.</p>
       </header>
       <div className="archive-list">

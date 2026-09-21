@@ -12,6 +12,21 @@ Current production: [cerulean-crest.vercel.app](https://cerulean-crest.vercel.ap
 
 Production's database and Basic publishing credential were preserved during isolation. Production MCP uses Auth0 OAuth with per-reader ownership; its temporary pilot token has been removed. Preview and development have independent publishing passwords and MCP tokens. The developer checkout's `.env.local` points to Development. Browser login additionally requires the [user-account configuration](USER_ACCOUNTS.md).
 
+## Local production-copy test database
+
+On 21 September 2026, the developer checkout was switched to a fresh production copy for local design testing:
+
+- Project: `flat-tooth-73377286` (production's Neon project).
+- Parent: `main` / `br-wandering-glitter-b2kcuoib`.
+- Test branch: `localhost-daybook-20260921` / `br-floral-cake-b2pswqak`.
+- Test compute: `ep-misty-mode-b21lyp4o` (use its pooled endpoint for the application).
+
+This branch is isolated from production. Only the checkout's ignored `.env.local` database settings were changed; Vercel Production, Preview, and Development configuration was not changed. All six public tables matched production by row count and content hash immediately after copying: 22 issues, 140 sections, 272 items, 3 editorial settings, 3 article-feedback records, and 3 migration records. It is a point-in-time copy and does not receive later production editions automatically.
+
+The previous local configuration is backed up at `.data/env.local.before-daybook-copy` (ignored by Git). Copy verification metadata is at `.data/localhost-copy-verification.json`. Both are local operational files. To refresh the test data later, create a fresh branch from production and update the local connection strings; do not reset or migrate the production parent. `vercel env pull` can replace local database settings with Vercel Development's database, so check the endpoint after pulling environment configuration.
+
+Use the [localhost sign-in instructions](USER_ACCOUNTS.md#signing-in-locally) to test with the same account that owns the live editions.
+
 ## One-time account setup
 
 From the project directory:

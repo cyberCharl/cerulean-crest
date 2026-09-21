@@ -71,15 +71,18 @@ export function IssueContent({ issue, owner, canImportLegacyProgress = false, ar
                 const isRead = readItems.has(item.url);
                 return (
                   <article className={`issue-item${isRead ? " is-read" : ""}`} id={`item-${item.number}`} key={item.id}>
-                    <div className="item-number" aria-hidden="true">{String(item.number).padStart(2, "0")}</div>
+                    <aside className="item-details" aria-label="Article details">
+                      <p className="item-type">{item.type}</p>
+                      <p className="item-author">{item.author}</p>
+                      <p className="item-publication">{item.publication}</p>
+                      <p className="item-published">{item.publishedAt}</p>
+                      <p className="item-duration">{item.readingMinutes} min read</p>
+                    </aside>
                     <div className="item-copy">
-                      <div className="item-meta">
-                        <span>{item.type}</span>
-                        <span>{item.readingMinutes} min</span>
-                      </div>
                       <h3><a href={item.url} target="_blank" rel="noreferrer">{item.title}</a></h3>
-                      <p className="byline">{item.author} <i>—</i> {item.publication} <i>—</i> {item.publishedAt}</p>
                       <p className="summary">{item.summary}</p>
+                    </div>
+                    <aside className="item-utilities" aria-label="Article actions">
                       <div className="item-actions">
                         <a className="source-link" href={item.url} target="_blank" rel="noreferrer">
                           Read at source <span aria-hidden="true">↗</span>
@@ -95,7 +98,7 @@ export function IssueContent({ issue, owner, canImportLegacyProgress = false, ar
                         </button>
                       </div>
                       <ArticleActions url={item.url} initialFeedback={feedbackByUrl.get(item.url)} />
-                    </div>
+                    </aside>
                   </article>
                 );
               })}
