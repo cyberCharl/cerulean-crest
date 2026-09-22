@@ -12,7 +12,7 @@ Production: [cerulean-crest.vercel.app](https://cerulean-crest.vercel.app)
 - [Deployment](docs/DEPLOYMENT.md) — production setup and required secrets.
 - [Roadmap](docs/ROADMAP.md) — MVP, multi-user product, then agent platform.
 - [User accounts](docs/USER_ACCOUNTS.md) — browser authentication, ownership migration, settings, and current onboarding limits.
-- [SQLite schema](schema.sql) and [Postgres schema](schema.postgres.sql) — the current data model.
+- [SQLite schema](lib/sqlite-schema.ts) and [Postgres migrations](migrations/) — the current data model. SQLite applies its schema on startup; Postgres changes go through versioned migrations.
 
 ## Local development
 

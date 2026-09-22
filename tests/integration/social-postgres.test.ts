@@ -61,6 +61,7 @@ test(
       await social.saveSocialProfile(a, { username: an, enabled: true });
       await db.createIssue(b, seedIssue);
       assert.deepEqual(await social.listFriendRecommendations(b), []);
+      assert.equal((await social.getSocialState(b)).shares[0].includedDate, seedIssue.date);
       await social.removeFriend(b, an);
       assert.equal((await social.getSocialState(b)).shares.length, 0);
     } finally {

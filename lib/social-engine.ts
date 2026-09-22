@@ -75,7 +75,7 @@ export async function shares(
 ): Promise<SharedArticle[]> {
   if (!(await profile(c, owner)).enabled) return [];
   const rows = await c.query(
-    `SELECT s.*,p.username,(SELECT MIN(i.issue_date) FROM issues i JOIN sections sec ON sec.issue_id=i.id JOIN items item ON item.section_id=sec.id WHERE i.owner_subject=$1 AND item.url=s.url) AS included_date FROM social_shares s JOIN social_profiles p ON p.owner_subject=s.sender JOIN social_friendships f ON f.id=s.friendship_id WHERE s.recipient=$2 AND s.dismissed=0 AND p.enabled=1 AND f.status='accepted' ${pendingOnly ? "AND s.recommend=1 AND NOT EXISTS(SELECT 1 FROM issues i JOIN sections sec ON sec.issue_id=i.id JOIN items item ON item.section_id=sec.id WHERE i.owner_subject=s.recipient AND item.url=s.url)" : ""} ORDER BY s.created_at DESC LIMIT 200`,
+    `SELECT s.*,p.username,CAST((SELECT MIN(i.issue_date) FROM issues i JOIN sections sec ON sec.issue_id=i.id JOIN items item ON item.section_id=sec.id WHERE i.owner_subject=$1 AND item.url=s.url) AS TEXT) AS included_date FROM social_shares s JOIN social_profiles p ON p.owner_subject=s.sender JOIN social_friendships f ON f.id=s.friendship_id WHERE s.recipient=$2 AND s.dismissed=0 AND p.enabled=1 AND f.status='accepted' ${pendingOnly ? "AND s.recommend=1 AND NOT EXISTS(SELECT 1 FROM issues i JOIN sections sec ON sec.issue_id=i.id JOIN items item ON item.section_id=sec.id WHERE i.owner_subject=s.recipient AND item.url=s.url)" : ""} ORDER BY s.created_at DESC LIMIT 200`,
     [owner, owner],
   );
   return rows.map((r) => ({

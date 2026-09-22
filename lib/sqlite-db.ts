@@ -7,6 +7,7 @@ import path from "node:path";
 import type { Issue, IssueInput, IssueSummary } from "./schema.ts";
 import { seedIssue } from "./seed.ts";
 import { isIssueDate } from "./date.ts";
+import { sqliteSchema } from "./sqlite-schema.ts";
 
 const databasePath = process.env.DATABASE_PATH || path.join(process.cwd(), ".data", "cerulean-crest.db");
 fs.mkdirSync(path.dirname(databasePath), { recursive: true });
@@ -15,44 +16,7 @@ const db = new Database(databasePath, { timeout: 5_000 });
 db.pragma("busy_timeout = 5000");
 db.pragma("journal_mode = WAL");
 db.pragma("foreign_keys = ON");
-db.exec(`
-  CREATE TABLE IF NOT EXISTS issues (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    owner_subject TEXT,
-    issue_date TEXT NOT NULL,
-    title TEXT NOT NULL,
-    editor_note TEXT NOT NULL,
-    coverage_gap TEXT,
-    available_minutes INTEGER NOT NULL,
-    expected_minutes INTEGER NOT NULL,
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(owner_subject, issue_date)
-  );
-  CREATE TABLE IF NOT EXISTS sections (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    issue_id INTEGER NOT NULL REFERENCES issues(id) ON DELETE CASCADE,
-    title TEXT NOT NULL,
-    position INTEGER NOT NULL,
-    UNIQUE(issue_id, position)
-  );
-  CREATE TABLE IF NOT EXISTS items (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    section_id INTEGER NOT NULL REFERENCES sections(id) ON DELETE CASCADE,
-    position INTEGER NOT NULL,
-    title TEXT NOT NULL,
-    author TEXT NOT NULL,
-    publication TEXT NOT NULL,
-    published_at TEXT NOT NULL,
-    reading_minutes INTEGER NOT NULL,
-    content_type TEXT NOT NULL,
-    url TEXT NOT NULL,
-    summary TEXT NOT NULL,
-    UNIQUE(section_id, position)
-  );
-  CREATE INDEX IF NOT EXISTS idx_sections_issue ON sections(issue_id, position);
-  CREATE INDEX IF NOT EXISTS idx_items_section ON items(section_id, position);
-`);
+db.exec(sqliteSchema);
 
 // Rebuild the original globally-unique date table without losing IDs or children.
 if (!(db.prepare("PRAGMA table_info(issues)").all() as Array<{name: string}>).some(column => column.name === "owner_subject")) {
@@ -72,7 +36,6 @@ if (!(db.prepare("PRAGMA table_info(issues)").all() as Array<{name: string}>).so
 }
 // Unassigned legacy editions stay inaccessible unless an operator specifies their owner.
 if (process.env.CERULEAN_OWNER_SUBJECT) db.prepare("UPDATE issues SET owner_subject = ? WHERE owner_subject IS NULL").run(process.env.CERULEAN_OWNER_SUBJECT);
-db.exec("CREATE TABLE IF NOT EXISTS editorial_settings (owner_subject TEXT PRIMARY KEY, settings TEXT NOT NULL)");
 
 const replaceIssueTransaction = db.transaction((owner: string, input: IssueInput) => {
   const existing = db.prepare("SELECT id FROM issues WHERE owner_subject = ? AND issue_date = ?").get(owner, input.date) as { id: number } | undefined;
@@ -214,14 +177,6 @@ export function getSettings(owner: string): unknown {
 export function saveSettings(owner: string, settings: unknown): void {
   db.prepare("INSERT INTO editorial_settings(owner_subject, settings) VALUES (?, ?) ON CONFLICT(owner_subject) DO UPDATE SET settings = excluded.settings").run(requireOwner(owner), JSON.stringify(settings));
 }
-
-// No edition foreign key: a reader's saved articles survive edition replacement.
-db.exec(`CREATE TABLE IF NOT EXISTS article_feedback (
-  owner_subject TEXT NOT NULL, url TEXT NOT NULL, title TEXT NOT NULL, publication TEXT NOT NULL,
-  saved INTEGER NOT NULL DEFAULT 0 CHECK(saved IN (0, 1)),
-  reaction TEXT CHECK(reaction IN ('more', 'less')), note TEXT NOT NULL DEFAULT '' CHECK(length(note) <= 2000),
-  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY(owner_subject, url));
-  CREATE INDEX IF NOT EXISTS idx_article_feedback_owner_updated ON article_feedback(owner_subject, updated_at DESC);`);
 
 export function getArticleFeedback(owner: string, url: string) {
   const row = db.prepare("SELECT * FROM article_feedback WHERE owner_subject = ? AND url = ?")
