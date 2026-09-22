@@ -62,8 +62,7 @@ body[data-reader-theme] .site-footer { max-width: 1260px; font-size: .8rem; }
 body[data-reader-theme="tactile-correspondence"] { --paper: #f7f0e2; --paper-deep: #eee2cd; --ink: #352e29; --muted: #776858; --cerulean: #8b473c; --cerulean-dark: #793f35; --hairline: #6d503b40; background-color: #dfd3be; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Cpath fill='%23644d35' opacity='.08' filter='url(%23n)' d='M0 0h180v180H0z'/%3E%3C/svg%3E"); }
 .tactile-correspondence > article { position: relative; width: min(100% - 3rem, 1360px); padding: 3.5rem 3rem 1px; margin-top: 3rem; background: var(--paper); border: 1px solid #a88c683d; box-shadow: 0 2px 4px #48341e0c, 0 16px 50px #48341e10; }
 .tactile-correspondence > article::before { content: ''; position: absolute; top: 0; bottom: 0; left: 1.3rem; width: 1px; background: #9d6e4730; pointer-events: none; }
-.tactile-correspondence .issue-cover { position: relative; padding-right: 4rem; border-bottom: 1px solid var(--hairline); padding-bottom: 1.5rem; }
-.tactile-correspondence .issue-cover::after { content: 'D'; position: absolute; top: 0; right: 0; display: grid; place-items: center; width: 3rem; height: 3.6rem; outline: 1px solid var(--cerulean-dark); outline-offset: 4px; border: 1px solid var(--cerulean-dark); font: italic 2rem var(--font-body); color: var(--cerulean-dark); opacity: .75; }
+.tactile-correspondence .issue-cover { border-bottom: 1px solid var(--hairline); padding-bottom: 1.5rem; }
 .tactile-correspondence .discovery-label { color: var(--cerulean-dark); }
 .tactile-correspondence .editor-note { border: 0; }
 .tactile-correspondence .editor-note > p { font-style: italic; }
@@ -80,8 +79,6 @@ body[data-reader-theme="tactile-correspondence"] { --paper: #f7f0e2; --paper-dee
   .edition-study .issue-navigation { grid-template-columns: 1fr 1fr; }
   .tactile-correspondence > article { width: calc(100% - 1rem); padding: 2rem 1.25rem 1px; }
   .tactile-correspondence > article::before { left: .45rem; }
-  .tactile-correspondence .issue-cover { padding-right: 3rem; }
-  .tactile-correspondence .issue-cover::after { width: 1.7rem; height: 2.2rem; font-size: 1.4rem; outline-offset: 3px; }
   .tactile-correspondence .discovery-label { font-size: .75rem; letter-spacing: .03em; }
 }
 @media print { .edition-study > article, .tactile-correspondence > article { width: 100%; margin: 0; padding: 0; border: 0; box-shadow: none; } .tactile-correspondence > article::before { display: none; } }
