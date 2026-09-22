@@ -77,6 +77,11 @@ export default async function Settings({ searchParams }: { searchParams: Promise
       </ul>}
       {feedback.length === 50 ? <p>Showing your 50 most recently updated pieces with feedback. Older feedback remains available on its article.</p> : null}
     </section>
+    <section aria-labelledby="friends-sharing">
+      <h2 id="friends-sharing">Friends &amp; sharing</h2>
+      <p>Optionally choose a username and exchange articles with people you know. Your editions and editorial constitution stay private.</p>
+      <p><Link href="/friends">Manage friends and sharing →</Link></p>
+    </section>
     <section aria-labelledby="curator-setup">
       <h2 id="curator-setup">Connect your curator</h2>
       <p><Link href="/onboarding?step=connect">Continue to your first edition</Link> for connection steps and a short instruction to give your curator.</p>

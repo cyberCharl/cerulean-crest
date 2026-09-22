@@ -226,3 +226,34 @@ test("MCP feedback excludes bookmarks and other readers, and never rewrites expl
   const cleared = await client.callTool({ name: "get_editorial_feedback", arguments: {} });
   assert.deepEqual((cleared.structuredContent as {feedback: unknown[]}).feedback, []);
 });
+
+test("friend nominations preserve provenance, isolate readers, and stop resurfacing after publication", async (context) => {
+  const social = await import("../lib/social-store.ts");
+  const { createIssue } = await import("../lib/db.ts");
+  const sender = "nomination-sender", recipient = "mcp-test-owner";
+  await social.saveSocialProfile(sender, { username: "nomination_sender", enabled: true });
+  await social.saveSocialProfile(recipient, { username: "nomination_reader", enabled: true });
+  await social.requestFriend(sender, "nomination_reader");
+  const request = (await social.getSocialState(recipient)).incomingRequests[0];
+  await social.respondFriendRequest(recipient, request.id, "accept");
+  const source = structuredClone(issue);
+  source.date = "2031-06-11";
+  source.sections[0].items[0].url = "https://example.com/friend-nomination";
+  await createIssue(sender, source);
+  await social.shareArticle(sender, { username: "nomination_reader", url: source.sections[0].items[0].url, title: "A useful piece", note: "Interesting original evidence", recommend: true });
+  const { client, server } = await connectedClient(async (input) => createIssue(recipient, input));
+  context.after(async () => { await client.close(); await server.close(); });
+  const result = await client.callTool({ name: "get_friend_recommendations", arguments: {} });
+  const nominations = (result.structuredContent as { recommendations: Array<{ username: string; note: string; url: string }> }).recommendations;
+  assert.equal(nominations.length, 1);
+  assert.equal(nominations[0].username, "nomination_sender");
+  assert.equal(nominations[0].note, "Interesting original evidence");
+  assert.deepEqual(await social.listFriendRecommendations("unrelated-reader"), []);
+  const write = await connectedClient(async () => ({ issueId: 1, created: true }), ["editions:write"]);
+  context.after(async () => { await write.client.close(); await write.server.close(); });
+  assert.equal((await write.client.callTool({ name: "get_friend_recommendations", arguments: {} })).isError, true);
+  const published = await client.callTool({ name: "create_daily_edition", arguments: source });
+  assert.equal((published.structuredContent as {created:boolean}).created, true);
+  const after = await client.callTool({ name: "get_friend_recommendations", arguments: {} });
+  assert.deepEqual((after.structuredContent as {recommendations:unknown[]}).recommendations, []);
+});

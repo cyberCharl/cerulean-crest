@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getSocialProfile } from "@/lib/social-store";
 import { getSettings } from "@/lib/db";
 import { readerTheme } from "@/lib/reader-theme";
 import { getUser } from "@/lib/browser-auth";
@@ -22,7 +23,8 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const user = await getUser();
-  const theme = readerTheme(user ? await getSettings(user.subject) : {});
+  const [settings, profile] = user ? await Promise.all([getSettings(user.subject), getSocialProfile(user.subject)]) : [{}, null];
+  const theme = readerTheme(settings);
   return (
     <html lang="en">
       <body data-reader-theme={theme}>
@@ -36,6 +38,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
               <Link href={appUrl("/today")}>Today</Link>
               <Link href={appUrl("/archive")}>Archive</Link>
               <Link href={appUrl("/saved")}>Saved</Link>
+              {profile?.enabled ? <Link href={appUrl("/friends")}>Friends</Link> : null}
               <Link href={appUrl("/settings")}>Settings</Link>
               <a href={appUrl("/auth/logout")}>Sign out</a>
             </> : <>

@@ -1,0 +1,27 @@
+.page { max-width: 1040px; margin: 4rem auto 6rem; padding: 0 1.5rem; color: var(--ink); }
+.header { max-width: 700px; margin-bottom: 3rem; }
+.header h1 { font-family: var(--font-display), Georgia, serif; font-size: clamp(2.7rem, 6vw, 4.5rem); font-weight: 400; line-height: 1.1; margin: .7rem 0 1rem; }
+.page p { line-height: 1.65; }
+.page h2 { font-family: var(--font-display), Georgia, serif; font-size: 1.65rem; font-weight: 500; margin: 0 0 .7rem; }
+.section { border-top: 1px solid var(--hairline); padding-top: 1.7rem; margin-bottom: 2.7rem; min-width: 0; }
+.columns { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 3.5rem; }
+.form { display: grid; gap: 1rem; margin-top: 1.3rem; }
+.form label { display: grid; gap: .4rem; font-weight: 500; }
+.form input, .form textarea, .form select { width: 100%; border: 1px solid var(--hairline); background: var(--paper); color: inherit; padding: .75rem; font: inherit; border-radius: 0; }
+.form small, .hint { font-size: .88rem; font-weight: 400; line-height: 1.55; color: var(--muted, #655f55); }
+.form .check { display: flex; align-items: flex-start; gap: .65rem; font-weight: 400; line-height: 1.5; }
+.form .check input { width: 1rem; height: 1rem; margin-top: .2rem; flex-shrink: 0; accent-color: var(--ink); }
+.page button { justify-self: start; border: 1px solid var(--ink); color: var(--ink); background: transparent; padding: .6rem .95rem; font: inherit; cursor: pointer; }
+.form > button { color: var(--paper); background: var(--ink); }
+.page :is(button,input,textarea,select,a):focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+.list { list-style: none; margin: 0; padding: 0; }
+.list > li { border-bottom: 1px solid var(--hairline); padding: 1.25rem 0; overflow-wrap: anywhere; }
+.row { display: flex; flex-wrap: wrap; gap: .75rem 1rem; align-items: center; justify-content: space-between; }
+.actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+.status { padding: 1rem; border-left: 2px solid var(--ink); margin-bottom: 2rem; }
+.article h3 { font-family: var(--font-display), Georgia, serif; font-size: 1.4rem; line-height: 1.45; margin: .55rem 0; }
+.article h3 a { text-decoration-thickness: 1px; text-underline-offset: .2em; }
+.note { white-space: pre-wrap; border-left: 1px solid var(--hairline); padding-left: 1rem; }
+.eyebrow { font-size: .8rem; letter-spacing: .05em; text-transform: uppercase; }
+.empty { color: var(--muted, #655f55); }
+@media (max-width: 750px) { .page { margin-top: 2.5rem; } .columns { grid-template-columns: 1fr; gap: 0; } }

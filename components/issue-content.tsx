@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
+import { ArticleShare } from "@/components/article-share";
 import { ArticleActions } from "@/components/article-actions";
 import type { ArticleFeedback } from "@/lib/article-feedback";
 import type { Issue } from "@/lib/schema";
@@ -11,7 +12,7 @@ function storageKey(owner: string, date: string) {
   return `cerulean-crest:${encodeURIComponent(owner)}:${date}:read`;
 }
 
-export function IssueContent({ issue, owner, canImportLegacyProgress = false, articleFeedback = [] }: { issue: Issue; owner: string; canImportLegacyProgress?: boolean; articleFeedback?: ArticleFeedback[] }) {
+export function IssueContent({ header, issue, owner, canImportLegacyProgress = false, articleFeedback = [], sharingEnabled = false }: { header?: ReactNode; sharingEnabled?: boolean; issue: Issue; owner: string; canImportLegacyProgress?: boolean; articleFeedback?: ArticleFeedback[] }) {
   const [readItems, setReadItems] = useState<Set<string>>(() => new Set());
   const items = useMemo(() => issue.sections.flatMap((section) => section.items), [issue.sections]);
 
@@ -47,17 +48,22 @@ export function IssueContent({ issue, owner, canImportLegacyProgress = false, ar
 
   return (
     <div className="issue-body">
-      <aside className="progress-rail" aria-label="Reading progress">
-        <div className="progress-sticky">
-          <span className="progress-eyebrow">Your edition</span>
-          <strong>{readCount}<i>/</i>{items.length}</strong>
-          <span className="progress-label">pieces read</span>
-          <div className="progress-track" aria-hidden="true"><span style={{ "--progress": `${percent}%` } as React.CSSProperties} /></div>
-          <span className="progress-time">{readMinutes} min complete</span>
-          <Link className="saved-collection-link" href="/saved">Your saved articles →</Link>
+      <aside className="edition-sidebar" aria-label="Edition details and reading progress">
+        <div className="edition-sidebar-content">
+          <p className="margin-label">In this edition</p>
+          <p className="issue-metrics"><span>{items.length} pieces</span><span>{issue.availableMinutes} minutes of reading</span></p>
+          {issue.coverageGap ? <details className="coverage-note"><summary>Coverage note</summary><p>{issue.coverageGap}</p></details> : null}
+          <div className="edition-progress" aria-label="Reading progress">
+            <p><strong>{readCount} / {items.length}</strong> pieces read</p>
+            <div className="edition-progress-track" aria-hidden="true"><span style={{ width: `${percent}%` }} /></div>
+            <p>{readMinutes} min complete</p>
+          </div>
+          <Link className="edition-saved-link" href="/saved">Your saved articles →</Link>
         </div>
       </aside>
 
+      <div className="edition-reading-column">
+        {header}
       <div className="sections">
         {issue.sections.map((section, sectionIndex) => (
           <section className="issue-section" key={section.id} aria-labelledby={`section-${section.id}`}>
@@ -71,18 +77,14 @@ export function IssueContent({ issue, owner, canImportLegacyProgress = false, ar
                 const isRead = readItems.has(item.url);
                 return (
                   <article className={`issue-item${isRead ? " is-read" : ""}`} id={`item-${item.number}`} key={item.id}>
-                    <aside className="item-details" aria-label="Article details">
-                      <p className="item-type">{item.type}</p>
-                      <p className="item-author">{item.author}</p>
-                      <p className="item-publication">{item.publication}</p>
-                      <p className="item-published">{item.publishedAt}</p>
-                      <p className="item-duration">{item.readingMinutes} min read</p>
-                    </aside>
                     <div className="item-copy">
                       <h3><a href={item.url} target="_blank" rel="noreferrer">{item.title}</a></h3>
+                      <p className="article-byline">
+                        <span>{item.author}</span><span>{item.publication}</span><span>{item.publishedAt}</span><span>{item.type}</span><span>{item.readingMinutes} min read</span>
+                      </p>
                       <p className="summary">{item.summary}</p>
                     </div>
-                    <aside className="item-utilities" aria-label="Article actions">
+                    <footer className="article-controls" aria-label="Article actions">
                       <div className="item-actions">
                         <a className="source-link" href={item.url} target="_blank" rel="noreferrer">
                           Read at source <span aria-hidden="true">↗</span>
@@ -98,13 +100,15 @@ export function IssueContent({ issue, owner, canImportLegacyProgress = false, ar
                         </button>
                       </div>
                       <ArticleActions url={item.url} initialFeedback={feedbackByUrl.get(item.url)} />
-                    </aside>
+                      {sharingEnabled ? <ArticleShare url={item.url} title={item.title} /> : null}
+                    </footer>
                   </article>
                 );
               })}
             </div>
           </section>
         ))}
+      </div>
       </div>
     </div>
   );

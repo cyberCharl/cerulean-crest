@@ -1,3 +1,4 @@
+import { getSocialProfile } from "@/lib/social-store";
 import { readerTheme } from "@/lib/reader-theme";
 import { requireUser } from "@/lib/browser-auth";
 import type { Metadata } from "next";
@@ -25,18 +26,19 @@ export async function EditionPage({ params }: PageProps) {
   const issue = await getIssue(user.subject, date);
   if (!issue) notFound();
 
-  const [neighbors, latest, settings, articleFeedback] = await Promise.all([
+  const [neighbors, latest, settings, articleFeedback, socialProfile] = await Promise.all([
     neighboringIssues(user.subject, date), latestIssueDate(user.subject), getSettings(user.subject),
     listArticleFeedback(user.subject, { urls: issue.sections.flatMap((section) => section.items.map((item) => item.url)) }),
+    getSocialProfile(user.subject),
   ]);
   const theme = readerTheme(settings);
   const isLatestAvailable = date === latest && date < todayDate(settings.timeZone);
-  const itemCount = issue.sections.reduce((sum, section) => sum + section.items.length, 0);
   const [dayOfMonth, month, year] = longDate(issue.date).split(" ");
 
   return (
     <main className={`edition-study ${theme}`} data-edition-style={theme}>
       <article>
+        <IssueContent key={`${user.subject}:${issue.date}`} issue={issue} sharingEnabled={socialProfile.enabled} articleFeedback={articleFeedback} owner={user.subject} canImportLegacyProgress={user.subject === process.env.CERULEAN_OWNER_SUBJECT} header={
         <header className="issue-hero">
           {isLatestAvailable ? <p className="edition-notice" role="status">Today’s edition has not arrived yet. This is the latest available edition.</p> : null}
           <div className="issue-cover">
@@ -49,25 +51,11 @@ export async function EditionPage({ params }: PageProps) {
               <span className="issue-date-year">{year}</span>
             </h1>
           </div>
-          <aside className="edition-details" aria-label="Edition details">
-            <p className="margin-label">In this edition</p>
-            <p className="issue-metrics">
-              <span>{itemCount} pieces</span>
-              <span>{issue.availableMinutes} minutes</span>
-            </p>
-          </aside>
           <div className="editor-note">
             <p>{issue.editorNote}</p>
           </div>
-          {issue.coverageGap ? (
-            <details className="coverage-note">
-              <summary>Coverage note</summary>
-              <p>{issue.coverageGap}</p>
-            </details>
-          ) : null}
         </header>
-
-        <IssueContent key={`${user.subject}:${issue.date}`} issue={issue} articleFeedback={articleFeedback} owner={user.subject} canImportLegacyProgress={user.subject === process.env.CERULEAN_OWNER_SUBJECT} />
+        } />
 
         <nav className="issue-navigation" aria-label="Issue navigation">
           {neighbors.previous ? <Link href={`/issues/${neighbors.previous}`}>← {longDate(neighbors.previous)}</Link> : <span />}

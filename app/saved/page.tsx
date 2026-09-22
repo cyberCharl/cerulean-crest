@@ -1,3 +1,5 @@
+import { ArticleShare } from "@/components/article-share";
+import { getSocialProfile } from "@/lib/social-store";
 import Link from "next/link";
 import { ArticleActions } from "@/components/article-actions";
 import { requireUser } from "@/lib/browser-auth";
@@ -8,7 +10,7 @@ export const metadata = { title: "Saved articles", robots: { index: false, follo
 
 export default async function SavedPage() {
   const user = await requireUser();
-  const articles = await listArticleFeedback(user.subject, { savedOnly: true });
+  const [articles, socialProfile] = await Promise.all([listArticleFeedback(user.subject, { savedOnly: true }), getSocialProfile(user.subject)]);
   return <main className="archive-page saved-page">
     <header className="archive-header">
       <p className="edition-number">Your private collection</p>
@@ -25,6 +27,7 @@ export default async function SavedPage() {
         <p className="byline">{article.publication}</p>
         <h2><a href={article.url} target="_blank" rel="noreferrer">{article.title} <span aria-hidden="true">↗</span></a></h2>
         <ArticleActions url={article.url} initialFeedback={article} />
+        {socialProfile.enabled ? <ArticleShare url={article.url} title={article.title} /> : null}
       </article>)}
     </div>}
     <p><Link href="/archive">Browse all editions →</Link></p>

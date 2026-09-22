@@ -81,8 +81,12 @@ test("HTTP publishing, duplicate protection, authentication and public validatio
   assert.equal((await fetch(`${base}/issues/${issue.date}`, { headers: otherSession })).status, 404);
   const defaultEdition = await (await fetch(`${base}/issues/${issue.date}`, { headers: ownerSession })).text();
   assert.ok(defaultEdition.includes('data-reader-theme="quiet-book"'));
-  assert.ok(defaultEdition.includes('class="item-details"'));
-  assert.ok(defaultEdition.includes('class="item-utilities"'));
+  assert.ok(defaultEdition.includes('class="edition-sidebar"'));
+  assert.equal((defaultEdition.match(/class="edition-sidebar"/g) ?? []).length, 1);
+  assert.ok(defaultEdition.includes('class="article-byline"'));
+  assert.ok(!defaultEdition.includes('class="item-details"'));
+  assert.ok(defaultEdition.includes('class="article-controls"'));
+  assert.ok(!defaultEdition.includes('class="item-utilities"'));
   assert.ok(!defaultEdition.includes('Edition appearance'));
   for (const style of ["quiet-book", "tactile-correspondence"]) {
     const response = await fetch(`${base}/issues/${issue.date}/${style}`, { headers: ownerSession, redirect: "manual" });
@@ -179,6 +183,51 @@ test("HTTP publishing, duplicate protection, authentication and public validatio
   assert.ok(clearedSettings.includes(escapeHtml(savedGuidelines)));
   await feedbackAction(ownerSession, { url: articleUrl, saved: false });
   assert.ok(!(await (await fetch(`${base}/saved`, { headers: ownerSession })).text()).includes(articleUrl));
+
+  // Exercise the social opt-in and sharing loop through real server actions.
+  const thirdSession = await session("social-unrelated-reader");
+  function exportedAction(name: string) {
+    const id = Object.entries(actionManifest.node).find(([, action]) => (action as {exportedName?: string}).exportedName === name)?.[0];
+    assert.ok(id, `${name} is present in the compiled action manifest`);
+    return id;
+  }
+  async function socialForm(name: string, cookie: Record<string, string>, fields: Record<string, string>) {
+    const form = new FormData();
+    form.set(`$ACTION_ID_${exportedAction(name)}`, "");
+    for (const [key, value] of Object.entries(fields)) form.set(key, value);
+    return fetch(`${base}/friends`, { method: "POST", headers: { ...cookie, Origin: base }, body: form, redirect: "manual" });
+  }
+  assert.equal((await fetch(`${base}/friends`, {redirect:"manual"})).status, 307);
+  for (const [cookie, username] of [[ownerSession, "http_sender"], [otherSession, "http_recipient"], [thirdSession, "http_outsider"]] as const) {
+    const saved = await socialForm("updateSocialProfile", cookie, {username, enabled:"on"});
+    assert.equal(saved.status, 303);
+    assert.ok(!saved.headers.get("location")?.includes("error="));
+  }
+  await socialForm("sendFriendRequest", ownerSession, {username:"http_recipient"});
+  const incoming = await (await fetch(`${base}/friends`, {headers:otherSession})).text();
+  const requestId = incoming.match(/name="id" value="([^"]+)"/)?.[1];
+  assert.ok(requestId, "Recipient sees the pending request");
+  const unauthorizedAccept = await socialForm("respondToRequest", thirdSession, {id:requestId,decision:"accept"});
+  assert.ok(unauthorizedAccept.headers.get("location")?.includes("error="));
+  const accepted = await socialForm("respondToRequest", otherSession, {id:requestId,decision:"accept"});
+  assert.ok(!accepted.headers.get("location")?.includes("error="));
+  const socialShareId = exportedAction("sendArticleToFriend");
+  async function share(cookie: Record<string,string>, username: string) {
+    const response = await fetch(`${base}/friends`, {method:"POST",headers:{...cookie, "Next-Action":socialShareId,Origin:base,"Content-Type":"text/plain;charset=UTF-8"},body:JSON.stringify([{username,url:articleUrl,title:"Untrusted client title",note:"A deliberate HTTP recommendation",recommend:true}]),redirect:"manual"});
+    return response.text();
+  }
+  assert.ok((await share(ownerSession,"http_recipient")).includes('"sent":true'));
+  assert.ok(!(await share(thirdSession,"http_recipient")).includes('"sent":true'));
+  assert.ok(!(await share({},"http_recipient")).includes('"sent":true'));
+  const inbox = await (await fetch(`${base}/friends`, {headers:otherSession})).text();
+  assert.ok(inbox.includes("A deliberate HTTP recommendation"));
+  assert.ok(inbox.includes("http_sender"));
+  assert.ok(!inbox.includes("Untrusted client title"));
+  assert.ok(!(await (await fetch(`${base}/friends`, {headers:thirdSession})).text()).includes("A deliberate HTTP recommendation"));
+  assert.equal((await fetch(`${base}/issues/${issue.date}`, {headers:otherSession})).status,404);
+  await socialForm("endFriendship", otherSession, {username:"http_sender"});
+  assert.ok(!(await share(ownerSession,"http_recipient")).includes('"sent":true'));
+  assert.ok(!(await (await fetch(`${base}/friends`, {headers:otherSession})).text()).includes("A deliberate HTTP recommendation"));
 
   assert.equal((await fetch(`${base}/issues/${issue.date}`, { headers: { Cookie: "__session=tampered" }, redirect: "manual" })).status, 307);
   for (const [date, payload, expected] of [

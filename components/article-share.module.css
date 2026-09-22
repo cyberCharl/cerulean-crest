@@ -1,0 +1,10 @@
+.share { margin-top: .85rem; font-size: .88rem; line-height: 1.5; }
+.share button { font: inherit; border: 0; border-bottom: 1px solid var(--hairline); background: transparent; color: inherit; padding: .3rem 0; text-align: left; cursor: pointer; }
+.share button:disabled { opacity: .6; cursor: wait; }
+.form { display: grid; gap: .8rem; margin-top: 1rem; }
+.form label { display: grid; gap: .35rem; }
+.form select, .form textarea { width: 100%; min-width: 0; font: inherit; background: var(--paper); color: var(--ink); border: 1px solid var(--hairline); border-radius: 0; padding: .5rem; }
+.form .check { display: flex; gap: .5rem; align-items: flex-start; }
+.check input { flex-shrink: 0; accent-color: var(--ink); margin-top: .25rem; }
+.hint { font-size: .8rem; line-height: 1.5; margin: 0; color: var(--muted, #655f55); }
+.share :is(button,select,textarea,input,a):focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }

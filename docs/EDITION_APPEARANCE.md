@@ -4,7 +4,7 @@ Quiet book is the default theme throughout Daybook. Readers can choose Quiet boo
 
 Editions use `/issues/YYYY-MM-DD`. The old `/quiet-book` and `/tactile-correspondence` comparison URLs redirect to the canonical edition and respect the saved preference. The original Cerulean appearance and edition appearance switcher have been retired.
 
-On desktops at least 1100 CSS pixels wide, a centred reading column contains each title and summary. Author, publication, date, content type, and reading time sit in the left margin; source links, read state, saving, and private feedback sit on the right. Edition context follows the same column alignment. Smaller screens stack these elements in a single readable column.
+On desktops at least 1100 CSS pixels wide, one centred reading column contains the edition introduction and every article. A single edition-level side area groups total reading time, article count, the coverage dropdown, and reading progress. Each article has a subdued inline byline and compact source, read, save, feedback, and sharing controls beneath its summary; articles never have their own sidebars. Smaller screens place edition details above the single reading column.
 
 Both themes share authentication, ownership, content, saved articles, feedback, and browser reading progress. Appearance updates patch only the theme, and editorial updates preserve it. MCP editorial tools cannot change the theme and exclude it from the editorial brief. Article image extraction is not part of this implementation.
 
