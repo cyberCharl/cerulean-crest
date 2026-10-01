@@ -9,7 +9,7 @@ export function browserAuthConfigured(): boolean {
 let client: Auth0Client | undefined;
 export function auth0(): Auth0Client {
   if (!browserAuthConfigured()) throw new Error("Browser sign-in is not configured");
-  return client ??= new Auth0Client({ appBaseUrl: configuredAppOrigin(), signInReturnToPath: "/today", enableAccessTokenEndpoint: false });
+  return client ??= new Auth0Client({ appBaseUrl: configuredAppOrigin(), signInReturnToPath: "/latest", enableAccessTokenEndpoint: false });
 }
 export type Reader = { subject: string; name?: string; email?: string };
 export const getUser = cache(async (): Promise<Reader | null> => {

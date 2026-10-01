@@ -52,7 +52,8 @@ test("HTTP publishing, duplicate protection, authentication and public validatio
     assert.equal((await fetch(`${base}/issues/${date}`, { redirect: "manual" })).status, 307);
     assert.equal((await fetch(`${base}/api/issues/${date}`, { headers })).status, 404);
   }
-  const issue = { ...seedIssue, date: "2031-01-15", title: "Original HTTP edition" };
+  // An old edition must still be the latest without a false missing-today warning.
+  const issue = { ...seedIssue, date: "2021-01-15", title: "Original HTTP edition" };
   client = new Client({ name: "http-test", version: "1.0.0" });
   await client.connect(new StreamableHTTPClientTransport(new URL(`${base}/mcp`), { requestInit: { headers: { Authorization: "Bearer local-mcp-only" } } }));
   const tools = await client.listTools();
@@ -80,6 +81,10 @@ test("HTTP publishing, duplicate protection, authentication and public validatio
   assert.match(await privatePage.text(), /Original HTTP edition|A focused|issue-hero/);
   assert.equal((await fetch(`${base}/issues/${issue.date}`, { headers: otherSession })).status, 404);
   const defaultEdition = await (await fetch(`${base}/issues/${issue.date}`, { headers: ownerSession })).text();
+  assert.ok(defaultEdition.includes("Curiofold"));
+  assert.ok(defaultEdition.includes(`href="${base}/latest">Latest</a>`));
+  assert.ok(!defaultEdition.includes("edition has not arrived yet"));
+  assert.ok(!defaultEdition.includes("Daybook"));
   assert.ok(defaultEdition.includes('data-reader-theme="quiet-book"'));
   assert.ok(defaultEdition.includes('class="edition-sidebar"'));
   assert.equal((defaultEdition.match(/class="edition-sidebar"/g) ?? []).length, 1);
@@ -97,8 +102,12 @@ test("HTTP publishing, duplicate protection, authentication and public validatio
   assert.ok(!otherArchive.includes(issue.title));
   assert.ok(otherArchive.includes("Your first edition has not been published"));
   assert.equal((await fetch(`${base}/onboarding`, { redirect: "manual" })).status, 307);
-  const newReaderToday = await fetch(`${base}/today`, { headers: otherSession, redirect: "manual" });
-  assert.equal(newReaderToday.headers.get("location"), "/onboarding");
+  const legacyToday = await fetch(`${base}/today`, { headers: otherSession, redirect: "manual" });
+  assert.equal(legacyToday.headers.get("location"), "/latest");
+  const newReaderLatest = await fetch(`${base}/latest`, { headers: otherSession, redirect: "manual" });
+  assert.equal(newReaderLatest.headers.get("location"), "/onboarding");
+  const ownerLatest = await fetch(`${base}/latest`, { headers: ownerSession, redirect: "manual" });
+  assert.equal(ownerLatest.headers.get("location"), `/issues/${issue.date}`);
   const onboarding = await fetch(`${base}/onboarding`, { headers: otherSession });
   assert.equal(onboarding.status, 200);
   assert.match(await onboarding.text(), /Make room for reading/);
@@ -109,6 +118,36 @@ test("HTTP publishing, duplicate protection, authentication and public validatio
   assert.equal((await fetch(`${base}/settings`, { redirect: "manual" })).status, 307);
   // Exercise the actual compiled server action through Next's HTTP boundary.
   const actionManifest = JSON.parse(await readFile(".next/server/server-reference-manifest.json", "utf8"));
+  // Submit the bound onboarding forms exactly as a browser without JavaScript can.
+  async function submitOnboarding(step: string, fields: Record<string, string>) {
+    const markup = await (await fetch(`${base}/onboarding?step=${step}`, { headers: otherSession })).text();
+    const formMarkup = markup.match(/<form\b[^>]*>[\s\S]*?<\/form>/g)?.find(value => value.includes(`name="${step === "rhythm" ? "deliveryFrequency" : "guidelines"}"`));
+    assert.ok(formMarkup, "onboarding step includes its form");
+    const body = new FormData();
+    for (const input of formMarkup.matchAll(/<input\b[^>]*>/g)) {
+      const name = input[0].match(/name="([^"]*)"/)?.[1];
+      if (!name?.startsWith("$ACTION")) continue;
+      const value = input[0].match(/value="([^"]*)"/)?.[1] ?? "";
+      body.set(name, value.replaceAll("&quot;", '"').replaceAll("&#x27;", "'").replaceAll("&lt;", "<").replaceAll("&gt;", ">").replaceAll("&amp;", "&"));
+    }
+    for (const [key, value] of Object.entries(fields)) body.set(key, value);
+    return fetch(`${base}/onboarding?step=${step}`, { method: "POST", headers: { ...otherSession, Origin: base }, body, redirect: "manual" });
+  }
+  const rhythmSaved = await submitOnboarding("rhythm", { readingMinutes: "25", editionMinutes: "50", timeZone: "Europe/Amsterdam", deliveryFrequency: "weekly", deliveryTime: "19:45", deliveryDay: "Sunday" });
+  assert.equal(rhythmSaved.status, 303);
+  assert.equal(rhythmSaved.headers.get("location"), "/onboarding?step=interests");
+  const interestsSaved = await submitOnboarding("interests", { interests: "Technology", guidelines: "More useful ideas" });
+  assert.equal(interestsSaved.headers.get("location"), "/onboarding?step=connect");
+  assert.equal((await fetch(`${base}/onboarding?step=interests`, { headers: otherSession, redirect: "manual" })).headers.get("location"), "/settings");
+  const connectMarkup = await (await fetch(`${base}/onboarding?step=connect`, { headers: otherSession })).text();
+  assert.ok(connectMarkup.includes("Every Sunday at 19:45 (Europe/Amsterdam)"));
+  assert.ok(connectMarkup.includes("Create or update my recurring ChatGPT task"));
+  const rhythmMarkup = await (await fetch(`${base}/onboarding?step=rhythm`, { headers: otherSession })).text();
+  assert.match(rhythmMarkup, /value="weekly" selected=""/);
+  assert.match(rhythmMarkup, /value="Sunday" selected=""/);
+  assert.ok(rhythmMarkup.includes('value="19:45"'));
+  const ownerConnect = await (await fetch(`${base}/onboarding?step=connect`, { headers: ownerSession })).text();
+  assert.ok(!ownerConnect.includes("Every Sunday at 19:45"));
   const settingsMarkup = await privateSettings.text();
   const themeActionId = settingsMarkup.match(/name="\$ACTION_ID_([^"]+)"/)?.[1];
   assert.ok(themeActionId, "appearance action must be present in the production build");
@@ -153,34 +192,60 @@ test("HTTP publishing, duplicate protection, authentication and public validatio
   assert.ok(action.body.includes('"saved":true'));
   assert.ok((await (await fetch(`${base}/settings`, { headers: ownerSession })).text()).includes("HTTP private editorial note"));
   assert.ok(!(await (await fetch(`${base}/settings`, { headers: otherSession })).text()).includes("HTTP private editorial note"));
-  const editorialFeedback = await client.callTool({ name: "get_editorial_feedback", arguments: {} });
-  assert.ok(JSON.stringify(editorialFeedback.structuredContent).includes("HTTP private editorial note"));
-  const savedGuidelines = "First constitution paragraph.\n\nPreserve this second paragraph. <script>unsafe()</script>";
-  await client.callTool({ name: "update_editorial_preferences", arguments: { guidelines: savedGuidelines, readingMinutes: 25, editionMinutes: 55, interests: ["History & ideas"] } });
+  const editorialBrief = await client.callTool({ name: "get_editorial_brief", arguments: {} });
+  assert.ok(JSON.stringify(editorialBrief.structuredContent).includes("HTTP private editorial note"));
+  const savedConstitution = "# Editorial constitution\n\nFirst constitution paragraph.\n\nPreserve this second paragraph. <script>unsafe()</script>";
+  const editableConstitution = (await client.callTool({ name: "get_editorial_constitution", arguments: {} })).structuredContent as { markdown: string; revision: string };
+  assert.ok(!editableConstitution.markdown.includes("HTTP private editorial note"));
+  await client.callTool({ name: "update_editorial_constitution", arguments: { revision: editableConstitution.revision, edits: [{ oldText: editableConstitution.markdown, newText: savedConstitution }] } });
   const activeBriefResponse = await client.callTool({ name: "get_editorial_brief", arguments: {} });
-  const activeBrief = JSON.parse((activeBriefResponse.structuredContent as { brief: string }).brief);
+  const activeBrief = activeBriefResponse.structuredContent as { constitution: string; readingContext: { readingMinutes: number; editionMinutes: number } };
   const constitutionMarkup = await (await fetch(`${base}/settings`, { headers: ownerSession })).text();
   const constitutionDocument = constitutionMarkup.match(/<article[^>]*>([\s\S]*?)<\/article>/)?.[1];
   assert.ok(constitutionDocument, "Settings renders the active constitution as a reading document");
   const escapeHtml = (value: string) => value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#x27;");
-  for (const text of [activeBrief.purpose, activeBrief.editorialGuidelines, ...activeBrief.selectionRules, ...activeBrief.publishingRules, ...activeBrief.interests]) {
-    assert.ok(constitutionDocument.includes(escapeHtml(text)), `Active constitution missing: ${text}`);
-  }
-  assert.ok(constitutionDocument.includes("25") && constitutionDocument.includes("55"));
-  assert.ok(constitutionDocument.replaceAll("<!-- -->", "").includes(`${activeBrief.defaults.acceptableAvailableMinutes.minimum}–${activeBrief.defaults.acceptableAvailableMinutes.maximum}`));
+  assert.equal(activeBrief.constitution, savedConstitution);
+  assert.equal(activeBrief.readingContext.readingMinutes, 60);
+  assert.equal(activeBrief.readingContext.editionMinutes, 120);
+  assert.ok(constitutionDocument.includes("First constitution paragraph"));
+  assert.ok(constitutionDocument.includes("Preserve this second paragraph"));
   assert.ok(!constitutionDocument.includes("<script>unsafe()"));
+  const briefPreview = await (await fetch(`${base}/settings/brief`, { headers: ownerSession })).text();
+  assert.ok(briefPreview.includes("First constitution paragraph"));
+  assert.ok(briefPreview.includes("HTTP private editorial note"));
+  assert.ok(briefPreview.includes("For each edition, first call get_editorial_brief"));
+  assert.equal((await fetch(`${base}/settings/brief`, { redirect: "manual" })).status, 307);
   const otherConstitution = await (await fetch(`${base}/settings`, { headers: otherSession })).text();
   assert.ok(!otherConstitution.includes("First constitution paragraph"));
-  assert.ok(otherConstitution.includes("You haven’t saved any personal guidelines"));
-  assert.ok(otherConstitution.includes(escapeHtml(activeBrief.purpose)), "Empty personal guidelines do not hide shared constitution");
-  assert.ok((await (await fetch(`${base}/settings`, { headers: ownerSession })).text()).includes(escapeHtml(savedGuidelines)));
+  assert.ok(otherConstitution.includes("More useful ideas"));
+  assert.ok(otherConstitution.includes("Make a finite personal edition"));
+  assert.ok((await (await fetch(`${base}/settings`, { headers: ownerSession })).text()).includes(escapeHtml(savedConstitution)));
   action = await feedbackAction(ownerSession, { url: articleUrl, reaction: null, note: "" });
   assert.ok(action.body.includes('"saved":true'));
-  const afterClear = await client.callTool({ name: "get_editorial_feedback", arguments: {} });
-  assert.deepEqual((afterClear.structuredContent as {feedback: unknown[]}).feedback, []);
+  const afterClear = await client.callTool({ name: "get_editorial_brief", arguments: {} });
+  assert.ok(!Object.hasOwn(afterClear.structuredContent ?? {}, "articleFeedback"));
   const clearedSettings = await (await fetch(`${base}/settings`, { headers: ownerSession })).text();
   assert.ok(!clearedSettings.includes("HTTP private editorial note"));
-  assert.ok(clearedSettings.includes(escapeHtml(savedGuidelines)));
+  assert.ok(clearedSettings.includes(escapeHtml(savedConstitution)));
+  const constitutionForm = clearedSettings.match(/<form\b[^>]*>[\s\S]*?<\/form>/g)?.find(value => value.includes('name="constitutionMarkdown"'));
+  const constitutionActionId = constitutionForm?.match(/name="\$ACTION_ID_([^"]+)"/)?.[1];
+  assert.ok(constitutionActionId, "Settings exposes an editable constitution form");
+  const browserConstitution = "# Editorial constitution\n\nA change made on the website.";
+  const constitutionBody = new FormData();
+  constitutionBody.set(`$ACTION_ID_${constitutionActionId}`, "");
+  const browserRevision = constitutionForm?.match(/name="revision" value="([^"]+)"/)?.[1];
+  assert.ok(browserRevision);
+  constitutionBody.set("revision", browserRevision);
+  constitutionBody.set("constitutionMarkdown", browserConstitution);
+  const browserSaved = await fetch(`${base}/settings`, { method: "POST", headers: { ...ownerSession, Origin: base }, body: constitutionBody, redirect: "manual" });
+  assert.equal(browserSaved.headers.get("location"), "/settings?constitution=saved");
+  const browserBrief = await client.callTool({ name: "get_editorial_brief", arguments: {} });
+  assert.equal((browserBrief.structuredContent as { constitution: string }).constitution, browserConstitution);
+  constitutionBody.set("constitutionMarkdown", "A stale browser tab must not replace the latest edit.");
+  const staleBrowser = await fetch(`${base}/settings`, { method: "POST", headers: { ...ownerSession, Origin: base }, body: constitutionBody, redirect: "manual" });
+  assert.equal(staleBrowser.headers.get("location"), "/settings?error=constitution-conflict");
+  const afterStaleBrowser = await client.callTool({ name: "get_editorial_constitution", arguments: {} });
+  assert.equal((afterStaleBrowser.structuredContent as { markdown: string }).markdown, browserConstitution);
   await feedbackAction(ownerSession, { url: articleUrl, saved: false });
   assert.ok(!(await (await fetch(`${base}/saved`, { headers: ownerSession })).text()).includes(articleUrl));
 
@@ -213,13 +278,13 @@ test("HTTP publishing, duplicate protection, authentication and public validatio
   assert.ok(!accepted.headers.get("location")?.includes("error="));
   const socialShareId = exportedAction("sendArticleToFriend");
   async function share(cookie: Record<string,string>, username: string) {
-    const response = await fetch(`${base}/friends`, {method:"POST",headers:{...cookie, "Next-Action":socialShareId,Origin:base,"Content-Type":"text/plain;charset=UTF-8"},body:JSON.stringify([{username,url:articleUrl,title:"Untrusted client title",note:"A deliberate HTTP recommendation",recommend:true}]),redirect:"manual"});
+    const response = await fetch(`${base}/friends`, {method:"POST",headers:{...cookie, "Next-Action":socialShareId,Origin:base,"Content-Type":"text/plain;charset=UTF-8"},body:JSON.stringify([{username,url:articleUrl,title:"Untrusted client title",note:"A deliberate HTTP recommendation"}]),redirect:"manual"});
     return response.text();
   }
   assert.ok((await share(ownerSession,"http_recipient")).includes('"sent":true'));
   assert.ok(!(await share(thirdSession,"http_recipient")).includes('"sent":true'));
   assert.ok(!(await share({},"http_recipient")).includes('"sent":true'));
-  const inbox = await (await fetch(`${base}/friends`, {headers:otherSession})).text();
+  const inbox = await (await fetch(`${base}/friends/http_sender`, {headers:otherSession})).text();
   assert.ok(inbox.includes("A deliberate HTTP recommendation"));
   assert.ok(inbox.includes("http_sender"));
   assert.ok(!inbox.includes("Untrusted client title"));
@@ -227,7 +292,7 @@ test("HTTP publishing, duplicate protection, authentication and public validatio
   assert.equal((await fetch(`${base}/issues/${issue.date}`, {headers:otherSession})).status,404);
   await socialForm("endFriendship", otherSession, {username:"http_sender"});
   assert.ok(!(await share(ownerSession,"http_recipient")).includes('"sent":true'));
-  assert.ok(!(await (await fetch(`${base}/friends`, {headers:otherSession})).text()).includes("A deliberate HTTP recommendation"));
+  assert.equal((await fetch(`${base}/friends/http_sender`, {headers:otherSession})).status, 404);
 
   assert.equal((await fetch(`${base}/issues/${issue.date}`, { headers: { Cookie: "__session=tampered" }, redirect: "manual" })).status, 307);
   for (const [date, payload, expected] of [
@@ -235,7 +300,7 @@ test("HTTP publishing, duplicate protection, authentication and public validatio
     [issue.date, { ...issue, title: "Explicit replacement" }, 200],
     ["2031-01-17", issue, 409],
     ["2026-02-31", { ...issue, date: "2026-02-31" }, 422],
-    [issue.date, { ...issue, availableMinutes: 1400 }, 422],
+    [issue.date, { ...issue, availableMinutes: 1441 }, 422],
   ] as const) {
     const response = await fetch(`${base}/api/issues/${date}`, { method: "PUT", headers, body: JSON.stringify(payload) });
     assert.equal(response.status, expected);

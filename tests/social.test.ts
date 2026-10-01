@@ -10,7 +10,7 @@ delete process.env.VERCEL;
 const db = await import("../lib/db.ts");
 const social = await import("../lib/social-store.ts");
 const { seedIssue } = await import("../lib/seed.ts");
-test("friends are explicit, private, deduplicated, opt-out aware and edition nominations are reconciled", async () => {
+test("friend conversations are private, deduplicated, opt-out aware and read state controls recommendations", async () => {
   try {
     await db.createIssue("a", seedIssue);
     const article = seedIssue.sections[0].items[0];
@@ -54,23 +54,41 @@ test("friends are explicit, private, deduplicated, opt-out aware and edition nom
       username: "bravo",
       url: article.url,
       title: "Fake",
-      recommend: false,
       note: "Read this",
     });
     await social.shareArticle("a", {
       username: "bravo",
       url: article.url,
       title: "Fake",
-      recommend: true,
     });
     let shares = (await social.getSocialState("b")).shares;
     assert.equal(shares.length, 1);
     assert.equal(shares[0].title, article.title);
-    assert.equal(shares[0].recommend, true);
     assert.equal(shares[0].note, "Read this");
+    assert.equal(shares[0].readAt, null);
+    assert.equal((await social.getSocialState("b")).friends[0].unreadCount, 1);
+    const recipientThread = await social.getFriendConversation("b", "alice");
+    const senderThread = await social.getFriendConversation("a", "bravo");
+    assert.equal(recipientThread[0].direction, "received");
+    assert.equal(senderThread[0].direction, "sent");
     assert.equal((await social.getSocialState("c")).shares.length, 0);
-    await social.dismissShare("c", shares[0].id);
+    await assert.rejects(
+      social.setSharedArticleRead("c", { id: shares[0].id, read: true }),
+      /not found/,
+    );
     assert.equal((await social.listFriendRecommendations("b")).length, 1);
+    await social.setSharedArticleRead("b", { id: shares[0].id, read: true });
+    assert.equal((await social.listFriendRecommendations("b")).length, 0);
+    assert.ok((await social.getFriendConversation("a", "bravo"))[0].readAt);
+    assert.equal((await social.getSocialState("b")).friends[0].unreadCount, 0);
+    await social.setSharedArticleRead("b", { id: shares[0].id, read: false });
+    assert.equal((await social.listFriendRecommendations("b")).length, 1);
+    await social.setSharedArticleReadByUrl("b", { url: article.url, read: true });
+    assert.equal((await social.listFriendRecommendations("b")).length, 0);
+    await social.setSharedArticleReadByUrl("b", { url: article.url, read: false });
+    await social.markSharedArticlesRead("b", [article.url]);
+    assert.equal((await social.listFriendRecommendations("b")).length, 0);
+    await social.setSharedArticleReadByUrl("b", { url: article.url, read: false });
     await social.saveSocialProfile("a", { username: "alice", enabled: false });
     assert.equal((await social.getSocialState("b")).shares.length, 0);
     await assert.rejects(
@@ -97,19 +115,29 @@ test("friends are explicit, private, deduplicated, opt-out aware and edition nom
     assert.equal((await social.listFriendRecommendations("b")).length, 0);
     shares = (await social.getSocialState("b")).shares;
     assert.equal(shares[0].includedDate, seedIssue.date);
-    await social.dismissShare("b", shares[0].id);
-    assert.equal((await social.getSocialState("b")).shares.length, 0);
+    await social.setSharedArticleRead("b", { id: shares[0].id, read: true });
+    assert.ok((await social.getSocialState("b")).shares[0].readAt);
     await social.shareArticle("a", {
       username: "bravo",
       url: article.url,
       title: article.title,
-      recommend: true,
     });
-    assert.equal(
-      (await social.getSocialState("b")).shares.length,
-      0,
-      "Repeated shares never resurrect dismissal",
-    );
+    assert.ok((await social.getSocialState("b")).shares[0].readAt, "Repeated shares never reset read state");
+    // A bounded thread must retain the newest messages, in reading order.
+    const Database = (await import("better-sqlite3")).default;
+    const fixture = new Database(process.env.DATABASE_PATH!);
+    try {
+      const insert = fixture.prepare("INSERT INTO social_shares(id,friendship_id,sender,recipient,url,title,note,recommend,created_at) VALUES(?,?,?,?,?,?,?,1,?)");
+      fixture.transaction(() => {
+        for (let index = 0; index < 501; index++) {
+          insert.run(crypto.randomUUID(), request.id, "a", "b", `https://example.com/thread/${index}`, `Thread ${index}`, "", new Date(Date.UTC(2040, 0, 1, 0, index)).toISOString());
+        }
+      })();
+    } finally { fixture.close(); }
+    const bounded = await social.getFriendConversation("b", "alice");
+    assert.equal(bounded.length, 500);
+    assert.equal(bounded[0].title, "Thread 1");
+    assert.equal(bounded.at(-1)?.title, "Thread 500");
     await social.removeFriend("a", "bravo");
     assert.equal((await social.getSocialState("b")).friends.length, 0);
     await assert.rejects(

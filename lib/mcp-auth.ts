@@ -46,9 +46,9 @@ export async function verifyUserToken(token: string, config: OAuthConfig, keys: 
 }
 
 export function mcpChallenge(origin: string, scope = MCP_SCOPES.join(" ")): string {
-  if (process.env.CERULEAN_MCP_AUTH_MODE === "pilot") return 'Bearer realm="Cerulean Crest MCP"';
+  if (process.env.CERULEAN_MCP_AUTH_MODE === "pilot") return 'Bearer realm="Curiofold MCP"';
   const metadata = new URL("/.well-known/oauth-protected-resource", configuredAppOrigin() || origin);
-  return `Bearer resource_metadata="${metadata}", scope="${scope}", error="insufficient_scope", error_description="Authorize Cerulean Crest to continue"`;
+  return `Bearer resource_metadata="${metadata}", scope="${scope}", error="insufficient_scope", error_description="Authorize Curiofold to continue"`;
 }
 
 export async function authorizeMcpRequest(authorization: string | null): Promise<AuthInfo | null> {

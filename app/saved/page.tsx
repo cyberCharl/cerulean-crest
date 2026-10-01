@@ -21,7 +21,7 @@ export default async function SavedPage() {
     {articles.length === 0 ? <div className="saved-empty">
       <h2>A little room for later.</h2>
       <p>Use “Save article” on any piece in your editions to keep it here across devices.</p>
-      <Link className="source-link" href="/today">Open your latest edition →</Link>
+      <Link className="source-link" href="/latest">Open your latest edition →</Link>
     </div> : <div className="saved-list">
       {articles.map((article) => <article className="saved-article" key={article.url}>
         <p className="byline">{article.publication}</p>

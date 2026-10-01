@@ -4,8 +4,8 @@ Status: copy prepared for review; use only after the stated features are deploye
 
 | Portal field | Proposed value |
 | --- | --- |
-| Name | `[PRODUCT]` (working name: Cerulean Crest) |
-| Short description | A finite daily reading edition, shaped by your interests. |
+| Name | `[PRODUCT]` (working name: Curiofold) |
+| Short description | A finite reading edition, shaped by your interests. |
 | Category | Productivity, if offered by the portal |
 | Developer identity | `[PUBLISHER]`, exactly as verified in the selected OpenAI organization |
 | Website | `[ORIGIN]/` |
@@ -20,22 +20,22 @@ Status: copy prepared for review; use only after the stated features are deploye
 
 ## Long description
 
-[PRODUCT] helps you turn your interests into a finite personal reading edition. Ask ChatGPT to consult your saved editorial brief and recent editions, research suitable sources, and save a new edition to your private reader. Each selection links to its source and includes a short explanation of why it is worth your time.
+[PRODUCT] helps you turn your interests into a finite personal reading edition. Ask ChatGPT to read your saved Markdown editorial constitution with current feedback and friend recommendations, research suitable sources, and save only the final edition to your private reader. Each selection links to its source and includes a short explanation of why it is worth your time.
 
-Set your reading budget and editorial guidelines on the website, or ask ChatGPT to update them. Explicit changes are saved to the same settings you can review and edit yourself. In the reader, save articles for later and use “Tell the editor” to leave a reaction or private note. During curation, that feedback provides context for future selections; saving alone is not a request for more of a topic.
+Set your reading budget and edit your constitution on the website, or ask ChatGPT to update the constitution after an explicit request. Both paths save the same Markdown document. In the reader, save articles for later and use “Tell the editor” to leave a reaction or private note. During curation, that feedback provides context for future selections; saving alone is not a request for more of a topic.
 
 An account and connected authorization are required. Editions are private to your account. The connected host supplies research capabilities; [PRODUCT] stores your preferences, feedback and editions. Scheduling is arranged separately in the host and depends on its supported capabilities.
 
 ## Starter prompts
 
 1. Create today's [PRODUCT] edition using my saved editorial brief.
-2. Show me my current editorial preferences and reading budget.
-3. Update my editorial guidelines to prefer original scientific research and fewer startup announcements; keep my reading budget unchanged.
+2. Show me my editorial constitution and reading budget.
+3. Update my editorial constitution to prefer original scientific research and fewer startup announcements; keep the rest of it and my reading budget unchanged.
 4. Before curating, review the feedback I left through Tell the editor.
 
 ## Initial release notes
 
-Initial submission of [PRODUCT], a personal reading service with a remote MCP server and a curation skill. The integration retrieves the authenticated reader's editorial brief, recent edition history and article feedback, creates private daily editions, and updates explicit editorial preferences when requested. The companion website provides settings, saved articles and private article feedback.
+Initial submission of [PRODUCT], a personal reading service with a remote MCP server and a curation skill. The integration retrieves the authenticated reader's Markdown constitution with recent edition history, article feedback and friend recommendations, publishes complete private editions, and updates the constitution on explicit request. The companion website provides settings, saved articles and private article feedback.
 
 The reviewer guide includes account setup, reproducible positive and negative cases, and expected outcomes. Source discovery happens through the host's research tools. Same-date edition creation returns the existing edition instead of replacing it. No public publication, purchases, messages to other people or in-app scheduling are offered by this submission.
 

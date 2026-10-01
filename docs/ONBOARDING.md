@@ -1,17 +1,17 @@
 # New-user onboarding
 
-Updated 17 September 2026. Accounts, landing, settings and the wizard are deployed. Unit, authenticated HTTP, type and production-build checks pass. Production smoke checks pass; interactive owner testing is pending. The public ChatGPT plugin has not been submitted or published. See [publication research](CHATGPT_PUBLICATION.md) and [announcement readiness](ANNOUNCEMENT_PLAN.md).
+The production flow creates a per-reader Markdown editorial constitution and asks ChatGPT to publish only the final edition. It was deployed on 22 September 2026 in `dpl_4kQ7b2n3P5inkxPKnq1N324KZ2gZ`. The public ChatGPT plugin has not been submitted, and a live ChatGPT rehearsal remains separate. See [the MCP contract](MCP.md) and [publication preparation](CHATGPT_PUBLICATION.md).
 
 ## Implemented wizard
 
-1. **Sign up from the landing page.** Auth0 hosts signup. The website and curator must use the same Cerulean Crest account; this is separate from the ChatGPT account.
-2. **Reading rhythm.** `/today` sends users without editions to `/onboarding`. Choose intended reading minutes and total material minutes independently (defaults 60 and 120). Extra material offers choice, not homework. First setup suggests the browser timezone; existing saved preferences are preserved.
-3. **Interests.** Choose from twelve broad topics and optionally add a sentence about current curiosities, preferred sources or things to avoid. No topics and no notes is valid: begin with a broad mix. Topic choices are starting points, not exclusive filters. The agent receives these alongside reading volume through `get_editorial_brief`.
-4. **First edition.** Review the saved brief, connect in ChatGPT using the same app account, and copy a short first-edition request. `CERULEAN_CHATGPT_PLUGIN_URL` supplies the real published listing URL when available. Until configured, the page explicitly says the public plugin is unavailable. No guessed listing link or shared OAuth credentials are exposed.
-5. **Return to read.** Check for an edition or follow the private URL from ChatGPT. An existing edition takes precedence at `/today`. The wizard also links to the latest edition once one exists. Opening the plugin or copying a prompt never claims that generation has started.
-6. **Establish the ritual.** After trying an edition, arrange recurring scheduling externally in ChatGPT. App settings remain the source of reading volume and editorial preferences on every run.
+1. **Sign up from the landing page.** Auth0 hosts signup. The website and curator must use the same Curiofold account; this is separate from the ChatGPT account.
+2. **Reading rhythm.** `/latest` sends users without editions to `/onboarding`. Choose intended reading minutes and total material minutes independently (defaults 60 and 120). Extra material offers choice, not homework. Choose delivery every day, on weekdays (Monday–Friday), or weekly on a selected day, plus a local delivery time (initial suggestion: daily at 08:00). First setup suggests the browser timezone; existing saved preferences are preserved.
+3. **Starting point.** Choose from twelve broad topics and optionally add a sentence about current curiosities, preferred sources or things to avoid. No topics and no notes is valid. These inputs seed an editable Markdown constitution; topics are not maintained as an enduring selector. A deterministic template creates the first document. An LLM-based draft is a possible later enhancement.
+4. **First edition.** Review the saved document and delivery rhythm, connect in ChatGPT using the same app account, and copy the generated instruction. It asks ChatGPT to read the assembled brief, search widely with an internal candidate list, submit only the finished edition, and set up a recurring task at the saved frequency and local time. Existing readers can copy the recurring instruction without requesting another first edition. Older preferences without a delivery choice retain a one-edition prompt until a rhythm is saved. `CERULEAN_CHATGPT_PLUGIN_URL` supplies the real published listing URL when available. Until configured, the page says the public plugin is unavailable.
+5. **Return to read.** Check for an edition or follow the private URL from ChatGPT. An existing edition takes precedence at `/latest`. The wizard also links to the latest edition once one exists. Opening the plugin or copying a prompt never claims that generation has started.
+6. **Establish the ritual.** Confirm the recurring task in ChatGPT. The app saves the delivery preference but does not create or synchronize external schedules. After changing delivery preferences, copy the updated instruction into ChatGPT; it asks to update an existing task rather than create a duplicate. App settings remain the source of reading volume and editorial preferences on every run.
 
-Each submitted step is saved per account; users resume at their saved step. Settings exposes the same topic choices for subsequent edits. Existing readers go directly to their editions and are not forced through setup. Existing JSON preferences remain compatible; no schema migration is needed.
+Each submitted step is saved per account; users resume at their saved step. Settings renders and edits the same Markdown constitution that the MCP tool reads and updates. Existing readers go directly to their editions and are not forced through setup. Existing JSON preferences remain compatible; older guidelines and topics seed a document until it is first saved.
 
 ## Deliberate limits
 
@@ -27,7 +27,7 @@ The owner previously completed live hosted sign-in and confirmed access to exist
 
 Still required: interactive desktop/mobile wizard checks; publish and authorize the ChatGPT plugin; observe a fresh external user's signup → saved brief → authorization → first private edition; verify recurring runs and token refresh. The owner's successful login is not a substitute for that journey.
 
-Production deployment: `dpl_BYDapCWNQhhRyWnF6ntF9q4waHfK`, 17 September 2026. Existing readers can test directly at `/onboarding?step=rhythm`; `/today` continues to open their edition.
+Production deployment: `dpl_BYDapCWNQhhRyWnF6ntF9q4waHfK`, 17 September 2026. Existing readers can test directly at `/onboarding?step=rhythm`; `/latest` continues to open their edition.
 
 ## Assisted pilot feedback — 17 September 2026
 

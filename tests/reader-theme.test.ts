@@ -24,7 +24,7 @@ test("appearance and editorial form patches preserve concurrent changes and isol
   form.set("readingMinutes", "30");
   form.set("editionMinutes", "60");
   form.set("timeZone", "UTC");
-  form.set("guidelines", "More long-form history");
+  form.set("guidelines", "Ignored legacy field");
   form.append("interests", "History & ideas");
   form.set("theme", "quiet-book"); // Appearance is never accepted by this form.
   const parsed = editorialPreferencesFromForm(form);
@@ -37,7 +37,7 @@ test("appearance and editorial form patches preserve concurrent changes and isol
   ]);
   const saved = await db.getSettings("theme-reader");
   assert.equal(saved.theme, "tactile-correspondence");
-  assert.equal(saved.guidelines, "More long-form history");
+  assert.equal(saved.guidelines, "More history");
   assert.equal(saved.onboardingStep, "connect");
   assert.equal(readerTheme(await db.getSettings("other-reader")), "quiet-book");
   await assert.rejects(db.patchSettings("theme-reader", { theme: "original" } as never));

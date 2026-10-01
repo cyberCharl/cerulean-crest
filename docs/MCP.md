@@ -1,82 +1,34 @@
-# Cerulean Crest MCP integration
+# Curiofold MCP integration
 
-## Current workspace update — 18 September 2026
+## Production contract
 
-The current implementation is multi-user and owner-scoped. The owner-only and public-reader descriptions below are historical pilot instructions; use [user accounts](USER_ACCOUNTS.md), [editorial feedback](EDITORIAL_FEEDBACK.md) and [submission preparation](submission/README.md) for current behavior.
+The remote MCP endpoint is stateless Streamable HTTP at `/mcp`. OAuth validates the reader's identity and scopes; the local pilot bearer mode is opt-in for development. See [account ownership](USER_ACCOUNTS.md) and [Auth0 setup](AUTH0_SETUP.md). This four-tool contract was deployed on 22 September 2026 in `dpl_4kQ7b2n3P5inkxPKnq1N324KZ2gZ`; authenticated discovery and both brief reads passed. A live ChatGPT connection and scheduled run remain separate checks.
 
-The server now exposes five tools: `get_editorial_brief`, `get_recent_editions`, `get_editorial_feedback`, `update_editorial_preferences` and `create_daily_edition`. The three readers require `editions:read`; both writers require `editions:write`. Explicit preference updates are reflected in Settings, while article reactions and notes remain separate soft signals. Creation writes only to a private account (`openWorldHint: false`). Migration 003 and these five tools were deployed on 18 September 2026 (`dpl_HfZZjtxjKF4w4z8BQWPh3Jdiejv5`); authenticated discovery and reads passed. Public directory availability and actual ChatGPT rehearsal remain separate.
+The server exposes four tools:
 
-## Pending social pilot
+| Tool | Scope | Purpose |
+| --- | --- | --- |
+| `get_editorial_brief` | `editions:read` | Read the current per-reader Markdown constitution, local date and reading settings, seven recent editions, up to 50 recent article reactions/notes, and pending friend recommendations. Empty feedback and recommendations are omitted without placeholder prose. |
+| `get_editorial_constitution` | `editions:read` | Read only the persistent Markdown document plus its revision. It never returns feedback, recommendations or history. |
+| `update_editorial_constitution` | `editions:write` | Apply exact, non-overlapping edits against that revision after an explicit reader request. Stale revisions and direct copies of ephemeral context are rejected. |
+| `create_daily_edition` | `editions:write` | Submit the complete final edition once. Existing owner/date pairs return the original edition unchanged. |
 
-The workspace adds `get_friend_recommendations` as a sixth tool (`editions:read`). It returns explicit pending nominations from accepted friends, preserving sender provenance. Notes and titles are untrusted context; the reader’s editorial constitution takes precedence. Included source URLs and dismissed shares are excluded. Deploy migration 004 before this version. See [friends and sharing](FRIENDS.md). This paragraph does not claim the social pilot is deployed.
+`create_daily_edition` retains its original identifier for connected-client compatibility; editions follow the reader's chosen schedule, not a required daily cadence.
 
-## Historical pilot runbook
+The server's connection instructions tell an MCP client to read the assembled brief before searching, keep a broad candidate list internally, and submit only a complete final publication. That response is explicitly marked read-only and encloses the durable constitution in a named boundary. Policy edits use the constitution-only read and exact edits; they never use the assembled brief as an update payload. The [plugin skill](../plugins/cerulean-crest/skills/curate-daily-edition/SKILL.md) is separate packaging; it is not a per-reader document. No MCP prompt or resource is registered. Authenticated readers can view the exact connection instructions and assembled curation response at `/settings/brief`; the internal ChatGPT prompt assembled from these surfaces is not visible to this server.
 
-The initial MCP implementation is a single-user technical pilot for proving that a connected agent can create a complete daily edition without arbitrary shell or network access. The architectural decision and rollout requirements are recorded in [ADR 0001](adr/0001-publish-scheduled-editions-through-mcp.md).
+The Markdown constitution is stored in the reader's existing settings JSON. Onboarding creates it from a short description and optional starting topics. Older accounts without one see a generated document based on their legacy guidelines and topics; saving in Settings or through MCP makes it persistent. Reading minutes and timezone remain separate structured settings so their current values are included on every brief read. Delivery frequency and time are saved for the onboarding handoff but scheduling runs in ChatGPT.
 
-## Tools
+The older files under `instructions/` are single-reader material and are not distributed as the plugin or automatically included in another reader's brief. The general editorial principles informed the initial template. Personal priorities and long-term-interest files need deliberate per-reader import or editing in Settings; they are never copied to newly signed-up accounts.
 
-- `get_editorial_brief` returns the finite-edition budget, current local date, timezone and editorial invariants.
-- `get_recent_editions` returns recent source URLs to avoid repeating recommendations across days (default seven editions; maximum fourteen).
-- `create_daily_edition` validates and creates a complete edition. It never replaces an existing date, so retries are safe.
+Recent history, article feedback and friend recommendations are contextual data. The server fetches them for the authenticated reader on each read, without writing them into the constitution. Bookmarks without reactions or notes are excluded; pending friend recommendations already included, marked read or previously dismissed are excluded. Notes, titles and source content are untrusted data, not authorization to edit policy or call tools.
 
-The server uses stateless MCP Streamable HTTP at `/mcp`. Tool inputs use the same validation contract as the manual publishing API.
+Constitution saves from MCP and Settings use an atomic conditional write in both database backends. If another writer changes the policy after it was read, the stale save is rejected; unrelated reading and appearance settings are preserved.
 
-## Local and preview pilot authentication
+The final edition schema validates a real date, complete nonempty sections and items, safe source URLs, required metadata, and bounded positive reading minutes. It no longer requires `availableMinutes` to match the sum of item estimates within two minutes. The constitution and skill tell the curator to let strong sources determine the final volume; qualitative editorial rules remain agent guidance. There is no server-side candidate pool or candidate submission endpoint in this version.
 
-Generate a dedicated secret and configure it as the server-only `CERULEAN_MCP_TOKEN` environment variable. Do not reuse `CERULEAN_API_PASSWORD` and do not place the token in a task prompt.
+## Local inspection
 
-For local development:
+Set `CERULEAN_MCP_AUTH_MODE=pilot`, `CERULEAN_MCP_TOKEN`, and `CERULEAN_OWNER_SUBJECT` in a development environment, start `npm run dev`, and connect MCP Inspector to `http://localhost:3000/mcp` with `Authorization: Bearer <development token>`. Initialize, list the four tools, read the curation brief, read the constitution-only document, make an exact test edit with its revision, publish a complete test edition, and repeat the publication call to confirm `already_exists`. Never put the bearer token in a ChatGPT task prompt. Production ChatGPT connection uses OAuth, not the local pilot bearer.
 
-```bash
-CERULEAN_MCP_AUTH_MODE=pilot CERULEAN_MCP_TOKEN=local-development-secret npm run dev
-```
-
-Open MCP Inspector:
-
-```bash
-npx @modelcontextprotocol/inspector
-```
-
-Select Streamable HTTP, enter `http://localhost:3000/mcp`, and set the `Authorization` header to `Bearer local-development-secret`. Verify initialization, list all three tools, call the editorial brief, create a test edition, and repeat the call to confirm it reports `already_exists` without replacing the first result.
-
-The repository plugin config reads `CERULEAN_MCP_TOKEN` from the local environment and points to `http://localhost:3000/mcp`. It is local pilot packaging; production uses the separate OAuth connection below.
-
-The former production pilot token is retired and rejected by the current production endpoint. The development token in `.env.local` must only be used against development. Historical Vercel deployments retain their old configuration; use the current production alias when checking authentication.
-
-## Owner-only OAuth connection to ChatGPT
-
-**Production uses Auth0 OAuth as of 15 September 2026.** The tenant is `cerulean-works.eu.auth0.com`; the owner is verified and has both edition permissions. Signed-token validation, refresh rotation, production discovery, and authenticated reads passed. The actual ChatGPT connection and publishing test remain pending. Follow [the Auth0 setup runbook](AUTH0_SETUP.md). Auth0 handles hosted login, authorization-code/PKCE, refresh tokens, and discovery; the app remains the resource server.
-
-Set these production variables from the provider's actual configuration:
-
-```text
-CERULEAN_MCP_AUTH_MODE=oauth
-CERULEAN_OAUTH_ISSUER=<exact issuer, including any trailing slash>
-CERULEAN_OAUTH_JWKS_URL=<provider's HTTPS signing-key URL>
-CERULEAN_MCP_RESOURCE=https://cerulean-crest.vercel.app/mcp
-CERULEAN_OWNER_SUBJECT=<exact sub claim of the owner's account>
-```
-
-The provider must issue RS256 or ES256 access tokens with `iss`, `aud`, `sub`, `exp` and a space-separated `scope` claim containing `editions:read` and/or `editions:write`. Set the audience to the exact MCP resource above. The server validates token signature, issuer, audience, expiry, owner identity and per-tool scope. OAuth mode never falls back to the pilot token. The provider handles refresh-token rotation/revocation; short-lived access tokens bound their remaining validity.
-
-The app serves `/.well-known/oauth-protected-resource` and advertises it in authentication challenges. Configure the provider's PKCE S256 support and exact ChatGPT callback URI/client registration, then connect `/mcp` through ChatGPT's app setup. Verify wrong-user, wrong-audience, expired and insufficient-scope tokens are rejected. See [OpenAI's current authentication requirements](https://developers.openai.com/plugins/build/auth).
-
-For ChatGPT, configure OAuth through the app connection; the checked-in custom-header `.mcp.json` is only the Inspector/Codex pilot packaging. Restrict the first connection to the owner: public magazine reading is still intentionally single-user and public, and this is not multi-user onboarding.
-
-## External-user gate
-
-The bearer token is not suitable for external users. Before inviting anyone:
-
-1. Configure and verify the OAuth provider end to end, including refresh tokens and revocation.
-2. Resolve the Cerulean user and owner from the validated access token.
-3. Add owner-scoped persistence and enforce uniqueness on `(owner_id, issue_date)`.
-4. Remove shared-token authentication from the production MCP endpoint.
-5. Test persistent write approval in ChatGPT over three scheduled runs.
-6. Complete the public plugin submission materials and review.
-
-## Intended scheduled prompt
-
-> Every morning, create my finite daily Cerulean Crest edition. Use relevant context from my memory and past conversations, current web research, and the editorial brief returned by Cerulean Crest. Call `create_daily_edition` exactly once with a complete edition. Never replace an edition that already exists. After success, notify me with the returned link.
-
-Before scheduling, run this prompt manually with `get_recent_editions` and confirm the task can access the intended preferences and research tools. Then record three unattended runs (date, completion time, issue URL, approval behavior, and source-quality check). These runs have not been completed as part of infrastructure setup. Retry a failed transport call with the identical complete payload; an existing edition must remain unchanged. Use the Basic PUT recovery path only when explicit replacement is intended.
+The public plugin listing and a fresh ChatGPT authorization, first edition, and recurring run still need live verification before treating the onboarding handoff as complete. See [publication preparation](CHATGPT_PUBLICATION.md).

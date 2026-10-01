@@ -52,13 +52,22 @@ export async function state(
   };
   if (!p.enabled) return result;
   const rows = await c.query(
-    "SELECT f.id,f.requester,f.status,p.username FROM social_friendships f JOIN social_profiles p ON p.owner_subject=CASE WHEN f.member_a=$1 THEN f.member_b ELSE f.member_a END WHERE (f.member_a=$2 OR f.member_b=$3) AND p.enabled=1 ORDER BY p.username",
-    [owner, owner, owner],
+    `SELECT f.id,f.requester,f.status,p.username,
+      (SELECT COUNT(*) FROM social_shares s WHERE s.friendship_id=f.id AND s.recipient=$2 AND s.read_at IS NULL AND s.dismissed=0) AS unread_count,
+      (SELECT MAX(s.created_at) FROM social_shares s WHERE s.friendship_id=f.id) AS last_shared_at
+      FROM social_friendships f
+      JOIN social_profiles p ON p.owner_subject=CASE WHEN f.member_a=$1 THEN f.member_b ELSE f.member_a END
+      WHERE (f.member_a=$3 OR f.member_b=$4) AND p.enabled=1 ORDER BY p.username`,
+    [owner, owner, owner, owner],
   );
   for (const row of rows) {
     const entry = { id: String(row.id), username: String(row.username) };
     if (row.status === "accepted")
-      result.friends.push({ username: entry.username });
+      result.friends.push({
+        username: entry.username,
+        unreadCount: Number(row.unread_count ?? 0),
+        lastSharedAt: row.last_shared_at ? String(row.last_shared_at) : null,
+      });
     else
       (row.requester === owner
         ? result.outgoingRequests
@@ -75,19 +84,61 @@ export async function shares(
 ): Promise<SharedArticle[]> {
   if (!(await profile(c, owner)).enabled) return [];
   const rows = await c.query(
-    `SELECT s.*,p.username,CAST((SELECT MIN(i.issue_date) FROM issues i JOIN sections sec ON sec.issue_id=i.id JOIN items item ON item.section_id=sec.id WHERE i.owner_subject=$1 AND item.url=s.url) AS TEXT) AS included_date FROM social_shares s JOIN social_profiles p ON p.owner_subject=s.sender JOIN social_friendships f ON f.id=s.friendship_id WHERE s.recipient=$2 AND s.dismissed=0 AND p.enabled=1 AND f.status='accepted' ${pendingOnly ? "AND s.recommend=1 AND NOT EXISTS(SELECT 1 FROM issues i JOIN sections sec ON sec.issue_id=i.id JOIN items item ON item.section_id=sec.id WHERE i.owner_subject=s.recipient AND item.url=s.url)" : ""} ORDER BY s.created_at DESC LIMIT 200`,
-    [owner, owner],
+    `SELECT s.*,p.username,CAST((SELECT MIN(i.issue_date) FROM issues i JOIN sections sec ON sec.issue_id=i.id JOIN items item ON item.section_id=sec.id WHERE i.owner_subject=s.recipient AND item.url=s.url) AS TEXT) AS included_date
+      FROM social_shares s
+      JOIN social_profiles p ON p.owner_subject=s.sender
+      JOIN social_friendships f ON f.id=s.friendship_id
+      WHERE s.recipient=$1 AND p.enabled=1 AND f.status='accepted'
+      ${pendingOnly ? "AND s.read_at IS NULL AND s.dismissed=0 AND NOT EXISTS(SELECT 1 FROM issues i JOIN sections sec ON sec.issue_id=i.id JOIN items item ON item.section_id=sec.id WHERE i.owner_subject=s.recipient AND item.url=s.url)" : ""}
+      ORDER BY s.created_at DESC LIMIT 200`,
+    [owner],
   );
   return rows.map((r) => ({
     id: String(r.id),
     username: String(r.username),
+    direction: "received" as const,
     url: String(r.url),
     title: String(r.title),
     note: String(r.note),
-    recommend: r.recommend === 1,
     createdAt: String(r.created_at),
+    readAt: r.read_at ? String(r.read_at) : null,
     includedDate: r.included_date as string | null,
   }));
+}
+
+export async function conversation(
+  c: SocialConnection,
+  owner: string,
+  username: string,
+): Promise<SharedArticle[]> {
+  const other = await friend(c, owner, username);
+  const r = await relation(c, owner, other);
+  if (r?.status !== "accepted")
+    throw new SocialError("That friend conversation is unavailable");
+  const rows = await c.query(
+    `SELECT s.*,sender_profile.username AS sender_username,recipient_profile.username AS recipient_username,
+      CASE WHEN s.recipient=$1 THEN CAST((SELECT MIN(i.issue_date) FROM issues i JOIN sections sec ON sec.issue_id=i.id JOIN items item ON item.section_id=sec.id WHERE i.owner_subject=s.recipient AND item.url=s.url) AS TEXT) ELSE NULL END AS included_date
+      FROM social_shares s
+      JOIN social_profiles sender_profile ON sender_profile.owner_subject=s.sender
+      JOIN social_profiles recipient_profile ON recipient_profile.owner_subject=s.recipient
+      WHERE s.friendship_id=$2 AND (s.sender=$3 OR s.recipient=$4)
+      ORDER BY s.created_at DESC, s.id DESC LIMIT 500`,
+    [owner, r.id, owner, owner],
+  );
+  return rows.reverse().map((row) => {
+    const direction = row.sender === owner ? "sent" as const : "received" as const;
+    return {
+      id: String(row.id),
+      username: String(direction === "sent" ? row.recipient_username : row.sender_username),
+      direction,
+      url: String(row.url),
+      title: String(row.title),
+      note: String(row.note),
+      createdAt: String(row.created_at),
+      readAt: row.read_at ? String(row.read_at) : null,
+      includedDate: row.included_date ? String(row.included_date) : null,
+    };
+  });
 }
 export async function saveProfile(
   c: SocialConnection,
@@ -166,7 +217,6 @@ export async function share(
     url: string;
     title: string;
     note: string;
-    recommend: boolean;
   },
 ) {
   const other = await friend(c, owner, input.username);
@@ -179,8 +229,8 @@ export async function share(
   );
   if (!article) throw new SocialError("Article not found in your editions");
   await c.query(
-    // A repeated share may nominate an existing share; it never resets dismissal or overwrites its note.
-    `INSERT INTO social_shares(id,friendship_id,sender,recipient,url,title,note,recommend,created_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) ON CONFLICT(sender,recipient,url) DO UPDATE SET recommend=CASE WHEN excluded.recommend=1 THEN 1 ELSE social_shares.recommend END`,
+    // Repeated sends are idempotent: they do not reset read state or overwrite the original note.
+    `INSERT INTO social_shares(id,friendship_id,sender,recipient,url,title,note,recommend,created_at) VALUES($1,$2,$3,$4,$5,$6,$7,1,$8) ON CONFLICT(sender,recipient,url) DO NOTHING`,
     [
       randomUUID(),
       r.id,
@@ -189,14 +239,53 @@ export async function share(
       input.url,
       article.title,
       input.note,
-      input.recommend ? 1 : 0,
       new Date().toISOString(),
     ],
   );
 }
-export async function dismiss(c: SocialConnection, owner: string, id: string) {
-  await c.query(
-    "UPDATE social_shares SET dismissed=1 WHERE id=$1 AND recipient=$2",
+
+export async function setRead(
+  c: SocialConnection,
+  owner: string,
+  id: string,
+  read: boolean,
+) {
+  const [share] = await c.query(
+    `SELECT s.id FROM social_shares s JOIN social_friendships f ON f.id=s.friendship_id
+      WHERE s.id=$1 AND s.recipient=$2 AND f.status='accepted'`,
     [id, owner],
   );
+  if (!share) throw new SocialError("Shared article not found");
+  await c.query(
+    "UPDATE social_shares SET read_at=$1,dismissed=0 WHERE id=$2 AND recipient=$3",
+    [read ? new Date().toISOString() : null, id, owner],
+  );
+}
+
+export async function setReadByUrl(
+  c: SocialConnection,
+  owner: string,
+  url: string,
+  read: boolean,
+) {
+  await c.query(
+    `UPDATE social_shares SET read_at=$1,dismissed=0 WHERE recipient=$2 AND url=$3
+      AND EXISTS(SELECT 1 FROM social_friendships f WHERE f.id=social_shares.friendship_id AND f.status='accepted')`,
+    [read ? new Date().toISOString() : null, owner, url],
+  );
+}
+
+export async function markUrlsRead(
+  c: SocialConnection,
+  owner: string,
+  urls: string[],
+) {
+  const readAt = new Date().toISOString();
+  for (const url of urls) {
+    await c.query(
+      `UPDATE social_shares SET read_at=$1,dismissed=0 WHERE recipient=$2 AND url=$3 AND read_at IS NULL
+        AND EXISTS(SELECT 1 FROM social_friendships f WHERE f.id=social_shares.friendship_id AND f.status='accepted')`,
+      [readAt, owner, url],
+    );
+  }
 }

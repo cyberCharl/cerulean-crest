@@ -1,8 +1,10 @@
 import { requireUser } from "@/lib/browser-auth";
-import { getSettings, patchSettings, listArticleFeedback } from "@/lib/db";
+import { getSettings, patchSettings, compareAndSetConstitution, listArticleFeedback } from "@/lib/db";
 import { EditorialConstitution } from "@/components/editorial-constitution";
 import { ArticleActions } from "@/components/article-actions";
-import { editorialPreferencesFromForm, interestOptions } from "@/lib/editorial-settings";
+import { editorialConstitutionSchema, editorialPreferencesFromForm } from "@/lib/editorial-settings";
+import { editorialConstitution } from "@/lib/editorial-brief";
+import { constitutionRevision } from "@/lib/editorial-constitution-update";
 import { readerTheme, readerThemeSchema } from "@/lib/reader-theme";
 import { revalidatePath } from "next/cache";
 import Link from "next/link";
@@ -27,7 +29,17 @@ async function updateTheme(form: FormData) {
   revalidatePath("/", "layout");
   redirect("/settings?appearance=saved");
 }
-export default async function Settings({ searchParams }: { searchParams: Promise<{ saved?: string; error?: string; appearance?: string }> }) {
+async function updateConstitution(form: FormData) {
+  "use server";
+  const user = await requireUser();
+  const parsed = editorialConstitutionSchema.safeParse(form.get("constitutionMarkdown"));
+  if (!parsed.success) redirect("/settings?error=constitution");
+  const current = await getSettings(user.subject);
+  if (form.get("revision") !== constitutionRevision(editorialConstitution(current))) redirect("/settings?error=constitution-conflict");
+  if (!await compareAndSetConstitution(user.subject, current, parsed.data)) redirect("/settings?error=constitution-conflict");
+  redirect("/settings?constitution=saved");
+}
+export default async function Settings({ searchParams }: { searchParams: Promise<{ saved?: string; error?: string; appearance?: string; constitution?: string }> }) {
   const user = await requireUser();
   const [settings, query, feedback] = await Promise.all([getSettings(user.subject), searchParams, listArticleFeedback(user.subject, { feedbackOnly: true, limit: 50 })]);
   return <main className={styles.page}>
@@ -35,7 +47,7 @@ export default async function Settings({ searchParams }: { searchParams: Promise
     <h1>Settings</h1>
     <section aria-labelledby="appearance-heading" className={styles.appearance}>
       <h2 id="appearance-heading">Appearance</h2>
-      <p>Choose how Daybook looks. Your choice follows you across editions and devices.</p>
+      <p>Choose how Curiofold looks. Your choice follows you across editions and devices.</p>
       {query.appearance === "saved" ? <p role="status">Your appearance is saved.</p> : null}
       {query.error === "theme" ? <p role="alert">Choose one of the two themes, then try again.</p> : null}
       <form action={updateTheme} className={styles.form}>
@@ -47,22 +59,27 @@ export default async function Settings({ searchParams }: { searchParams: Promise
         <button type="submit">Save appearance</button>
       </form>
     </section>
-    <EditorialConstitution settings={settings} />
-    <h2>Edit your preferences</h2>
-    <p>Give your curator a sense of your interests and the time you want to spend reading.</p>
-    <p>These are your explicit preferences. Changes you request through ChatGPT are saved here too. Article reactions and notes guide future selections separately and never automatically rewrite your constitution.</p>
-    {query.saved ? <p role="status">Your preferences are saved. Your curator receives them when it next requests your editorial brief.</p> : null}
+    <EditorialConstitution markdown={editorialConstitution(settings)} />
+    <p><Link href="/settings/brief">See exactly what this server sends to your curator →</Link></p>
+    <h2>Edit your constitution</h2>
+    <p>Edit the Markdown here, or ask your connected curator in ChatGPT to make a lasting editorial change. Both save the same document.</p>
+    {query.constitution === "saved" ? <p role="status">Your constitution is saved. Your curator receives it on its next brief read.</p> : null}
+    {query.error === "constitution" ? <p role="alert">Write a constitution under 30,000 characters, then try again.</p> : null}
+    {query.error === "constitution-conflict" ? <p role="alert">Your constitution changed while you were editing. Your submission was not saved; review the current document before trying again.</p> : null}
+    <form action={updateConstitution} className={styles.form}>
+      <input type="hidden" name="revision" value={constitutionRevision(editorialConstitution(settings))} />
+      <label>Editorial constitution<textarea name="constitutionMarkdown" rows={24} maxLength={30000} required defaultValue={editorialConstitution(settings)} /><span>Keep the guidance you still want when revising it.</span></label>
+      <button type="submit">Save constitution</button>
+    </form>
+    <h2>Reading settings</h2>
+    <p>These numbers guide the edition, with room for the final selection to vary. Article reactions and friend recommendations are included in each brief read without changing your constitution.</p>
+    {query.saved ? <p role="status">Your reading settings are saved.</p> : null}
     {query.error === "invalid" ? <p role="alert">Please check your reading minutes, edition minutes and timezone, then try again.</p> : null}
     <form action={updateSettings} className={styles.form}>
       <label>Reading time, in minutes<input name="readingMinutes" type="number" min="5" max="240" required defaultValue={settings.readingMinutes} /><span>The time you would like to spend. It is fine to stop there.</span></label>
       <label>Material in each edition, in minutes<input name="editionMinutes" type="number" min="5" max="480" required defaultValue={settings.editionMinutes} /><span>Extra material gives you choice. You never need to finish every piece.</span></label>
       <label>Your timezone<input name="timeZone" required maxLength={100} defaultValue={settings.timeZone} placeholder="Africa/Johannesburg" /><span>Used to date your editions; delivery scheduling stays in ChatGPT.</span></label>
-      <fieldset className={styles.interests}><legend>Interests</legend>
-        <p>Starting points for your editor, with room to look beyond them.</p>
-        {interestOptions.map(topic => <label key={topic}><input type="checkbox" name="interests" value={topic} defaultChecked={settings.interests?.includes(topic) ?? false} />{topic}</label>)}
-      </fieldset>
-      <label>Editorial guidelines<textarea name="guidelines" rows={8} maxLength={8000} defaultValue={settings.guidelines} placeholder="Interests, goals, trusted sources, topics to avoid, and what you would like to discover…" /></label>
-      <button type="submit">Save preferences</button>
+      <button type="submit">Save reading settings</button>
     </form>
     <section aria-labelledby="editorial-feedback">
       <h2 id="editorial-feedback">What you’ve told the editor</h2>
@@ -85,7 +102,7 @@ export default async function Settings({ searchParams }: { searchParams: Promise
     <section aria-labelledby="curator-setup">
       <h2 id="curator-setup">Connect your curator</h2>
       <p><Link href="/onboarding?step=connect">Continue to your first edition</Link> for connection steps and a short instruction to give your curator.</p>
-      <p>Your saved preferences are fetched by the curator each run. Arrange recurring scheduling in ChatGPT after trying your first edition.</p>
+      <p><Link href="/onboarding?step=rhythm">Choose your delivery frequency and time</Link>, then copy the updated instruction into ChatGPT to create or update your recurring task.</p>
     </section>
   </main>;
 }

@@ -7,7 +7,7 @@ type RouteContext = { params: Promise<{ date: string }> };
 function unauthorizedResponse() {
   return Response.json(
     { error: "Unauthorized" },
-    { status: 401, headers: { "WWW-Authenticate": 'Basic realm="Cerulean Crest API", charset="UTF-8"' } },
+    { status: 401, headers: { "WWW-Authenticate": 'Basic realm="Curiofold API", charset="UTF-8"' } },
   );
 }
 

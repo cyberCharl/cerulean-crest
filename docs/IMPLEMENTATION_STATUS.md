@@ -1,3 +1,23 @@
+# Curiofold workspace review — 1 October 2026
+
+The reviewed workspace includes the Curiofold brand, Latest navigation with a legacy `/today` redirect, schedule-aware publication health, persistent editorial constitutions, and friend conversations with read state. No deployment was performed during this review.
+
+Review fixes make constitution saves atomic against concurrent edits in SQLite and Postgres, reject stale Settings forms, keep the latest 500 conversation messages in chronological order, and validate route usernames without decoding them twice. Regression coverage includes simultaneous policy edits, changed legacy policy, long threads and stale browser submissions.
+
+Validation: all 41 unit/MCP tests, TypeScript, the production build and local HTTP integration passed. Three isolated Postgres integration cases were skipped because `TEST_DATABASE_URL` was not configured; live Postgres execution remains unverified for these fixes. The available runtime reports Node 25.8.2, including the installed `node@24` path, so the declared Node 24 runtime was not independently verified. Upstream `origin/main` was fetched before committing and had no missing changes.
+
+Existing removals of historical presentation renders, the EPUB sample and its source assets were retained; the previous versions remain recoverable in Git history. These files are not runtime application dependencies.
+
+---
+
+# Editorial constitution production release — 22 September 2026
+
+Production deployment `dpl_4kQ7b2n3P5inkxPKnq1N324KZ2gZ` is Ready at https://cerulean-crest.vercel.app, deployed directly from the current workspace. The release replaces the generated settings brief with one persistent Markdown editorial constitution, adds a separate constitution-only MCP read and revision-checked exact edits, and keeps feedback, friend recommendations and edition history in read-only curation context. The agent now builds candidates internally and submits only the final edition. Reading-minute totals have editorial flexibility.
+
+Verification: 36 unit/MCP tests, TypeScript, the production build, local HTTP integration, three isolated Postgres tests on the production-copy branch, and the production dependency audit passed under Node 24. Production smoke checks passed for the public site, health endpoint, protected brief preview, OAuth metadata and unauthenticated challenge. A refreshed signed owner token discovered the four expected tools and successfully read both the assembled brief and the isolated constitution. The production error-log scan returned no entries. A real ChatGPT connection and scheduled run remain separate acceptance checks.
+
+---
+
 # Editorial feedback release — 18 September 2026
 
 Production deployment `dpl_HfZZjtxjKF4w4z8BQWPh3Jdiejv5` is Ready at https://cerulean-crest.vercel.app, deployed directly from the current workspace. Save article, private Saved collection, Tell the editor reactions/notes, Settings feedback review, and MCP editorial-preference updates are live.

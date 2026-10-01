@@ -24,23 +24,32 @@ export const shareArticleSchema = z
     url: articleUrlSchema,
     title: z.string().trim().min(1).max(500),
     note: z.string().trim().max(2000).default(""),
-    recommend: z.boolean().default(false),
   })
   .strict();
+export const shareReadSchema = z.object({
+  id: z.uuid(),
+  read: z.boolean(),
+}).strict();
+export const sharedUrlReadSchema = z.object({
+  url: articleUrlSchema,
+  read: z.boolean(),
+}).strict();
+export const sharedUrlsSchema = z.array(articleUrlSchema).max(1000);
 export type SocialProfile = { username: string | null; enabled: boolean };
 export type SharedArticle = {
   id: string;
   username: string;
+  direction: "sent" | "received";
   url: string;
   title: string;
   note: string;
-  recommend: boolean;
   createdAt: string;
+  readAt: string | null;
   includedDate: string | null;
 };
 export type SocialState = {
   profile: SocialProfile;
-  friends: { username: string }[];
+  friends: { username: string; unreadCount: number; lastSharedAt: string | null }[];
   incomingRequests: { id: string; username: string }[];
   outgoingRequests: { id: string; username: string }[];
   shares: SharedArticle[];

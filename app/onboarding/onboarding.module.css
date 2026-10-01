@@ -17,7 +17,11 @@
 .numberInput span { color: var(--muted); font-size: .85rem; font-weight: 400; }
 .form small { display: block; color: var(--muted); font-weight: 400; font-size: .9rem; line-height: 1.5; }
 .field { display: block; margin-top: 1.5rem; }
-.field > input, .field > textarea { display: block; width: 100%; padding: .9rem; background: rgba(255,255,255,.18); border: 1px solid var(--hairline); color: var(--ink); font: inherit; font-weight: 400; margin: .65rem 0; border-radius: 0; }
+.field > input, .field > textarea, .field > select { display: block; width: 100%; min-width: 0; padding: .9rem; background: rgba(255,255,255,.18); border: 1px solid var(--hairline); color: var(--ink); font: inherit; font-weight: 400; margin: .65rem 0; border-radius: 0; }
+.schedule { border: none; border-top: 1px solid var(--hairline); padding: 1.5rem 0 0; margin: 0; min-width: 0; }
+.schedule legend { padding-right: 1rem; font-weight: 600; font-family: var(--font-body); font-size: 1.5rem; }
+.schedule > p { color: var(--muted); line-height: 1.5; margin: 0; }
+.scheduleFields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); gap: 0 1.5rem; }
 .field > input { max-width: 25rem; }
 .field > textarea { resize: vertical; line-height: 1.5; }
 .topics { border: none; padding: 0; margin: 0 0 2rem; min-width: 0; }

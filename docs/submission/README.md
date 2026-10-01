@@ -1,6 +1,6 @@
 # ChatGPT plugin submission packet
 
-Prepared 18 September 2026. **Draft, not submitted.** The working product name is Cerulean Crest. Replace bracketed inputs consistently once the name and domain are final. These files do not publish policies or configure any provider.
+Prepared 18 September 2026. **Draft, not submitted.** The working product name is Curiofold. Replace bracketed inputs consistently once the name and domain are final. These files do not publish policies or configure any provider.
 
 ## Ready to review
 

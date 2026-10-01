@@ -3,6 +3,7 @@ import test from "node:test";
 import { neon } from "@neondatabase/serverless";
 import { migrate } from "../../lib/migrations.ts";
 import { seedIssue } from "../../lib/seed.ts";
+import { editorialSettingsSchema, defaultSettings } from "../../lib/editorial-settings.ts";
 
 // Deliberately never falls back to DATABASE_URL or auto-loads .env.local.
 const connection = process.env.TEST_DATABASE_URL;
@@ -84,9 +85,18 @@ test("isolated Postgres feedback and settings preserve concurrent independent pa
     assert.equal(await db.getSettings(other), null);
     await assert.rejects(db.patchSettings(owner, { readingMinutes: 0 }));
     assert.deepEqual(await db.getSettings(owner), settings);
+    const expected = editorialSettingsSchema.parse(settings);
+    const edits = await Promise.all(["First policy", "Second policy"].map(markdown => db.compareAndSetConstitution(owner, expected, markdown)));
+    assert.equal(edits.filter(Boolean).length, 1, "Only one writer may change a known revision");
+    const updated = editorialSettingsSchema.parse(await db.getSettings(owner));
+    assert.equal(updated.theme, settings.theme);
+    assert.equal(updated.readingMinutes, settings.readingMinutes);
+    assert.equal(await db.compareAndSetConstitution(owner, expected, "Stale policy"), null);
+    const firstEdits = await Promise.all(["Initial A", "Initial B"].map(markdown => db.compareAndSetConstitution(other, defaultSettings, markdown)));
+    assert.equal(firstEdits.filter(Boolean).length, 1, "Concurrent first saves also compare under the row lock");
   } finally {
     await sql`DELETE FROM article_feedback WHERE owner_subject = ${owner}`;
-    await sql`DELETE FROM editorial_settings WHERE owner_subject = ${owner}`;
+    await sql`DELETE FROM editorial_settings WHERE owner_subject IN (${owner}, ${other})`;
     await sql`DELETE FROM issues WHERE owner_subject = ${owner}`;
   }
 });

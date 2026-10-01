@@ -315,3 +315,18 @@ export async function patchSettings(owner: string, patch: Partial<EditorialSetti
     RETURNING settings`;
   return editorialSettingsSchema.parse(rows[0].settings);
 }
+
+/** The conflict predicate is evaluated under the row lock, including concurrent first saves. */
+export async function compareAndSetConstitution(owner: string, expected: EditorialSettings, markdown: string): Promise<EditorialSettings | null> {
+  owner = requireOwner(owner);
+  const initial = editorialSettingsSchema.parse({ ...defaultSettings, constitutionMarkdown: markdown });
+  const rows = await sql`INSERT INTO editorial_settings(owner_subject, settings)
+    VALUES (${owner}, ${JSON.stringify(initial)}::jsonb)
+    ON CONFLICT(owner_subject) DO UPDATE SET settings = editorial_settings.settings || ${JSON.stringify({ constitutionMarkdown: markdown })}::jsonb
+    WHERE (editorial_settings.settings->>'constitutionMarkdown') IS NOT DISTINCT FROM ${expected.constitutionMarkdown ?? null}
+      AND (${expected.constitutionMarkdown !== undefined} OR (
+        COALESCE(editorial_settings.settings->>'guidelines', '') = ${expected.guidelines}
+        AND COALESCE(editorial_settings.settings->'interests', '[]'::jsonb) = ${JSON.stringify(expected.interests ?? [])}::jsonb))
+    RETURNING settings`;
+  return rows[0] ? editorialSettingsSchema.parse({ ...defaultSettings, ...rows[0].settings }) : null;
+}

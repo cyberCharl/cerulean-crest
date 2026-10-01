@@ -2,7 +2,7 @@ import type { IssueInput } from "./schema";
 
 export const seedIssue: IssueInput = {
   date: "2026-09-01",
-  title: "Cerulean Crest",
+  title: "Curiofold",
   editorNote: "Industrial design, South African manufacturing, practical marine robotics, cities as ecological systems, waste, surfing and two low-friction engineering/history pieces. No academic papers.",
   coverageGap: "Palladium, Future / Proof and Threading the Needle were checked across recent and older material. The intended James O. Sullivan newsletter could not be confidently identified.",
   availableMinutes: 113,

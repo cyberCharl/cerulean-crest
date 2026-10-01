@@ -11,13 +11,13 @@ export async function saveOnboarding(step: BriefStep, _previous: OnboardingFormS
   const current = await getSettings(user.subject);
   const parsed = settingsFromOnboarding(current, step, form);
   if (!parsed.success) return { error: step === "rhythm"
-    ? "Choose 5–240 minutes of reading, 5–480 minutes of material, and a valid timezone."
+    ? "Choose 5–240 minutes of reading, 5–480 minutes of material, a delivery frequency and time, a day for weekly editions, and a valid timezone."
     : "Please use the topic choices below and keep your notes under 8,000 characters." };
   try {
-    const { readingMinutes, editionMinutes, timeZone, interests, guidelines, onboardingStep } = parsed.data;
+    const { readingMinutes, editionMinutes, timeZone, deliverySchedule, constitutionMarkdown, onboardingStep } = parsed.data;
     await patchSettings(user.subject, step === "rhythm"
-      ? { readingMinutes, editionMinutes, timeZone, onboardingStep }
-      : { interests, guidelines, onboardingStep });
+      ? { readingMinutes, editionMinutes, timeZone, deliverySchedule, onboardingStep }
+      : { constitutionMarkdown, onboardingStep });
   } catch {
     return { error: "We couldn’t save your preferences. Your answers are still here; please try again." };
   }

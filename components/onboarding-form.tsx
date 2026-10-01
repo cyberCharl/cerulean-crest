@@ -5,6 +5,7 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import { saveOnboarding } from "@/app/onboarding/actions";
 import { interestOptions, type EditorialSettings } from "@/lib/editorial-settings";
 import type { BriefStep, OnboardingFormState } from "@/lib/onboarding";
+import { defaultDeliverySchedule, deliveryDays, type DeliverySchedule } from "@/lib/delivery-schedule";
 import styles from "@/app/onboarding/onboarding.module.css";
 
 export function OnboardingForm({ step, settings, detectTimeZone }: { step: BriefStep; settings: EditorialSettings; detectTimeZone: boolean }) {
@@ -12,6 +13,10 @@ export function OnboardingForm({ step, settings, detectTimeZone }: { step: Brief
   const [timeZone, setTimeZone] = useState(settings.timeZone);
   const [readingMinutes, setReadingMinutes] = useState(String(settings.readingMinutes));
   const [editionMinutes, setEditionMinutes] = useState(String(settings.editionMinutes));
+  const schedule = settings.deliverySchedule ?? defaultDeliverySchedule;
+  const [deliveryFrequency, setDeliveryFrequency] = useState<DeliverySchedule["frequency"]>(schedule.frequency);
+  const [deliveryTime, setDeliveryTime] = useState(schedule.time);
+  const [deliveryDay, setDeliveryDay] = useState<string>(schedule.frequency === "weekly" ? schedule.day : "Monday");
   const [interests, setInterests] = useState(settings.interests ?? []);
   const [guidelines, setGuidelines] = useState(settings.guidelines);
   const timeZoneEdited = useRef(false);
@@ -36,10 +41,32 @@ export function OnboardingForm({ step, settings, detectTimeZone }: { step: Brief
           <small id="edition-help">The total material in an edition. Extra pieces give you permission to pick and skip.</small>
         </label>
       </div>
-      <label className={styles.field} htmlFor="timeZone">Your timezone
-        <input id="timeZone" name="timeZone" required maxLength={100} value={timeZone} onChange={event => { timeZoneEdited.current = true; setTimeZone(event.target.value); }} aria-describedby="timezone-help" />
-        <small id="timezone-help">We suggest your browser’s timezone on first setup. Change it if needed. Scheduling stays in ChatGPT.</small>
-      </label>
+      <fieldset className={styles.schedule}>
+        <legend>When would you like your editions?</legend>
+        <p id="schedule-help">Choose your rhythm. We’ll include it in the instruction you give ChatGPT to set up recurring editions.</p>
+        <div className={styles.scheduleFields}>
+          <label className={styles.field} htmlFor="deliveryFrequency">How often
+            <select id="deliveryFrequency" name="deliveryFrequency" value={deliveryFrequency} onChange={event => setDeliveryFrequency(event.target.value as DeliverySchedule["frequency"])} aria-describedby="schedule-help">
+              <option value="daily">Every day</option>
+              <option value="weekdays">Weekdays (Monday–Friday)</option>
+              <option value="weekly">Once a week</option>
+            </select>
+          </label>
+          {deliveryFrequency === "weekly" ? <label className={styles.field} htmlFor="deliveryDay">Which day
+            <select id="deliveryDay" name="deliveryDay" value={deliveryDay} onChange={event => setDeliveryDay(event.target.value)}>
+              {deliveryDays.map(day => <option key={day} value={day}>{day}</option>)}
+            </select>
+          </label> : null}
+          <label className={styles.field} htmlFor="deliveryTime">Delivery time
+            <input id="deliveryTime" name="deliveryTime" type="time" required value={deliveryTime} onChange={event => setDeliveryTime(event.target.value)} aria-describedby="delivery-time-help" />
+            <small id="delivery-time-help">Local time in the timezone below.</small>
+          </label>
+        </div>
+        <label className={styles.field} htmlFor="timeZone">Your timezone
+          <input id="timeZone" name="timeZone" required maxLength={100} value={timeZone} onChange={event => { timeZoneEdited.current = true; setTimeZone(event.target.value); }} aria-describedby="timezone-help" />
+          <small id="timezone-help">We suggest your browser’s timezone on first setup. Change it if needed. Scheduling stays in ChatGPT.</small>
+        </label>
+      </fieldset>
     </> : <>
       <fieldset className={styles.topics}>
         <legend>Choose a few things you’re drawn to</legend>
@@ -51,9 +78,9 @@ export function OnboardingForm({ step, settings, detectTimeZone }: { step: Brief
           </label>)}
         </div>
       </fieldset>
-      <label className={styles.field} htmlFor="guidelines">Anything your editor should know? <span className={styles.optional}>Optional</span>
+      <label className={styles.field} htmlFor="guidelines">What would you like to read about? <span className={styles.optional}>Optional</span>
         <textarea id="guidelines" name="guidelines" rows={4} maxLength={8000} value={guidelines} onChange={event => setGuidelines(event.target.value)} placeholder="I’m learning to grow food. I like thoughtful essays and practical stories. Less breaking news, please." aria-describedby="guidelines-help" />
-        <small id="guidelines-help">A current curiosity, a favourite source, or something you’d rather skip. A sentence is enough.</small>
+        <small id="guidelines-help">A sentence is enough to start your editable editorial constitution. Your topic choices are starting points, not permanent filters.</small>
       </label>
     </>}
     <div className={styles.actions}>

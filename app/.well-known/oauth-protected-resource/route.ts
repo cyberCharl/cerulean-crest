@@ -7,6 +7,6 @@ export function GET(): Response {
     return Response.json({ error: "OAuth is not configured" }, { status: 503 });
   }
   return Response.json({ resource: config.resource, authorization_servers: [config.issuer], scopes_supported: MCP_SCOPES,
-    bearer_methods_supported: ["header"], resource_name: "Cerulean Crest" },
+    bearer_methods_supported: ["header"], resource_name: "Curiofold" },
   { headers: { "Access-Control-Allow-Origin": "*", "Cache-Control": "no-store" } });
 }

@@ -10,250 +10,175 @@ import { createCeruleanMcpServer } from "../lib/mcp-server.ts";
 import type { IssueInput } from "../lib/schema.ts";
 
 const issue: IssueInput = {
-  date: "2031-01-15",
-  title: "Cerulean Crest",
-  editorNote: "A focused edition.",
-  coverageGap: null,
-  availableMinutes: 12,
-  expectedMinutes: 6,
-  sections: [{
-    title: "Read First",
-    items: [{
-      title: "A useful piece",
-      author: "Author",
-      publication: "Publication",
-      publishedAt: "15 January 2031",
-      readingMinutes: 12,
-      type: "Essay",
-      url: "https://example.com/piece",
-      summary: "Why this earned a place in the edition.",
-    }],
-  }],
+  date: "2031-01-15", title: "Cerulean Crest", editorNote: "A focused edition.", coverageGap: null,
+  availableMinutes: 20, expectedMinutes: 6,
+  sections: [{ title: "Read First", items: [{ title: "A useful piece", author: "Author", publication: "Publication",
+    publishedAt: "15 January 2031", readingMinutes: 12, type: "Essay", url: "https://example.com/piece",
+    summary: "Why this earned a place in the edition." }] }],
 };
 
-async function connectedClient(createEdition: (input: IssueInput) => Promise<{ issueId: number; created: boolean }>, scopes = ["editions:read", "editions:write"]) {
+async function connectedClient(subject = "mcp-test-owner", scopes = ["editions:read", "editions:write"], createEdition?: (input: IssueInput) => Promise<{ issueId: number; created: boolean }>) {
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
-  const server = createCeruleanMcpServer({ baseUrl: "https://cerulean.example", scopes, subject: "mcp-test-owner", createEdition });
+  const server = createCeruleanMcpServer({ baseUrl: "https://cerulean.example", scopes, subject, createEdition });
   const client = new Client({ name: "cerulean-test", version: "1.0.0" });
   await server.connect(serverTransport);
   await client.connect(clientTransport);
   return { client, server };
 }
 
-test("advertises the editorial brief and idempotent create tools with accurate hints", async (context) => {
-  const { client, server } = await connectedClient(async () => ({ issueId: 1, created: true }));
-  context.after(async () => {
-    await client.close();
-    await server.close();
-  });
-
-  const result = await client.listTools();
-  const brief = result.tools.find((tool) => tool.name === "get_editorial_brief");
-  const create = result.tools.find((tool) => tool.name === "create_daily_edition");
-
-  assert.equal(brief?.annotations?.readOnlyHint, true);
-  assert.equal(create?.annotations?.readOnlyHint, false);
-  assert.equal(create?.annotations?.destructiveHint, false);
-  assert.equal(create?.annotations?.openWorldHint, false);
-});
-
-test("creates a complete edition and returns its canonical URL", async (context) => {
-  let received: IssueInput | undefined;
-  const { client, server } = await connectedClient(async (input) => {
-    received = input;
-    return { issueId: 42, created: true };
-  });
-  context.after(async () => {
-    await client.close();
-    await server.close();
-  });
-
-  const result = await client.callTool({ name: "create_daily_edition", arguments: issue });
-
-  assert.deepEqual(received, issue);
-  assert.deepEqual(result.structuredContent, {
-    created: true,
-    date: issue.date,
-    status: "created",
-    url: "https://cerulean.example/issues/2031-01-15",
-  });
-});
-
-test("rejects an invalid edition before calling storage", async (context) => {
-  let calls = 0;
-  const { client, server } = await connectedClient(async () => {
-    calls += 1;
-    return { issueId: 1, created: true };
-  });
-  context.after(async () => {
-    await client.close();
-    await server.close();
-  });
-
-  const invalid = structuredClone(issue);
-  invalid.availableMinutes = 100;
-  const result = await client.callTool({ name: "create_daily_edition", arguments: invalid });
-
-  assert.equal(result.isError, true);
-  assert.equal(calls, 0);
-});
-
-test("read-only authorization cannot publish, and the brief specifies date and timezone", async (context) => {
-  let writes = 0;
-  const { client, server } = await connectedClient(async () => { writes++; return { issueId: 1, created: true }; }, ["editions:read"]);
+test("concurrent constitution edits accept one writer and preserve unrelated settings", async (context) => {
+  const { client, server } = await connectedClient("concurrent-policy");
   context.after(async () => { await client.close(); await server.close(); });
-  const result = await client.callTool({ name: "create_daily_edition", arguments: issue });
-  assert.equal(result.isError, true);
-  assert.equal(writes, 0);
-  const brief = await client.callTool({ name: "get_editorial_brief", arguments: {} });
-  const parsed = JSON.parse(String((brief.structuredContent as Record<string, unknown>)?.brief));
-  assert.match(parsed.localDate, /^\d{4}-\d{2}-\d{2}$/);
-  assert.equal(typeof parsed.timeZone, "string");
+  const db = await import("../lib/db.ts");
+  const expected = await db.getSettings("concurrent-policy");
+  await db.patchSettings("concurrent-policy", { readingMinutes: 35 });
+  const document = (await client.callTool({ name: "get_editorial_constitution", arguments: {} })).structuredContent as { markdown: string; revision: string };
+  const results = await Promise.all(["First policy", "Second policy"].map(newText => client.callTool({
+    name: "update_editorial_constitution", arguments: { revision: document.revision, edits: [{ oldText: document.markdown, newText }] },
+  })));
+  assert.equal(results.filter(result => !result.isError).length, 1);
+  assert.equal(results.filter(result => result.isError).length, 1);
+  assert.equal((await db.getSettings("concurrent-policy")).readingMinutes, 35);
+  assert.equal(await db.compareAndSetConstitution("concurrent-policy", expected, "Stale replacement"), null);
+
+  const legacy = await db.getSettings("legacy-policy");
+  await db.patchSettings("legacy-policy", { guidelines: "New legacy preference" });
+  assert.equal(await db.compareAndSetConstitution("legacy-policy", legacy, "Stale legacy replacement"), null);
 });
 
-test("MCP editorial brief reads only the authenticated reader's preferences", async (context) => {
+test("MCP separates curation context from constitution reads and writes", async (context) => {
+  const { client, server } = await connectedClient();
+  context.after(async () => { await client.close(); await server.close(); });
+  const tools = (await client.listTools()).tools;
+  assert.deepEqual(tools.map((tool) => tool.name).sort(), ["create_daily_edition", "get_editorial_brief", "get_editorial_constitution", "update_editorial_constitution"]);
+  assert.equal(tools.find((tool) => tool.name === "get_editorial_brief")?.annotations?.readOnlyHint, true);
+  assert.equal(tools.find((tool) => tool.name === "get_editorial_constitution")?.annotations?.readOnlyHint, true);
+  assert.equal(tools.find((tool) => tool.name === "create_daily_edition")?.annotations?.idempotentHint, true);
+  assert.equal(tools.find((tool) => tool.name === "update_editorial_constitution")?.annotations?.destructiveHint, true);
+});
+
+test("brief combines the reader's document and current context without empty placeholders", async (context) => {
   const { saveSettings } = await import("../lib/db.ts");
-  await saveSettings("mcp-test-owner", { readingMinutes: 15, editionMinutes: 35, guidelines: "Find original astronomy work", interests: ["Science & nature"], timeZone: "Pacific/Auckland" });
-  await saveSettings("another-reader", { readingMinutes: 90, editionMinutes: 180, guidelines: "Private interests", timeZone: "UTC" });
-  const { client, server } = await connectedClient(async () => ({ issueId: 1, created: true }));
+  await saveSettings("brief-reader", { readingMinutes: 15, editionMinutes: 35, guidelines: "Legacy astronomy preference", interests: ["Science & nature"], timeZone: "Pacific/Auckland" });
+  await saveSettings("private-reader", { readingMinutes: 90, editionMinutes: 180, guidelines: "Private interests", timeZone: "UTC" });
+  const { client, server } = await connectedClient("brief-reader");
   context.after(async () => { await client.close(); await server.close(); });
   const result = await client.callTool({ name: "get_editorial_brief", arguments: {} });
-  const brief = JSON.parse(String((result.structuredContent as Record<string, unknown>).brief));
-  assert.equal(brief.defaults.expectedMinutes, 15);
-  assert.equal(brief.defaults.availableMinutes, 35);
-  assert.equal(brief.editorialGuidelines, "Find original astronomy work");
-  assert.deepEqual(brief.interests, ["Science & nature"]);
-  assert.equal(brief.timeZone, "Pacific/Auckland");
+  const brief = result.structuredContent as { brief: string; constitution: string; readingContext: { readingMinutes: number; editionMinutes: number; localDate: string; timeZone: string }; recentEditions: unknown[]; articleFeedback?: unknown[]; friendRecommendations?: unknown[] };
+  assert.match(brief.constitution, /Legacy astronomy preference/);
+  assert.match(brief.constitution, /Science & nature/);
+  assert.equal(brief.readingContext.readingMinutes, 15);
+  assert.equal(brief.readingContext.editionMinutes, 35);
+  assert.equal(brief.readingContext.timeZone, "Pacific/Auckland");
+  assert.match(brief.readingContext.localDate, /^\d{4}-\d{2}-\d{2}$/);
+  assert.deepEqual(brief.recentEditions, []);
+  assert.ok(!("articleFeedback" in brief));
+  assert.ok(!("friendRecommendations" in brief));
+  assert.ok(!brief.brief.includes("No feedback"));
+  assert.ok(!brief.brief.includes("Private interests"));
+  assert.match(brief.brief, /Never save this complete response/);
+  const document = (await client.callTool({ name: "get_editorial_constitution", arguments: {} })).structuredContent as { markdown: string; revision: string };
+  const copiedBrief = await client.callTool({ name: "update_editorial_constitution", arguments: {
+    revision: document.revision,
+    edits: [{ oldText: document.markdown, newText: brief.brief }],
+  } });
+  assert.equal(copiedBrief.isError, true);
 });
 
-test("MCP create and recent-history tools isolate two authenticated readers on the same date", async (context) => {
-  async function reader(subject: string) {
-    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
-    const server = createCeruleanMcpServer({ baseUrl: "https://cerulean.example", scopes: ["editions:read", "editions:write"], subject });
-    const client = new Client({ name: "isolation-test", version: "1" });
-    await server.connect(serverTransport);
-    await client.connect(clientTransport);
-    context.after(async () => { await client.close(); await server.close(); });
-    return client;
-  }
-  const [alice, bob] = await Promise.all([reader("alice"), reader("bob")]);
-  const aliceIssue = { ...issue, editorNote: "Alice's private note" };
-  const bobIssue = structuredClone(issue);
-  bobIssue.sections[0].items[0].url = "https://example.com/bob-private";
-  for (const [client, input] of [[alice, aliceIssue], [bob, bobIssue]] as const) {
-    const result = await client.callTool({ name: "create_daily_edition", arguments: input });
-    assert.equal((result.structuredContent as Record<string, unknown>).created, true);
-  }
-  const result = await alice.callTool({ name: "get_recent_editions", arguments: { limit: 7 } });
-  const data = JSON.stringify(result.structuredContent);
-  assert.ok(data.includes("https://example.com/piece"));
-  assert.ok(!data.includes("bob-private"));
-});
-
-test("a short edition's item count fits its configured reading volume", async (context) => {
-  const { saveSettings } = await import("../lib/db.ts");
-  await saveSettings("mcp-test-owner", { readingMinutes: 5, editionMinutes: 5, guidelines: "", timeZone: "UTC" });
-  const { client, server } = await connectedClient(async () => ({ issueId: 1, created: true }));
-  context.after(async () => { await client.close(); await server.close(); });
-  const result = await client.callTool({ name: "get_editorial_brief", arguments: {} });
-  const brief = JSON.parse(String((result.structuredContent as Record<string, unknown>).brief));
-  assert.equal(brief.defaults.availableMinutes, 5);
-  assert.equal(brief.defaults.itemCount.minimum, 1);
-  assert.ok(brief.defaults.itemCount.maximum <= brief.defaults.availableMinutes);
-});
-
-
-test("MCP preference writes preserve unrelated fields and isolate readers", async (context) => {
+test("explicit constitution edits reach the next brief and preserve other settings", async (context) => {
   const { saveSettings, getSettings } = await import("../lib/db.ts");
-  await saveSettings("mcp-test-owner", { readingMinutes: 25, editionMinutes: 50, guidelines: "Original", interests: ["Technology"], timeZone: "UTC", onboardingStep: "connect", theme: "tactile-correspondence" });
-  await saveSettings("unrelated-settings-reader", { readingMinutes: 60, editionMinutes: 120, guidelines: "Private", timeZone: "UTC" });
-  const { client, server } = await connectedClient(async () => ({ issueId: 1, created: true }));
+  await saveSettings("editor-reader", { readingMinutes: 25, editionMinutes: 50, guidelines: "Old", timeZone: "UTC", theme: "tactile-correspondence", onboardingStep: "connect" });
+  const { client, server } = await connectedClient("editor-reader");
   context.after(async () => { await client.close(); await server.close(); });
-  const result = await client.callTool({ name: "update_editorial_preferences", arguments: { guidelines: "More original research; avoid daily market news" } });
-  assert.notEqual(result.isError, true);
-  const stored = await getSettings("mcp-test-owner");
-  assert.equal(stored.guidelines, "More original research; avoid daily market news");
-  assert.equal(stored.readingMinutes, 25);
-  assert.equal(stored.editionMinutes, 50);
-  assert.deepEqual(stored.interests, ["Technology"]);
-  assert.equal(stored.onboardingStep, "connect");
-  assert.equal(stored.theme, "tactile-correspondence");
-  assert.ok(!("theme" in (result.structuredContent as { preferences: object }).preferences));
-  assert.equal((result.structuredContent as {settingsUrl: string}).settingsUrl, "https://cerulean.example/settings");
-  assert.equal((await getSettings("unrelated-settings-reader")).guidelines, "Private");
+  const read = await client.callTool({ name: "get_editorial_constitution", arguments: {} });
+  const current = read.structuredContent as { markdown: string; revision: string };
+  assert.match(current.revision, /^[a-f0-9]{64}$/);
+  const markdown = "# Editorial constitution\n\nOriginal research. Keep unrelated guidance.";
+  const update = await client.callTool({ name: "update_editorial_constitution", arguments: { revision: current.revision, edits: [{ oldText: current.markdown, newText: markdown }] } });
+  const result = update.structuredContent as { constitution: string; revision: string; settingsUrl: string };
+  assert.equal(result.constitution, markdown);
+  assert.match(result.revision, /^[a-f0-9]{64}$/);
+  assert.equal(result.settingsUrl, "https://cerulean.example/settings");
+  const saved = await getSettings("editor-reader");
+  assert.equal(saved.constitutionMarkdown, markdown);
+  assert.equal(saved.theme, "tactile-correspondence");
+  assert.equal(saved.onboardingStep, "connect");
+  assert.equal(saved.readingMinutes, 25);
   const brief = await client.callTool({ name: "get_editorial_brief", arguments: {} });
-  assert.equal((brief.structuredContent as {preferences: {guidelines: string}}).preferences.guidelines, stored.guidelines);
-  assert.ok(!JSON.stringify(brief).includes("tactile-correspondence"));
-  for (const args of [{ theme: "quiet-book" }, {}, { readingMinutes: 0 }, { timeZone: "not-a-zone" }, { owner: "unrelated-settings-reader", guidelines: "Hijack" }, { onboardingStep: "interests" }]) {
-    const invalid = await client.callTool({ name: "update_editorial_preferences", arguments: args });
+  assert.equal((brief.structuredContent as { constitution: string }).constitution, markdown);
+  for (const arguments_ of [{ revision: "invalid", edits: [{ oldText: markdown, newText: "x" }] }, { revision: result.revision, edits: [] }]) {
+    const invalid = await client.callTool({ name: "update_editorial_constitution", arguments: arguments_ });
     assert.equal(invalid.isError, true);
-    assert.deepEqual(await getSettings("mcp-test-owner"), stored);
   }
+  await client.callTool({ name: "update_editorial_constitution", arguments: { revision: result.revision, edits: [{ oldText: markdown, newText: "# Private reader hijack" }], owner: "private-reader" } });
+  assert.equal((await getSettings("private-reader")).constitutionMarkdown, undefined);
+  const stale = await client.callTool({ name: "update_editorial_constitution", arguments: { revision: current.revision, edits: [{ oldText: markdown, newText: "stale" }] } });
+  assert.equal(stale.isError, true);
 });
 
-test("MCP preference writes and feedback reads enforce scopes", async (context) => {
-  const { getSettings } = await import("../lib/db.ts");
-  const before = await getSettings("mcp-test-owner");
-  const read = await connectedClient(async () => ({ issueId: 1, created: true }), ["editions:read"]);
-  const write = await connectedClient(async () => ({ issueId: 1, created: true }), ["editions:write"]);
+test("read and write scopes protect the brief, document and publication", async (context) => {
+  const read = await connectedClient("scope-reader", ["editions:read"]);
+  const write = await connectedClient("scope-reader", ["editions:write"]);
   context.after(async () => { for (const connection of [read, write]) { await connection.client.close(); await connection.server.close(); } });
-  assert.equal((await read.client.callTool({ name: "update_editorial_preferences", arguments: { guidelines: "Forbidden" } })).isError, true);
-  assert.deepEqual(await getSettings("mcp-test-owner"), before);
-  assert.equal((await write.client.callTool({ name: "get_editorial_feedback", arguments: {} })).isError, true);
+  assert.equal((await read.client.callTool({ name: "update_editorial_constitution", arguments: { revision: "a".repeat(64), edits: [{ oldText: "old", newText: "new" }] } })).isError, true);
+  assert.equal((await read.client.callTool({ name: "create_daily_edition", arguments: issue })).isError, true);
+  assert.equal((await write.client.callTool({ name: "get_editorial_brief", arguments: {} })).isError, true);
+  assert.equal((await write.client.callTool({ name: "get_editorial_constitution", arguments: {} })).isError, true);
 });
 
-test("MCP feedback excludes bookmarks and other readers, and never rewrites explicit policy", async (context) => {
-  const { createIssue, updateArticleFeedback, getSettings } = await import("../lib/db.ts");
-  const feedbackIssue = structuredClone(issue);
-  feedbackIssue.date = "2031-05-10";
-  feedbackIssue.sections[0].items.push({ ...feedbackIssue.sections[0].items[0], title: "Bookmark only", url: "https://example.com/bookmark" });
-  await createIssue("mcp-test-owner", feedbackIssue);
-  await createIssue("feedback-other-reader", feedbackIssue);
-  await updateArticleFeedback("mcp-test-owner", { url: issue.sections[0].items[0].url, reaction: "more", note: "Loved the depth, not the daily news angle." });
-  await updateArticleFeedback("mcp-test-owner", { url: "https://example.com/bookmark", saved: true });
-  await updateArticleFeedback("feedback-other-reader", { url: issue.sections[0].items[0].url, note: "Other account private note" });
-  const before = await getSettings("mcp-test-owner");
-  const { client, server } = await connectedClient(async () => ({ issueId: 1, created: true }));
+test("final publication accepts discretionary duration but still validates shape", async (context) => {
+  let calls = 0;
+  const { client, server } = await connectedClient("publication-reader", ["editions:read", "editions:write"], async () => { calls++; return { issueId: 1, created: true }; });
   context.after(async () => { await client.close(); await server.close(); });
-  const result = await client.callTool({ name: "get_editorial_feedback", arguments: {} });
-  const data = result.structuredContent as { feedback: Array<{url: string; note: string}> };
-  assert.equal(data.feedback.length, 1);
-  assert.equal(data.feedback[0].note, "Loved the depth, not the daily news angle.");
-  assert.ok(!JSON.stringify(data).includes("Other account private note"));
-  assert.ok(!JSON.stringify(data).includes("Bookmark only"));
-  assert.deepEqual(await getSettings("mcp-test-owner"), before);
-  await updateArticleFeedback("mcp-test-owner", { url: issue.sections[0].items[0].url, reaction: null, note: "" });
-  const cleared = await client.callTool({ name: "get_editorial_feedback", arguments: {} });
-  assert.deepEqual((cleared.structuredContent as {feedback: unknown[]}).feedback, []);
+  const created = await client.callTool({ name: "create_daily_edition", arguments: issue });
+  assert.equal((created.structuredContent as { status: string }).status, "created");
+  assert.equal(calls, 1);
+  const invalid = await client.callTool({ name: "create_daily_edition", arguments: { ...issue, date: "2031-02-31" } });
+  assert.equal(invalid.isError, true);
+  assert.equal(calls, 1);
 });
 
-test("friend nominations preserve provenance, isolate readers, and stop resurfacing after publication", async (context) => {
+test("brief includes only the reader's recent editions and explicit article feedback", async (context) => {
+  const { createIssue, updateArticleFeedback } = await import("../lib/db.ts");
+  await createIssue("history-reader", issue);
+  await createIssue("other-history-reader", { ...issue, sections: [{ ...issue.sections[0], items: [{ ...issue.sections[0].items[0], url: "https://example.com/private" }] }] });
+  await updateArticleFeedback("history-reader", { url: issue.sections[0].items[0].url, reaction: "more", note: "More depth" });
+  const { client, server } = await connectedClient("history-reader");
+  context.after(async () => { await client.close(); await server.close(); });
+  const brief = (await client.callTool({ name: "get_editorial_brief", arguments: {} })).structuredContent as { brief: string; recentEditions: Array<{ items: Array<{ url: string }> }>; articleFeedback: Array<{ note: string }> };
+  assert.equal(brief.recentEditions[0].items[0].url, issue.sections[0].items[0].url);
+  assert.equal(brief.articleFeedback[0].note, "More depth");
+  assert.ok(!brief.brief.includes("https://example.com/private"));
+  const document = (await client.callTool({ name: "get_editorial_constitution", arguments: {} })).structuredContent as { markdown: string; revision: string };
+  assert.ok(!document.markdown.includes("More depth"));
+  const contaminated = await client.callTool({ name: "update_editorial_constitution", arguments: {
+    revision: document.revision,
+    edits: [{ oldText: document.markdown, newText: `${document.markdown}\n\nMore depth` }],
+  } });
+  assert.equal(contaminated.isError, true);
+  const after = (await client.callTool({ name: "get_editorial_constitution", arguments: {} })).structuredContent as { markdown: string };
+  assert.equal(after.markdown, document.markdown);
+});
+
+test("pending friend recommendations appear before research and disappear after inclusion", async (context) => {
   const social = await import("../lib/social-store.ts");
   const { createIssue } = await import("../lib/db.ts");
-  const sender = "nomination-sender", recipient = "mcp-test-owner";
+  const sender = "nomination-sender", recipient = "nomination-recipient";
   await social.saveSocialProfile(sender, { username: "nomination_sender", enabled: true });
   await social.saveSocialProfile(recipient, { username: "nomination_reader", enabled: true });
   await social.requestFriend(sender, "nomination_reader");
   const request = (await social.getSocialState(recipient)).incomingRequests[0];
   await social.respondFriendRequest(recipient, request.id, "accept");
-  const source = structuredClone(issue);
-  source.date = "2031-06-11";
-  source.sections[0].items[0].url = "https://example.com/friend-nomination";
-  await createIssue(sender, source);
-  await social.shareArticle(sender, { username: "nomination_reader", url: source.sections[0].items[0].url, title: "A useful piece", note: "Interesting original evidence", recommend: true });
-  const { client, server } = await connectedClient(async (input) => createIssue(recipient, input));
+  const nominated = { ...issue, date: "2031-06-11", sections: [{ ...issue.sections[0], items: [{ ...issue.sections[0].items[0], url: "https://example.com/friend-nomination" }] }] };
+  await createIssue(sender, nominated);
+  await social.shareArticle(sender, { username: "nomination_reader", url: nominated.sections[0].items[0].url, title: "A useful piece", note: "Original evidence" });
+  const { client, server } = await connectedClient(recipient);
   context.after(async () => { await client.close(); await server.close(); });
-  const result = await client.callTool({ name: "get_friend_recommendations", arguments: {} });
-  const nominations = (result.structuredContent as { recommendations: Array<{ username: string; note: string; url: string }> }).recommendations;
-  assert.equal(nominations.length, 1);
-  assert.equal(nominations[0].username, "nomination_sender");
-  assert.equal(nominations[0].note, "Interesting original evidence");
-  assert.deepEqual(await social.listFriendRecommendations("unrelated-reader"), []);
-  const write = await connectedClient(async () => ({ issueId: 1, created: true }), ["editions:write"]);
-  context.after(async () => { await write.client.close(); await write.server.close(); });
-  assert.equal((await write.client.callTool({ name: "get_friend_recommendations", arguments: {} })).isError, true);
-  const published = await client.callTool({ name: "create_daily_edition", arguments: source });
-  assert.equal((published.structuredContent as {created:boolean}).created, true);
-  const after = await client.callTool({ name: "get_friend_recommendations", arguments: {} });
-  assert.deepEqual((after.structuredContent as {recommendations:unknown[]}).recommendations, []);
+  const first = (await client.callTool({ name: "get_editorial_brief", arguments: {} })).structuredContent as { friendRecommendations: Array<{ username: string; note: string }> };
+  assert.equal(first.friendRecommendations[0].username, "nomination_sender");
+  assert.equal(first.friendRecommendations[0].note, "Original evidence");
+  await createIssue(recipient, nominated);
+  const next = (await client.callTool({ name: "get_editorial_brief", arguments: {} })).structuredContent as { friendRecommendations?: unknown[]; brief: string };
+  assert.ok(!("friendRecommendations" in next));
+  assert.ok(!next.brief.includes("Friend recommendations"));
 });

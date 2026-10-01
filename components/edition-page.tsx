@@ -5,8 +5,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { IssueContent } from "@/components/issue-content";
-import { longDate, weekday, todayDate } from "@/lib/date";
-import { getIssue, neighboringIssues, latestIssueDate, getSettings, listArticleFeedback } from "@/lib/db";
+import { longDate, weekday } from "@/lib/date";
+import { getIssue, neighboringIssues, getSettings, listArticleFeedback } from "@/lib/db";
 
 
 type PageProps = { params: Promise<{ date: string }> };
@@ -26,13 +26,12 @@ export async function EditionPage({ params }: PageProps) {
   const issue = await getIssue(user.subject, date);
   if (!issue) notFound();
 
-  const [neighbors, latest, settings, articleFeedback, socialProfile] = await Promise.all([
-    neighboringIssues(user.subject, date), latestIssueDate(user.subject), getSettings(user.subject),
+  const [neighbors, settings, articleFeedback, socialProfile] = await Promise.all([
+    neighboringIssues(user.subject, date), getSettings(user.subject),
     listArticleFeedback(user.subject, { urls: issue.sections.flatMap((section) => section.items.map((item) => item.url)) }),
     getSocialProfile(user.subject),
   ]);
   const theme = readerTheme(settings);
-  const isLatestAvailable = date === latest && date < todayDate(settings.timeZone);
   const [dayOfMonth, month, year] = longDate(issue.date).split(" ");
 
   return (
@@ -40,7 +39,6 @@ export async function EditionPage({ params }: PageProps) {
       <article>
         <IssueContent key={`${user.subject}:${issue.date}`} issue={issue} sharingEnabled={socialProfile.enabled} articleFeedback={articleFeedback} owner={user.subject} canImportLegacyProgress={user.subject === process.env.CERULEAN_OWNER_SUBJECT} header={
         <header className="issue-hero">
-          {isLatestAvailable ? <p className="edition-notice" role="status">Today’s edition has not arrived yet. This is the latest available edition.</p> : null}
           <div className="issue-cover">
             <p className="discovery-label">Your personal discovery feed</p>
             <p className="issue-day">{weekday(issue.date)}</p>

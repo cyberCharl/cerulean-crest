@@ -13,7 +13,7 @@ Privacy contact: [CONTACT]
 
 ### Information used to provide the service
 
-We use your authentication account identifier to associate your settings and editions with your account. Our sign-in provider handles authentication, and the website session can include your display name and email address. We store the editorial settings you provide, including interests, guidelines, reading budgets and timezone, plus your onboarding state.
+We use your authentication account identifier to associate your settings and editions with your account. Our sign-in provider handles authentication, and the website session can include your display name and email address. We store the editorial settings you provide, including your Markdown editorial constitution, reading budgets, timezone and delivery choices, plus your onboarding state.
 
 We store editions created for you: their dates, editorial notes, selected article titles and URLs, source attribution, summaries and reading times. [AFTER VERIFYING THE DEPLOYED FEATURE: We also store articles you save and the reactions and private notes you submit through Tell the editor, associated with your account and article.] Reading-progress marks currently use browser storage; they are distinct from saved articles and editorial reactions. [CONFIRM THIS REMAINS TRUE IN THE RELEASE.]
 
@@ -61,7 +61,7 @@ Contact [SUPPORT CONTACT]. Include what you were trying to do, the date/time, an
 
 **I cannot connect.** Sign into the website and check the account shown in Settings. Connect the plugin using that same sign-in method/account. If authorization has expired, reconnect through your host. If you still cannot connect, send support the error and timestamp, without credentials.
 
-**I cannot find my edition.** Open Today or Archive while signed into the account used during creation. Edition links require that account. Another account does not gain access by receiving a link.
+**I cannot find my edition.** Open Latest or Archive while signed into the account used during creation. Edition links require that account. Another account does not gain access by receiving a link.
 
 **How do I change my reading preferences?** Edit Settings or explicitly ask the connected host to update the preference. Review the saved result in Settings.
 

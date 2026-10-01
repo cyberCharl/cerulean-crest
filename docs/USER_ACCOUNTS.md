@@ -48,7 +48,7 @@ Rehearse on a production copy and preserve a recovery branch before the live mig
 
 ## Settings and remaining work
 
-`/settings` stores intended reading minutes, total edition minutes, timezone, and free-text editorial guidelines. `get_editorial_brief` reads the requesting user's current values on every call. Item-count guidance scales down for small editions. Surplus material intentionally offers choice; unread pieces must not automatically roll forward. Delivery schedules stay in ChatGPT.
+`/settings` stores intended reading minutes, suggested edition minutes, timezone, delivery choices, and one Markdown editorial constitution. `get_editorial_brief` reads the requesting user's current values on every call and adds current feedback, recommendations, and recent history as read-only context. `get_editorial_constitution` is the clean source for explicit policy edits. Surplus material may offer choice; unread pieces must not automatically roll forward. Delivery schedules run in ChatGPT.
 
 The ChatGPT connection is still an early developer-mode pilot requiring connector setup/credentials from the maintainer. A website account alone does not create a ChatGPT connection or schedule. Public plugin distribution and unattended delivery for a new reader remain separate verification gates. Reading progress remains browser-local; persisted feedback and “include in a future edition” are not implemented in this slice.
 

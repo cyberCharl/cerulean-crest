@@ -1,10 +1,11 @@
 import { articleFeedbackUpdateSchema, articleFeedbackListSchema, articleUrlSchema, type ArticleFeedback, type ArticleFeedbackUpdate, type ArticleFeedbackListOptions } from "./article-feedback.ts";
 import { requireOwner } from "./ownership.ts";
-import { editorialSettingsSchema, defaultSettings, type EditorialSettings } from "./editorial-settings.ts";
+import { editorialSettingsSchema, editorialConstitutionSchema, defaultSettings, type EditorialSettings } from "./editorial-settings.ts";
 import type { Issue, IssueInput, IssueSummary } from "./schema.ts";
 import { isIssueDate } from "./date.ts";
 
 type DatabaseBackend = {
+  compareAndSetConstitution(owner: string, expected: EditorialSettings, markdown: string): EditorialSettings | null | Promise<EditorialSettings | null>;
   getArticleFeedback(owner: string, url: string): ArticleFeedback | null | Promise<ArticleFeedback | null>;
   listArticleFeedback(owner: string, options: ArticleFeedbackListOptions): ArticleFeedback[] | Promise<ArticleFeedback[]>;
   updateArticleFeedback(owner: string, input: ArticleFeedbackUpdate): ArticleFeedback | Promise<ArticleFeedback>;
@@ -79,4 +80,7 @@ export async function updateArticleFeedback(owner: string, input: ArticleFeedbac
 }
 export async function patchSettings(owner: string, patch: Partial<EditorialSettings>): Promise<EditorialSettings> {
   return (await backend()).patchSettings(requireOwner(owner), editorialSettingsSchema.partial().strict().parse(patch));
+}
+export async function compareAndSetConstitution(owner: string, expected: EditorialSettings, markdown: string): Promise<EditorialSettings | null> {
+  return (await backend()).compareAndSetConstitution(requireOwner(owner), editorialSettingsSchema.parse(expected), editorialConstitutionSchema.parse(markdown));
 }

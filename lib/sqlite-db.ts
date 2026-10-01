@@ -18,6 +18,14 @@ db.pragma("journal_mode = WAL");
 db.pragma("foreign_keys = ON");
 db.exec(sqliteSchema);
 
+// SQLite fixtures and local installs do not use the Postgres migration journal.
+// Apply additive social upgrades in place so existing conversations survive.
+if (!(db.prepare("PRAGMA table_info(social_shares)").all() as Array<{name: string}>).some(column => column.name === "read_at")) {
+  db.exec("ALTER TABLE social_shares ADD COLUMN read_at TEXT");
+  db.exec("UPDATE social_shares SET read_at = created_at WHERE dismissed = 1");
+}
+db.exec("CREATE INDEX IF NOT EXISTS social_shares_recipient_read ON social_shares(recipient, read_at)");
+
 // Rebuild the original globally-unique date table without losing IDs or children.
 if (!(db.prepare("PRAGMA table_info(issues)").all() as Array<{name: string}>).some(column => column.name === "owner_subject")) {
   db.pragma("foreign_keys = OFF");
@@ -213,6 +221,18 @@ const updateArticleFeedbackTransaction = db.transaction((owner: string, input: A
 });
 export function updateArticleFeedback(owner: string, input: ArticleFeedbackUpdate) {
   return updateArticleFeedbackTransaction.immediate(requireOwner(owner), articleFeedbackUpdateSchema.parse(input));
+}
+const compareConstitutionTransaction = db.transaction((owner: string, expected: EditorialSettings, markdown: string) => {
+  const current = editorialSettingsSchema.parse({ ...defaultSettings, ...(getSettings(owner) as object | null) });
+  if (current.constitutionMarkdown !== expected.constitutionMarkdown
+    || (!current.constitutionMarkdown && (current.guidelines !== expected.guidelines
+      || JSON.stringify(current.interests ?? []) !== JSON.stringify(expected.interests ?? [])))) return null;
+  const updated = editorialSettingsSchema.parse({ ...current, constitutionMarkdown: markdown });
+  saveSettings(owner, updated);
+  return updated;
+});
+export function compareAndSetConstitution(owner: string, expected: EditorialSettings, markdown: string): EditorialSettings | null {
+  return compareConstitutionTransaction.immediate(requireOwner(owner), expected, markdown);
 }
 const patchSettingsTransaction = db.transaction((owner: string, patch: Partial<EditorialSettings>) => {
   const settings = editorialSettingsSchema.parse({ ...defaultSettings, ...(getSettings(owner) as object | null), ...patch });

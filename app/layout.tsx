@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getSocialProfile } from "@/lib/social-store";
 import { getSettings } from "@/lib/db";
 import { readerTheme } from "@/lib/reader-theme";
 import { getUser } from "@/lib/browser-auth";
@@ -17,28 +16,28 @@ import "./globals.css";
 import "./reader-theme.css";
 
 export const metadata: Metadata = {
-  title: { default: "Daybook", template: "%s — Daybook" },
+  title: { default: "Curiofold", template: "%s — Curiofold" },
   description: "A finite, human-scale edition for a better information diet.",
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const user = await getUser();
-  const [settings, profile] = user ? await Promise.all([getSettings(user.subject), getSocialProfile(user.subject)]) : [{}, null];
+  const settings = user ? await getSettings(user.subject) : {};
   const theme = readerTheme(settings);
   return (
     <html lang="en">
       <body data-reader-theme={theme}>
         <header className="site-header">
           <Link className="brand" href={marketingUrl()}>
-            <img className="study-brand-mark" src="/brand/daybook/daybook-mark.svg" width={36} height={36} alt="" aria-hidden="true" />
-            <span className="study-brand-name">Daybook<span className="study-brand-dot">.</span></span>
+            <img className="study-brand-mark" src="/brand/curiofold/curiofold-mark.svg" width={36} height={36} alt="" aria-hidden="true" />
+            <span className="study-brand-name">Curiofold<span className="study-brand-dot">.</span></span>
           </Link>
           <nav aria-label="Primary navigation">
             {user ? <>
-              <Link href={appUrl("/today")}>Today</Link>
+              <Link href={appUrl("/latest")}>Latest</Link>
               <Link href={appUrl("/archive")}>Archive</Link>
               <Link href={appUrl("/saved")}>Saved</Link>
-              {profile?.enabled ? <Link href={appUrl("/friends")}>Friends</Link> : null}
+              <Link href={appUrl("/friends")}>Friends</Link>
               <Link href={appUrl("/settings")}>Settings</Link>
               <a href={appUrl("/auth/logout")}>Sign out</a>
             </> : <>

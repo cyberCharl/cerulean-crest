@@ -2,7 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/browser-auth";
 import { getSettingsState, latestIssueDate } from "@/lib/db";
-import { configuredChatGptPluginUrl } from "@/lib/onboarding";
+import { buildFirstEditionPrompt, configuredChatGptPluginUrl } from "@/lib/onboarding";
+import { describeDeliverySchedule } from "@/lib/delivery-schedule";
 import { OnboardingForm } from "@/components/onboarding-form";
 import { FirstEditionPrompt } from "@/components/first-edition-prompt";
 import styles from "./onboarding.module.css";
@@ -16,6 +17,7 @@ export default async function Onboarding({ searchParams }: { searchParams: Promi
   const { settings } = settingsState;
   const requested = ["rhythm", "interests", "connect"].includes(query.step ?? "") ? query.step : undefined;
   const step = requested ?? settings.onboardingStep ?? "rhythm";
+  if (step === "interests" && settings.constitutionMarkdown && settings.onboardingStep === "connect") redirect("/settings");
   if (step === "connect" && !settings.onboardingStep && !latest) redirect("/onboarding?step=rhythm");
   const pluginUrl = configuredChatGptPluginUrl();
   const titles = { rhythm: "Make room for reading.", interests: "Follow your curiosity.", connect: "Your brief is ready." };
@@ -36,8 +38,10 @@ export default async function Onboarding({ searchParams }: { searchParams: Promi
         <p className={styles.lede}>Your editor has a place to start. The first edition is where you’ll find out what fits.</p>
         <div className={styles.summary}>
           <p><strong>{settings.readingMinutes} minutes</strong> to read, with <strong>{settings.editionMinutes} minutes</strong> of material to choose from.</p>
-          <p>{settings.interests?.length ? settings.interests.join(" · ") : "A broad mix, with room for discovery."}</p>
-          <Link href="/onboarding?step=interests">Adjust your brief</Link>
+          <p>Your editable editorial constitution is saved with your account.</p>
+          <p>{settings.deliverySchedule ? <>Requested delivery: <strong>{describeDeliverySchedule(settings.deliverySchedule, settings.timeZone)}</strong>.</> : "Choose a delivery rhythm to include a recurring schedule in your ChatGPT instruction."}</p>
+          <p><Link href="/onboarding?step=rhythm">Adjust your reading and delivery rhythm</Link></p>
+          <Link href="/settings">Read or edit your constitution</Link>
         </div>
         {latest ? <div className={styles.connection}>
           <h2>Your first edition is here.</h2>
@@ -45,17 +49,19 @@ export default async function Onboarding({ searchParams }: { searchParams: Promi
           <Link className={styles.primary} href={`/issues/${latest}`}>Open your edition →</Link>
         </div> : <>
           <div className={styles.connection}>
-            <h2>Connect Cerulean Crest in ChatGPT</h2>
-            <p>Use the same Cerulean Crest account you used here when ChatGPT asks you to sign in.</p>
+            <h2>Connect Curiofold in ChatGPT</h2>
+            <p>Use the same Curiofold account you used here when ChatGPT asks you to sign in.</p>
             {pluginUrl ? <a className={styles.primary} href={pluginUrl} target="_blank" rel="noopener noreferrer">Open the ChatGPT plugin ↗</a> : <p className={styles.notice}>The public ChatGPT plugin isn’t available yet. Your brief is saved; you can return here when the connection is ready.</p>}
           </div>
-          <h2>Then ask for one edition.</h2>
-          <p>After connecting, paste this into ChatGPT. It will fetch your saved preferences and return a link to your private edition.</p>
-          <FirstEditionPrompt />
-          <p className={styles.quiet}>No edition has arrived yet. Opening the plugin or copying this instruction doesn’t start generation.</p>
-          <Link href="/today" className={styles.checkLink}>Check for my edition →</Link>
         </>}
-        <p className={styles.ritual}>Once you’ve tried an edition, ask ChatGPT to make it a recurring task at a time that suits you. Your reading preferences stay here; the schedule stays there.</p>
+        <h2>{latest ? "Make it a recurring read." : settings.deliverySchedule ? "Your first edition, and the next ones." : "Then ask for one edition."}</h2>
+        <p>After connecting, paste this into ChatGPT.{settings.deliverySchedule ? " It includes your chosen delivery rhythm. Ask ChatGPT to confirm the recurring task is set up." : " It will fetch your saved preferences and return a link to your private edition."}</p>
+        <FirstEditionPrompt prompt={buildFirstEditionPrompt(settings, Boolean(latest))} />
+        {!latest ? <>
+          <p className={styles.quiet}>No edition has arrived yet. Opening the plugin or copying this instruction doesn’t start generation.</p>
+          <Link href="/latest" className={styles.checkLink}>Check for my edition →</Link>
+        </> : null}
+        <p className={styles.ritual}>Your delivery preference is saved here; the recurring task runs in ChatGPT. If you change your rhythm, paste the updated instruction into ChatGPT to update that task.</p>
       </> : <>
         <p className={styles.lede}>{step === "rhythm" ? "Choose a reading rhythm that fits. We’ll offer enough to explore, with a natural place to stop." : "You don’t need to describe yourself perfectly. A few interests are enough to begin; your editor should still look beyond them."}</p>
         <OnboardingForm key={step} step={step as "rhythm" | "interests"} settings={settings} detectTimeZone={!settingsState.saved} />

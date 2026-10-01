@@ -84,6 +84,7 @@ CREATE TABLE IF NOT EXISTS social_shares (
   note TEXT NOT NULL,
   recommend INTEGER NOT NULL CHECK(recommend IN (0, 1)),
   dismissed INTEGER NOT NULL DEFAULT 0 CHECK(dismissed IN (0, 1)),
+  read_at TEXT,
   created_at TEXT NOT NULL,
   UNIQUE(sender, recipient, url),
   CHECK(sender <> recipient)

@@ -1,7 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
   <title id="title">Daybook — Spine</title>
   <desc id="desc">A tall bound book with a continuous cover, a fine spine and a discovery diamond on its front.</desc>
-  <path d="M19 9h32v40H19a5 5 0 0 0 0 10h32" fill="#f2eadb" stroke="#242b28" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M19 9h32v50H19a5 5 0 0 1-5-5V14a5 5 0 0 1 5-5Z" fill="#F2EADB"/>
+  <path d="M19 9h4v40h-4a5 5 0 0 0-5 5V14a5 5 0 0 1 5-5Z" fill="#9B4B36"/>
+  <path d="M19 9h32v40H19a5 5 0 0 0 0 10h32" fill="none" stroke="#242b28" stroke-width="3" stroke-linejoin="round"/>
   <path d="M19 9a5 5 0 0 0-5 5v40M23 10v38M50 50v8" fill="none" stroke="#242b28" stroke-width="3" stroke-linejoin="round"/>
   <path d="m37 21 8 8-8 8-8-8z" fill="#9b4c36"/>
   <circle cx="37" cy="29" r="2.6" fill="#f2eadb"/>

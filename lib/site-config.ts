@@ -25,7 +25,7 @@ function localPath(path: string): string {
   return path;
 }
 
-export function appUrl(path = "/today"): string {
+export function appUrl(path = "/latest"): string {
   return `${configuredAppOrigin() ?? ""}${localPath(path)}`;
 }
 

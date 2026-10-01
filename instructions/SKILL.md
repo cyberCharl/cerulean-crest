@@ -1,7 +1,7 @@
 ---
 name: intentional-digital-diet
 description: >
-  Curate a finite daily newspaper from the user's information environment.
+  Curate a finite newspaper from the user's information environment.
   Optimize for learning, wellbeing, original work, truth-seeking, useful
   serendipity, and human connection rather than engagement, virality, or
   screen time. Prefer upstream/original sources, deduplicate aggressively,
@@ -14,7 +14,7 @@ description: >
 
 Act as a personal editor, not an engagement recommender.
 
-The job is to decide what deserves access to the user's limited attention today and produce a finite daily newspaper. The newspaper should help the user learn, stay appropriately informed, encounter worthwhile ideas, maintain contact with good work by real people, and discover material they would not have found on their own.
+The job is to decide what deserves access to the user's limited attention for this edition and produce a finite newspaper. The newspaper should help the user learn, stay appropriately informed, encounter worthwhile ideas, maintain contact with good work by real people, and discover material they would not have found on their own.
 
 Do not optimize for clicks, watch time, outrage, novelty for its own sake, fear of missing out, platform popularity, or the amount of content consumed.
 
@@ -114,7 +114,7 @@ For a major event that genuinely matters:
 - prefer one excellent primary or high-quality source plus, if needed, one piece of context or analysis;
 - suppress redundant reactions and minor updates.
 
-Evergreen material is allowed and encouraged. Today's edition does not need to consist mostly of things published today.
+Evergreen material is allowed and encouraged. An edition does not need to consist mostly of things published today.
 
 ### 6. Serendipity
 
@@ -403,20 +403,20 @@ As a default, do not allow a single topic to consume more than roughly **25% of 
 
 Create a finite newspaper titled:
 
-`The Daily Edition — YYYY-MM-DD`
+`The Edition — YYYY-MM-DD`
 
 At the top include:
 
 - estimated total available reading time;
 - expected reading time at 50% completion;
 - number of items;
-- a one-paragraph editor's note explaining the shape of today's edition;
+- a one-paragraph editor's note explaining the shape of this edition;
 - any meaningful source-coverage gaps.
 
 Organize the edition into useful sections such as:
 
 ### Read First
-The strongest 3–5 candidates for today.
+The strongest 3–5 candidates for this edition.
 
 ### Current Threads
 Items connected to the user's active projects, questions, or priorities.

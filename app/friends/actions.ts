@@ -3,8 +3,18 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getUser, requireUser } from "@/lib/browser-auth";
-import { SocialError } from "@/lib/social";
-import { getSocialState, saveSocialProfile, requestFriend, respondFriendRequest, removeFriend, shareArticle, dismissShare } from "@/lib/social-store";
+import { SocialError, usernameSchema } from "@/lib/social";
+import {
+  getSocialState,
+  saveSocialProfile,
+  requestFriend,
+  respondFriendRequest,
+  removeFriend,
+  shareArticle,
+  setSharedArticleRead,
+  setSharedArticleReadByUrl,
+  markSharedArticlesRead,
+} from "@/lib/social-store";
 
 function safeError(error: unknown) {
   return error instanceof SocialError ? error.message : "Your change could not be saved. Check the details and try again.";
@@ -34,9 +44,6 @@ export async function respondToRequest(form: FormData) {
 export async function endFriendship(form: FormData) {
   await submit(owner => removeFriend(owner, String(form.get("username") ?? "")), "Friend removed.");
 }
-export async function dismissSharedArticle(form: FormData) {
-  await submit(owner => dismissShare(owner, String(form.get("id") ?? "")), "Article dismissed.");
-}
 export async function availableFriends(): Promise<{ friends?: { username: string }[]; error?: string }> {
   const user = await getUser();
   if (!user) return { error: "Sign in again to share an article." };
@@ -46,12 +53,49 @@ export async function availableFriends(): Promise<{ friends?: { username: string
     return { friends: state.friends };
   } catch { return { error: "Your friends could not be loaded. Please try again." }; }
 }
-export async function sendArticleToFriend(input: { username: string; url: string; title: string; note: string; recommend: boolean }): Promise<{ error?: string; sent?: true }> {
+export async function sendArticleToFriend(input: { username: string; url: string; title: string; note: string }): Promise<{ error?: string; sent?: true; username?: string }> {
   const user = await getUser();
   if (!user) return { error: "Sign in again to share an article." };
   try {
     await shareArticle(user.subject, input);
     revalidatePath("/friends");
-    return { sent: true };
+    revalidatePath(`/friends/${input.username}`);
+    return { sent: true, username: input.username };
   } catch (error) { return { error: safeError(error) }; }
+}
+
+export async function changeSharedArticleRead(form: FormData) {
+  const parsedUsername = usernameSchema.safeParse(String(form.get("username") ?? ""));
+  const username = parsedUsername.success ? parsedUsername.data : "";
+  const user = await requireUser();
+  let error: string | undefined;
+  try {
+    await setSharedArticleRead(user.subject, {
+      id: String(form.get("id") ?? ""),
+      read: form.get("read") === "true",
+    });
+    refreshSocial();
+    if (username) revalidatePath(`/friends/${username}`);
+  } catch (cause) { error = safeError(cause); }
+  const target = username ? `/friends/${username}` : "/friends";
+  redirect(`${target}?${error ? `error=${encodeURIComponent(error)}` : "message=Reading%20status%20updated."}`);
+}
+
+export async function setSharedArticleReadFromReader(input: { url: string; read: boolean }): Promise<{ error?: string }> {
+  const user = await getUser();
+  if (!user) return { error: "Sign in again to update reading status." };
+  try {
+    await setSharedArticleReadByUrl(user.subject, input);
+    revalidatePath("/friends");
+    return {};
+  } catch (error) { return { error: safeError(error) }; }
+}
+
+export async function syncSharedArticleReads(urls: string[]): Promise<void> {
+  const user = await getUser();
+  if (!user || !urls.length) return;
+  try {
+    await markSharedArticlesRead(user.subject, urls);
+    revalidatePath("/friends");
+  } catch { /* Local reading progress remains available if social sync fails. */ }
 }

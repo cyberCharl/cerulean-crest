@@ -6,6 +6,6 @@ import { appUrl, isSeparateAppHost } from "@/lib/site-config";
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  if (isSeparateAppHost((await headers()).get("host"))) redirect("/today");
+  if (isSeparateAppHost((await headers()).get("host"))) redirect("/latest");
   return <LandingPage signupUrl={appUrl("/auth/login?screen_hint=signup")} signinUrl={appUrl("/auth/login")} />;
 }

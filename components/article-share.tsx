@@ -11,6 +11,7 @@ export function ArticleShare({ url, title }: { url: string; title: string }) {
   const [friends, setFriends] = useState<{ username: string }[] | null>(null);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [sentTo, setSentTo] = useState("");
   const [pending, startTransition] = useTransition();
 
   function toggle() {
@@ -26,29 +27,28 @@ export function ArticleShare({ url, title }: { url: string; title: string }) {
     });
   }
   return <div className={styles.share} aria-busy={pending}>
-    <button type="button" aria-expanded={open} aria-controls={`${id}-share`} onClick={toggle}>Share with a friend</button>
+    <button type="button" aria-expanded={open} aria-controls={`${id}-share`} onClick={toggle}>Send to a friend</button>
     {open ? <div id={`${id}-share`}>
       {friends?.length ? <form className={styles.form} onSubmit={event => {
         event.preventDefault();
         const form = event.currentTarget;
         const data = new FormData(form);
-        setError(""); setMessage("");
+        setError(""); setMessage(""); setSentTo("");
         startTransition(async () => {
           try {
-            const result = await sendArticleToFriend({ url, title, username: String(data.get("username") ?? ""), note: String(data.get("note") ?? ""), recommend: data.get("recommend") === "on" });
+            const result = await sendArticleToFriend({ url, title, username: String(data.get("username") ?? ""), note: String(data.get("note") ?? "") });
             if (result.error) setError(result.error);
-            else { form.reset(); setMessage("Article sent to your friend."); }
+            else { form.reset(); setSentTo(result.username ?? ""); setMessage("Article sent."); }
           } catch { setError("The article could not be sent. Please try again."); }
         });
       }}>
         <label>To<select name="username" required disabled={pending} defaultValue=""><option value="" disabled>Choose a friend</option>{friends.map(friend => <option key={friend.username} value={friend.username}>@{friend.username}</option>)}</select></label>
         <label>A note (optional)<textarea name="note" rows={3} maxLength={2000} disabled={pending} /></label>
-        <label className={styles.check}><input name="recommend" type="checkbox" disabled={pending} />Suggest for a future edition</label>
-        <p className={styles.hint}>Only this link, its title and your note are shared. Their curator decides what to include.</p>
+        <p className={styles.hint}>Only this link, its title and your note are shared. It stays in your private thread; while unread, it is also available to their curator as a friend recommendation.</p>
         <button type="submit" disabled={pending}>Send article</button>
       </form> : friends ? <p><Link href="/friends">Add a friend</Link> to share this piece.</p> : null}
       {error ? <p role="alert">{error}</p> : null}
-      <p role="status">{pending ? "One moment…" : message}</p>
+      <p role="status">{pending ? "One moment…" : message}{sentTo ? <> <Link href={`/friends/${sentTo}`}>View conversation →</Link></> : null}</p>
     </div> : null}
   </div>;
 }

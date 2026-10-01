@@ -5,7 +5,7 @@ import { migrate } from "../../lib/migrations.ts";
 import { seedIssue } from "../../lib/seed.ts";
 const connection = process.env.TEST_DATABASE_URL;
 test(
-  "Postgres social concurrency, opt-out and friend nominations",
+  "Postgres social concurrency, opt-out and friend conversation read state",
   { skip: !connection, timeout: 90000 },
   async () => {
     assert.equal(process.env.TEST_DATABASE_ALLOW_WRITES, "true");
@@ -47,7 +47,6 @@ test(
             username: bn,
             url: article.url,
             title: "Untrusted",
-            recommend: true,
           }),
         ),
       );
@@ -56,6 +55,12 @@ test(
         (await social.listFriendRecommendations(b))[0].title,
         article.title,
       );
+      const share = (await social.getFriendConversation(b, an))[0];
+      await social.setSharedArticleRead(b, { id: share.id, read: true });
+      assert.deepEqual(await social.listFriendRecommendations(b), []);
+      assert.ok((await social.getFriendConversation(a, bn))[0].readAt);
+      await social.setSharedArticleRead(b, { id: share.id, read: false });
+      assert.equal((await social.listFriendRecommendations(b)).length, 1);
       await social.saveSocialProfile(a, { username: an, enabled: false });
       assert.deepEqual(await social.listFriendRecommendations(b), []);
       await social.saveSocialProfile(a, { username: an, enabled: true });

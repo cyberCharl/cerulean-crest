@@ -7,6 +7,7 @@ import { ArticleActions } from "@/components/article-actions";
 import type { ArticleFeedback } from "@/lib/article-feedback";
 import type { Issue } from "@/lib/schema";
 import { parseReadingProgress, serializeReadingProgress } from "@/lib/reading-progress";
+import { setSharedArticleReadFromReader, syncSharedArticleReads } from "@/app/friends/actions";
 
 function storageKey(owner: string, date: string) {
   return `cerulean-crest:${encodeURIComponent(owner)}:${date}:read`;
@@ -23,6 +24,7 @@ export function IssueContent({ header, issue, owner, canImportLegacyProgress = f
       const value = current ?? (canImportLegacyProgress ? localStorage.getItem(`cerulean-crest:${issue.date}:read`) : null);
       const stored = parseReadingProgress(value, items);
       setReadItems(stored);
+      if (stored.size) void syncSharedArticleReads([...stored]);
       try {
         localStorage.setItem(storageKey(owner, issue.date), serializeReadingProgress(stored));
       } catch { /* Keep loaded progress even when writes are unavailable. */ }
@@ -39,6 +41,7 @@ export function IssueContent({ header, issue, owner, canImportLegacyProgress = f
     try {
       localStorage.setItem(storageKey(owner, issue.date), serializeReadingProgress(next));
     } catch { /* Reading remains usable when browser storage is disabled/full. */ }
+    void setSharedArticleReadFromReader({ url, read: next.has(url) });
   }
 
   const feedbackByUrl = new Map(articleFeedback.map((feedback) => [feedback.url, feedback]));

@@ -6,8 +6,8 @@ The [announcement readiness plan](ANNOUNCEMENT_PLAN.md) proposes the next launch
 
 ## v1 — Personal magazine (current)
 
-- Publish complete daily issues through one authenticated API.
-- Read today’s issue, browse the archive and track reading locally.
+- Publish complete scheduled editions through one authenticated API.
+- Read the latest edition, browse the archive and track reading locally.
 - Operate the product personally and refine the editorial experience from real use.
 
 ## v2 — Multi-user curation

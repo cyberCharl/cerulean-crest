@@ -4,6 +4,9 @@ import {
   usernameSchema,
   socialProfileSchema,
   shareArticleSchema,
+  shareReadSchema,
+  sharedUrlReadSchema,
+  sharedUrlsSchema,
 } from "./social.ts";
 import * as engine from "./social-engine.ts";
 async function run<T>(
@@ -47,9 +50,21 @@ export const shareArticle = (owner: string, input: unknown) => {
   const value = shareArticleSchema.parse(input);
   return run(owner, (c, o) => engine.share(c, o, value));
 };
-export const dismissShare = (owner: string, id: string) => {
-  const key = z.uuid().parse(id);
-  return run(owner, (c, o) => engine.dismiss(c, o, key));
+export const getFriendConversation = (owner: string, username: string) => {
+  const value = usernameSchema.parse(username);
+  return run(owner, (c, o) => engine.conversation(c, o, value), true);
+};
+export const setSharedArticleRead = (owner: string, input: unknown) => {
+  const value = shareReadSchema.parse(input);
+  return run(owner, (c, o) => engine.setRead(c, o, value.id, value.read));
+};
+export const setSharedArticleReadByUrl = (owner: string, input: unknown) => {
+  const value = sharedUrlReadSchema.parse(input);
+  return run(owner, (c, o) => engine.setReadByUrl(c, o, value.url, value.read));
+};
+export const markSharedArticlesRead = (owner: string, urls: unknown) => {
+  const value = sharedUrlsSchema.parse(urls);
+  return run(owner, (c, o) => engine.markUrlsRead(c, o, value));
 };
 export const listFriendRecommendations = (owner: string) =>
   run(owner, async (c, o) => engine.shares(c, o, true), true);

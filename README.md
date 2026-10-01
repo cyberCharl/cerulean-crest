@@ -1,6 +1,6 @@
-# Cerulean Crest
+# Curiofold
 
-Cerulean Crest is a finite, personal daily magazine. Readers sign in to private editions and configure their reading volume and editorial guidelines in the app. An externally scheduled ChatGPT curator retrieves that brief and publishes complete editions through authenticated MCP tools.
+Curiofold is a finite, personal magazine on your chosen schedule. Readers sign in to private editions and edit a Markdown editorial constitution. A connected ChatGPT curator reads that document with current feedback and friend recommendations, researches an edition, and publishes the complete final selection through MCP.
 
 Production: [cerulean-crest.vercel.app](https://cerulean-crest.vercel.app)
 
@@ -46,21 +46,22 @@ npm run test:integration
 | `DATABASE_URL` | Production | Neon/Postgres connection string. When absent, the app uses local SQLite. |
 | `DATABASE_URL_UNPOOLED` | Migrations | Direct Neon connection used by the explicit migration command, outside normal requests. |
 | `DATABASE_PATH` | No | Override the local SQLite file path. Ignored when `DATABASE_URL` is present. |
-| `CERULEAN_MCP_AUTH_MODE` | MCP | `pilot` for a dedicated bearer token; `oauth` for the owner-only ChatGPT integration. |
+| `CERULEAN_MCP_AUTH_MODE` | MCP | `pilot` for a dedicated bearer token; `oauth` for per-reader ChatGPT authorization. |
 | `CERULEAN_MCP_TOKEN` | Pilot | A separate generated secret for each environment. |
-| `CERULEAN_OAUTH_ISSUER`, `CERULEAN_OAUTH_JWKS_URL`, `CERULEAN_MCP_RESOURCE`, `CERULEAN_OWNER_SUBJECT` | OAuth | Identity provider, token audience, and allowed owner; see the MCP runbook. |
-| `EDITION_DEADLINE_HOUR` | No | Local hour after which missing today's edition makes `/api/health` return 503; defaults to 9. |
+| `CERULEAN_OAUTH_ISSUER`, `CERULEAN_OAUTH_JWKS_URL`, `CERULEAN_MCP_RESOURCE` | OAuth | Identity provider and token audience; see the MCP runbook. |
+| `CERULEAN_OWNER_SUBJECT` | Pilot/recovery | Explicit owner for pilot MCP, Basic Auth publishing, health monitoring and legacy data migration. OAuth readers use their authenticated subject. |
 
 Never commit real credentials. Basic Auth is safe here only behind HTTPS; production Vercel URLs provide HTTPS automatically.
 
 ## Architecture
 
 - Next.js App Router renders the reader, archive and API.
-- The public homepage is a landing page; `/today`, dated editions, archive, and settings require a browser session.
+- The public homepage is a landing page; `/latest`, dated editions, archive, and settings require a browser session. Legacy `/today` links redirect to `/latest`.
+- Authenticated `/api/health` checks the owner's saved delivery schedule and timezone. Weekly and weekday schedules stay current between deliveries; readers without a saved schedule report `unscheduled`. The former `EDITION_DEADLINE_HOUR` setting is no longer used.
 - Server Components read only the authenticated user's database rows. Edition dates are unique per user.
 - `PUT /api/issues/:date` validates and atomically replaces one complete issue.
 - `GET /api/issues/:date` returns a stored issue for authenticated verification.
-- Reading progress remains browser-local, scoped by account and keyed by source URL so it survives replacement of database item IDs. Server feedback and resurfacing requests are later work.
+- Reading progress remains browser-local, scoped by account and keyed by source URL so it survives replacement of database item IDs. Article feedback is stored per account and joins the read-only curation context; a general resurfacing queue remains later work.
 - Storage selects itself at runtime: SQLite locally, Neon Postgres when `DATABASE_URL` exists.
 
 The relational hierarchy is intentionally small:
@@ -78,7 +79,7 @@ Ownership scopes this hierarchy without changing the editorial payload structure
 - Authentication: HTTP Basic Auth.
 - Content type: `application/json`.
 - Success: `201` when a date is first created, `200` when it is replaced.
-- Validation: `422` with field details; the declared duration must be within two minutes of the item total.
+- Validation: `422` with field details for malformed or incomplete editions. Material minutes may vary from the sum of item estimates.
 - Date mismatch: `409` when the body date differs from the URL.
 - Unauthorized: `401` with a Basic Auth challenge.
 

@@ -1,5 +1,7 @@
 # Saved articles and editorial feedback
 
+The deployment record below describes the 18 September release. The current workspace folds feedback into `get_editorial_brief` and stores lasting policy in an editable Markdown constitution; see [the current MCP contract](MCP.md).
+
 Deployed to production on 18 September 2026: `dpl_HfZZjtxjKF4w4z8BQWPh3Jdiejv5`, Ready, at https://cerulean-crest.vercel.app. Migration 003 was rehearsed against a fresh production-copy branch and then applied to production. All 19 editions, 129 sections, 239 items and three settings records were unchanged; complete record digests matched before/after. The rehearsal branch was removed.
 
 ## Reader behavior
@@ -11,13 +13,13 @@ Deployed to production on 18 September 2026: `dpl_HfZZjtxjKF4w4z8BQWPh3Jdiejv5`,
 
 ## Explicit policy versus soft signals
 
-The existing settings record remains the authoritative editorial policy. `update_editorial_preferences` applies only supplied fields, validates them, derives the owner from the authenticated MCP subject and returns saved values plus the Settings URL. Guidelines and interests replace their respective complete values; the tool and curation skill instruct the agent to preserve unrelated instructions. This uses the existing `editions:write` scope. It cannot change onboarding progress or choose a different account.
+The existing settings record contains the authoritative Markdown editorial constitution. `get_editorial_constitution` returns only that document and a revision; after an explicit reader request, `update_editorial_constitution` applies exact edits against that revision and returns the saved document plus the Settings URL. It rejects stale revisions, ambiguous replacements, overlapping edits, assembled-brief markers, and direct copies of current feedback, friend recommendations, or history. This uses the existing `editions:write` scope. It cannot change onboarding progress or choose a different account.
 
-`get_editorial_brief` includes structured preferences as well as the existing textual brief. `get_editorial_feedback` requires `editions:read` and returns the most recently updated reactions/notes (default 50, maximum 100). It excludes records with only a bookmark. Feedback reads never modify explicit preferences.
+`get_editorial_brief` now combines the constitution, reading context, up to 50 recent reactions/notes, recent edition links, and pending friend recommendations in one read-only response. It excludes records with only a bookmark and omits empty feedback and recommendation sections. Feedback reads never modify the constitution.
 
 The curator retrieves the brief, recent editions and feedback before selecting candidates. Explicit preferences take precedence; one reaction should not rule out an entire topic. Source metadata and notes are contextual data, not authorization to execute commands or rewrite settings. The MCP server cannot mechanically establish natural-language user intent: the separation is reinforced by separate tools, descriptions and skill instructions, with write-scope enforcement at the server.
 
-There is no persistent inferred profile or autonomous policy-rewriting process in this release. Conservative adaptation occurs during each curation using the available recent feedback. Automatic resurfacing, friends/sharing and synced reading progress remain outside this slice.
+There is no persistent inferred profile or autonomous policy-rewriting process. Conservative adaptation occurs during each curation using the available recent feedback. Automatic resurfacing and synced reading progress remain outside this slice; friend recommendations are current ephemeral context.
 
 ## Storage and release
 
@@ -32,4 +34,4 @@ Apply `migrations/003-article-feedback.sql` through the existing migration comma
 - Both Postgres integration tests passed on a disposable branch of the separate Development project, including concurrent writes and migration repeatability; the branch was deleted afterward.
 - Local browser fixture: save an edition article, choose a reaction, write a note, open Saved, inspect feedback in Settings and clear it. The fixture uses disposable SQLite and a test-only authenticated session; it does not establish production OAuth/ChatGPT behavior.
 
-Production smoke checks passed: landing and health return 200, private reader routes require sign-in, anonymous MCP returns 401, and authenticated OAuth discovers all five tools and successfully reads brief, history and feedback. The deployment error-log query returned no entries. Browser sign-in was required in the verification browser; live interactive writes were left for the owner to test. Actual ChatGPT rehearsal remains separate work. See the [submission packet](submission/README.md).
+For the historical 18 September deployment, production smoke checks passed: landing and health returned 200, private reader routes required sign-in, anonymous MCP returned 401, and authenticated OAuth discovered that release's five tools and read its brief, history and feedback. The consolidated four-tool contract superseded it in production on 22 September 2026. See the [submission packet](submission/README.md).

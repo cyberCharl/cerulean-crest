@@ -28,9 +28,9 @@ test("accepts a well-formed issue", () => {
   assert.equal(issueInputSchema.safeParse(validIssue).success, true);
 });
 
-test("rejects a declared duration that disagrees with the item total", () => {
+test("allows editorial discretion in material minutes", () => {
   const result = issueInputSchema.safeParse({ ...validIssue, availableMinutes: 20 });
-  assert.equal(result.success, false);
+  assert.equal(result.success, true);
 });
 
 test("rejects malformed URLs", () => {

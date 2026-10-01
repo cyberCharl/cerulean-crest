@@ -8,7 +8,7 @@ Production site: `https://cerulean-crest.vercel.app`
 
 ## Agent instruction
 
-> Publish one **complete** Cerulean Crest edition. Read `CERULEAN_APP_URL` (or legacy `CERULEAN_SITE_URL`), `CERULEAN_API_USER` and `CERULEAN_API_PASSWORD` from secrets. Produce JSON matching the contract below, confirm that `availableMinutes` is within two minutes of the sum of all item `readingMinutes`, then PUT it to the configured app origin's `/api/issues/YYYY-MM-DD` using HTTP Basic Auth. Never print credentials. A PUT for an existing date replaces the whole edition, so never send a partial issue. After publishing, GET the same authenticated endpoint and confirm the date and item count. The reader URL requires browser sign-in as the edition owner.
+> Publish one **complete** Curiofold edition. Read `CERULEAN_APP_URL` (or legacy `CERULEAN_SITE_URL`), `CERULEAN_API_USER` and `CERULEAN_API_PASSWORD` from secrets. Produce JSON matching the contract below, then PUT it to the configured app origin's `/api/issues/YYYY-MM-DD` using HTTP Basic Auth. Never print credentials. A PUT for an existing date replaces the whole edition, so never send a partial issue. After publishing, GET the same authenticated endpoint and confirm the date and item count. The reader URL requires browser sign-in as the edition owner.
 
 The current values are:
 
@@ -52,8 +52,8 @@ Expected response:
 ```json
 {
   "date": "2026-09-02",
-  "title": "Cerulean Crest",
-  "editorNote": "The editorial thread connecting today’s edition.",
+  "title": "Curiofold",
+  "editorNote": "The editorial thread connecting this edition.",
   "coverageGap": null,
   "availableMinutes": 12,
   "expectedMinutes": 6,
@@ -85,7 +85,7 @@ Rules:
 - Send the canonical source URL, without tracking parameters where possible.
 - Every string must be non-empty; every item needs at least one reading minute.
 - `coverageGap` may be `null`.
-- `expectedMinutes` is the intended consumption target; `availableMinutes` is the sum of item durations.
+- `expectedMinutes` is a comfortable reading target; `availableMinutes` describes the approximate material offered. The schema permits editorial variance from item estimates.
 - The maximum accepted issue is 20 sections and 50 items per section.
 
 ## Verify the publication
