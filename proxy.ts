@@ -5,10 +5,11 @@ export async function proxy(request: NextRequest) {
     if (request.nextUrl.pathname.startsWith("/auth/")) return new NextResponse("Sign-in is being configured. Please try again soon.", { status: 503 });
     const response = NextResponse.next();
     response.headers.set("Cache-Control", "private, no-store");
+    if (/^\/(privacy|terms|support)(\/|$)/.test(request.nextUrl.pathname)) response.headers.set("X-Robots-Tag", "noindex, nofollow");
     return response;
   }
   const response = await auth0().middleware(request);
-  if (/^\/(today|archive|issues|saved|settings|onboarding|api|mcp|auth)(\/|$)/.test(request.nextUrl.pathname)) {
+  if (/^\/(today|archive|issues|saved|settings|onboarding|api|mcp|auth|privacy|terms|support)(\/|$)/.test(request.nextUrl.pathname)) {
     response.headers.set("Cache-Control", "private, no-store");
     response.headers.set("X-Robots-Tag", "noindex, nofollow");
   }
