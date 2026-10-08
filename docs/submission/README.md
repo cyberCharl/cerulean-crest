@@ -1,12 +1,13 @@
 # ChatGPT plugin submission packet
 
-Prepared 18 September 2026. **Draft, not submitted.** The working product name is Curiofold. Replace bracketed inputs consistently once the name and domain are final. These files do not publish policies or configure any provider.
+Prepared 18 September 2026. **Draft; recorded as not submitted on that date. Current external submission status has not been independently verified.** The working product name is Curiofold. Replace bracketed inputs consistently once the name and domain are final. These files do not publish policies or configure any provider.
 
 ## Ready to review
 
 - [Listing copy and release notes](listing.md)
 - [Reviewer setup, prompts, expected results and evidence sheet](reviewer-guide.md)
 - [Privacy, terms and support page drafts](policy-drafts.md)
+- [Implemented policy review pages, evidence and remaining decisions](policy-review.md)
 - [Technical publication runbook](../CHATGPT_PUBLICATION.md)
 
 Current official route: remote MCP plus the curation skill, **With MCP → Universal**. No embedded ChatGPT UI is proposed. Enter the stable production `/mcp` endpoint in the portal and upload the final tested skill bundle; the repository's development `.mcp.json` is not the production submission. [Official submission procedure](https://developers.openai.com/plugins/deploy/submission)

@@ -19,8 +19,8 @@ test("HTTP publishing, duplicate protection, authentication and public validatio
   const port = (socket.address() as { port: number }).port;
   await new Promise<void>((resolve) => socket.close(() => resolve()));
   const base = `http://127.0.0.1:${port}`;
-  const server = spawn(process.execPath, ["node_modules/next/dist/bin/next", "start", "-p", String(port)], {
-    env: { ...process.env, VERCEL: "", DATABASE_URL: "", DATABASE_URL_UNPOOLED: "", DATABASE_PATH: `${directory}/test.db`, SEED_DEMO: "false",
+  const server = spawn(process.execPath, ["node_modules/next/dist/bin/next", "start", "--hostname", "127.0.0.1", "-p", String(port)], {
+    env: { ...process.env, VERCEL_ENV: "production", POLICY_REVIEW_ENABLED: "true", VERCEL: "", DATABASE_URL: "", DATABASE_URL_UNPOOLED: "", DATABASE_PATH: `${directory}/test.db`, SEED_DEMO: "false",
       AUTH0_DOMAIN: "test.example.com", AUTH0_CLIENT_ID: "http-test", AUTH0_CLIENT_SECRET: "test-only", AUTH0_SECRET: "a".repeat(64),
       CERULEAN_APP_URL: base, CERULEAN_MARKETING_URL: base, APP_BASE_URL: base,
       CERULEAN_OWNER_SUBJECT: "http-test-owner", CERULEAN_SITE_URL: base, CERULEAN_API_USER: "test", CERULEAN_API_PASSWORD: "local-test-only", CERULEAN_MCP_AUTH_MODE: "pilot", CERULEAN_MCP_TOKEN: "local-mcp-only" },
@@ -46,6 +46,16 @@ test("HTTP publishing, duplicate protection, authentication and public validatio
     await delay(100);
   }
   assert.equal(ready, true);
+  // Configured Auth0 must not turn public policy routes into a sign-in wall.
+  for (const route of ["privacy", "terms", "support"]) {
+    const response = await fetch(`${base}/${route}`, { redirect: "manual" });
+    assert.equal(response.status, 200);
+    assert.match(response.headers.get("cache-control") || "", /no-store/);
+    assert.match(response.headers.get("x-robots-tag") || "", /noindex/);
+    const markup = await response.text();
+    assert.match(markup, /Not yet available/);
+    assert.ok(!markup.includes("Decisions before publication"));
+  }
   assert.equal((await fetch(`${base}/mcp`)).status, 401);
   const headers = { Authorization: `Basic ${Buffer.from("test:local-test-only").toString("base64")}`, "Content-Type": "application/json" };
   for (const date of ["not-a-date", "2026-02-31"]) {

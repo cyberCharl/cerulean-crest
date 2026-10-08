@@ -1,6 +1,6 @@
 # Public-page drafts: privacy, terms and support
 
-**Internal drafts, not published policies.** Bracketed inputs and unresolved operational decisions must be completed before these become public pages. They are product disclosure drafts, not a determination of legal compliance. Verify the shipped behavior and actual provider/account configuration before adoption. The proposed routes `/privacy`, `/terms` and `/support` do not yet exist.
+**Internal drafts, not published policies.** Bracketed inputs and unresolved operational decisions must be completed before these become public pages. They are product disclosure drafts, not a determination of legal compliance. Verify the shipped behavior and actual provider/account configuration before adoption. The routes `/privacy`, `/terms` and `/support` now exist for opt-in review; production serves only a not-yet-available notice. See [implementation evidence and decisions](policy-review.md). These older drafts are historical inputs: friends/sharing and server-side shared-article reading status now exist, so do not adopt this text unchanged.
 
 ## Privacy draft
 

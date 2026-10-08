@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getSettings } from "@/lib/db";
+import { policyReviewEnabled } from "@/lib/policy-review";
 import { readerTheme } from "@/lib/reader-theme";
 import { getUser } from "@/lib/browser-auth";
 import { appUrl, marketingUrl } from "@/lib/site-config";
@@ -50,6 +51,11 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <footer className="site-footer">
           <p><span className="footer-rule" />A finite edition for a better information diet.</p>
           <p>Made with judgment, not engagement metrics.</p>
+          {policyReviewEnabled() ? <nav aria-label="Policy review pages">
+            <Link href="/privacy">Privacy draft</Link>{" · "}
+            <Link href="/terms">Terms draft</Link>{" · "}
+            <Link href="/support">Support draft</Link>
+          </nav> : null}
         </footer>
       </body>
     </html>
