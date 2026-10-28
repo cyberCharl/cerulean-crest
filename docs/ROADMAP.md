@@ -2,6 +2,8 @@
 
 The direction is provisional and should follow actual use by the owner and early friends.
 
+The [reading backlog](BACKLOG.md) records the 28 October 2026 follow-up to the personal-newspaper experiment: prototype a durable link collection with three commitment levels and dormant candidates together with a small front page and optional inside pages. These two improvements should ship together after validation. It also preserves the personal-notebook, agent-capability, source-access, and demand-aware curation ideas; source access and automatic pausing remain uncertain and deferred. This backlog describes proposed work, not deployed functionality.
+
 The [announcement readiness plan](ANNOUNCEMENT_PLAN.md) proposes the next launch scope: private user editions, signup, configurable editorial settings, history-aware curation, intentional discovery, and a manageable reading rhythm. Branding changes remain deferred.
 
 ## v1 — Personal magazine (current)

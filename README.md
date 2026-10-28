@@ -6,6 +6,7 @@ Production: [filtered.page](https://filtered.page). The existing `cerulean-crest
 
 ## Start here
 
+- [Reading backlog](docs/BACKLOG.md) — six product ideas and the combined candidate/front-page experiment; [run the prototype](app/latest/READING-PROTOTYPE.md).
 - [Publishing an edition](docs/PUBLISHING.md) — the short runbook for a person or another agent.
 - [MCP integration](docs/MCP.md) — the scheduled-agent pilot, local test flow and external-user gates.
 - [ADR 0001](docs/adr/0001-publish-scheduled-editions-through-mcp.md) — why scheduled editions use an MCP app instead of GitHub or email transport.
