@@ -17,7 +17,7 @@ export function LandingPage({ signupUrl, signinUrl }: LandingPageProps) {
             something you didn’t know you were looking for.
           </p>
           <p className={styles.description}>
-            Curiofold is a personal, AI-curated discovery feed. Give your curator a
+            Filtered is a personal, AI-curated discovery feed. Give your curator a
             direction and find a considered selection of articles waiting in each edition, on a schedule you choose.
           </p>
           <div className={styles.actions}>
@@ -28,7 +28,7 @@ export function LandingPage({ signupUrl, signinUrl }: LandingPageProps) {
         </div>
         <aside className={styles.edition} aria-labelledby="sample-title">
           <div className={styles.editionTop}>
-            <span className={styles.editionBrand}>Curiofold<span>.</span></span>
+            <span className={styles.editionBrand}>Filtered<span>.</span></span>
             <span>Illustrative edition</span>
           </div>
           <p className={styles.editionLabel}>A few things worth your attention</p>

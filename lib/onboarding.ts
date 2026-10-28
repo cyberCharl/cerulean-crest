@@ -28,11 +28,11 @@ export function settingsFromOnboarding(current: EditorialSettings, step: BriefSt
 }
 
 export function buildFirstEditionPrompt(settings: EditorialSettings, hasEdition = false): string {
-  const curation = "Read my Curiofold editorial brief, including its current feedback, friend recommendations, and recent editions. Search widely, keep a candidate list internally, then submit only the complete final edition with create_daily_edition. Return the edition link.";
+  const curation = "Read my Filtered editorial brief, including its current feedback, friend recommendations, and recent editions. Search widely, keep a candidate list internally, then submit only the complete final edition with create_daily_edition. Return the edition link.";
   const firstEdition = `Create my first edition now. ${curation}`;
   if (!settings.deliverySchedule) return hasEdition ? curation : firstEdition;
   const schedule = describeDeliverySchedule(settings.deliverySchedule, settings.timeZone);
-  return `${hasEdition ? "Set up recurring editions for me in Curiofold." : firstEdition} Create or update my recurring ChatGPT task to curate and publish an edition on this schedule: ${schedule}. Use local time in ${settings.timeZone}, following daylight-saving changes where applicable. ${hasEdition ? "" : "For each recurring run: "}${curation} If a Curiofold task already exists, update it instead of creating a duplicate. Confirm the schedule with me in ChatGPT.`;
+  return `${hasEdition ? "Set up recurring editions for me in Filtered." : firstEdition} Create or update my recurring ChatGPT task to curate and publish an edition on this schedule: ${schedule}. Use local time in ${settings.timeZone}, following daylight-saving changes where applicable. ${hasEdition ? "" : "For each recurring run: "}${curation} If a recurring task already exists for this app, including under an earlier name, update it instead of creating a duplicate. Confirm the schedule with me in ChatGPT.`;
 }
 
 export function configuredChatGptPluginUrl(): string | undefined {

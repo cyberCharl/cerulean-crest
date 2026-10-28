@@ -16,7 +16,7 @@ import "./globals.css";
 import "./reader-theme.css";
 
 export const metadata: Metadata = {
-  title: { default: "Curiofold", template: "%s — Curiofold" },
+  title: { default: "Filtered", template: "%s — Filtered" },
   description: "A finite, human-scale edition for a better information diet.",
 };
 
@@ -29,8 +29,8 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       <body data-reader-theme={theme}>
         <header className="site-header">
           <Link className="brand" href={marketingUrl()}>
-            <img className="study-brand-mark" src="/brand/curiofold/curiofold-mark.svg" width={36} height={36} alt="" aria-hidden="true" />
-            <span className="study-brand-name">Curiofold<span className="study-brand-dot">.</span></span>
+            <img className="study-brand-mark" src="/brand/filtered/filtered-mark.svg" width={36} height={36} alt="" aria-hidden="true" />
+            <span className="study-brand-name">Filtered<span className="study-brand-dot">.</span></span>
           </Link>
           <nav aria-label="Primary navigation">
             {user ? <>

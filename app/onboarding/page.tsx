@@ -49,8 +49,8 @@ export default async function Onboarding({ searchParams }: { searchParams: Promi
           <Link className={styles.primary} href={`/issues/${latest}`}>Open your edition →</Link>
         </div> : <>
           <div className={styles.connection}>
-            <h2>Connect Curiofold in ChatGPT</h2>
-            <p>Use the same Curiofold account you used here when ChatGPT asks you to sign in.</p>
+            <h2>Connect Filtered in ChatGPT</h2>
+            <p>Use the same Filtered account you used here when ChatGPT asks you to sign in.</p>
             {pluginUrl ? <a className={styles.primary} href={pluginUrl} target="_blank" rel="noopener noreferrer">Open the ChatGPT plugin ↗</a> : <p className={styles.notice}>The public ChatGPT plugin isn’t available yet. Your brief is saved; you can return here when the connection is ready.</p>}
           </div>
         </>}

@@ -1,5 +1,22 @@
 # Deployment
 
+## Filtered domain rollout — 28 October 2026
+
+The product is named **Filtered**. `filtered.page` is attached to the existing `cerulean-works/cerulean-crest` Vercel project. Registration at Porkbun and DNS setup are pending; the existing `cerulean-crest.vercel.app` origin remains active until the custom domain and browser login are verified.
+
+Keep Porkbun's nameservers and configure the exact apex records returned by Vercel on 28 October:
+
+| Type | Host | Value |
+| --- | --- | --- |
+| A | `@` | `216.198.79.1` |
+| A | `@` | `64.29.17.1` |
+
+Replace conflicting apex parking records, preserving unrelated mail and verification records. Re-check with `npx vercel domains verify filtered.page --scope cerulean-works`; DNS acceptance alone does not establish working HTTPS.
+
+Before switching origins, authorize Auth0 CLI administration for `cerulean-works.eu.auth0.com`, add `https://filtered.page/auth/callback` to the existing Production browser client's callback allowlist and `https://filtered.page` to its logout allowlist, retaining existing entries. Set Production `CERULEAN_APP_URL` and `CERULEAN_MARKETING_URL` to `https://filtered.page`, redeploy, and verify sign-in and sign-out. The admin CLI currently requires reauthorization; existing reader login is unaffected.
+
+Keep `CERULEAN_MCP_RESOURCE` and existing client IDs unchanged. The existing ChatGPT connection can continue using its current endpoint; changing its connection URL requires a separate live authorization check. Domain registration does not rename or recreate accounts or data.
+
 The recommended production stack is Vercel for the Next.js application and Neon Postgres for durable relational storage. Vercel’s Neon integration provisions the database and injects its connection string into the project. Both the database and server functions use Frankfurt (`fra1`) so database round trips stay within one region.
 
 Current production: [cerulean-crest.vercel.app](https://cerulean-crest.vercel.app). The Vercel project is `cerulean-works/cerulean-crest`. Each environment has a separate Neon resource on the free plan:

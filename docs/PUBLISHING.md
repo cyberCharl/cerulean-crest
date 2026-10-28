@@ -8,7 +8,7 @@ Production site: `https://cerulean-crest.vercel.app`
 
 ## Agent instruction
 
-> Publish one **complete** Curiofold edition. Read `CERULEAN_APP_URL` (or legacy `CERULEAN_SITE_URL`), `CERULEAN_API_USER` and `CERULEAN_API_PASSWORD` from secrets. Produce JSON matching the contract below, then PUT it to the configured app origin's `/api/issues/YYYY-MM-DD` using HTTP Basic Auth. Never print credentials. A PUT for an existing date replaces the whole edition, so never send a partial issue. After publishing, GET the same authenticated endpoint and confirm the date and item count. The reader URL requires browser sign-in as the edition owner.
+> Publish one **complete** Filtered edition. Read `CERULEAN_APP_URL` (or legacy `CERULEAN_SITE_URL`), `CERULEAN_API_USER` and `CERULEAN_API_PASSWORD` from secrets. Produce JSON matching the contract below, then PUT it to the configured app origin's `/api/issues/YYYY-MM-DD` using HTTP Basic Auth. Never print credentials. A PUT for an existing date replaces the whole edition, so never send a partial issue. After publishing, GET the same authenticated endpoint and confirm the date and item count. The reader URL requires browser sign-in as the edition owner.
 
 The current values are:
 
@@ -52,7 +52,7 @@ Expected response:
 ```json
 {
   "date": "2026-09-02",
-  "title": "Curiofold",
+  "title": "Filtered",
   "editorNote": "The editorial thread connecting this edition.",
   "coverageGap": null,
   "availableMinutes": 12,

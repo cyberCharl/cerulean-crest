@@ -1,10 +1,10 @@
 # User accounts and first editions
 
-The first multi-user slice adds Auth0 browser signup/sign-in, private editions and archives, a public landing page, and per-reader editorial settings. It retains Cerulean Crest branding and the existing Vercel project.
+Filtered uses Auth0 browser signup/sign-in, private editions and archives, a public landing page, and per-reader editorial settings. The existing Vercel project and Auth0 identifiers remain unchanged.
 
 ## Identity and access
 
-The browser uses Auth0's Next.js SDK with authorization-code login, encrypted HTTP-only session cookies, and `/auth/login`, `/auth/callback`, and `/auth/logout`. Signup uses `/auth/login?screen_hint=signup`. The token endpoint is not exposed to the browser. Signup returns to `/today`; an empty archive links to settings.
+The browser uses Auth0's Next.js SDK with authorization-code login, encrypted HTTP-only session cookies, and `/auth/login`, `/auth/callback`, and `/auth/logout`. Signup uses `/auth/login?screen_hint=signup`. The token endpoint is not exposed to the browser. Signup returns to `/latest`; readers without an edition continue to onboarding. `/today` remains a compatibility redirect.
 
 The server derives ownership from the browser session or verified MCP access token's subject. The caller cannot choose an owner in the edition payload. All edition queries, archive navigation, recent-history tools, and settings are scoped by subject. Machine subjects are rejected by MCP authentication. One Auth0 issuer is configured per deployment; browser and MCP clients must use that same tenant so identities match.
 

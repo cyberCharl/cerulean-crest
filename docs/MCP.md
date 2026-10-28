@@ -1,4 +1,4 @@
-# Curiofold MCP integration
+# Filtered MCP integration
 
 ## Production contract
 

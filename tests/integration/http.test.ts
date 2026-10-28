@@ -81,7 +81,7 @@ test("HTTP publishing, duplicate protection, authentication and public validatio
   assert.match(await privatePage.text(), /Original HTTP edition|A focused|issue-hero/);
   assert.equal((await fetch(`${base}/issues/${issue.date}`, { headers: otherSession })).status, 404);
   const defaultEdition = await (await fetch(`${base}/issues/${issue.date}`, { headers: ownerSession })).text();
-  assert.ok(defaultEdition.includes("Curiofold"));
+  assert.ok(defaultEdition.includes("Filtered"));
   assert.ok(defaultEdition.includes(`href="${base}/latest">Latest</a>`));
   assert.ok(!defaultEdition.includes("edition has not arrived yet"));
   assert.ok(!defaultEdition.includes("Daybook"));

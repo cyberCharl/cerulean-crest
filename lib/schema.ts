@@ -19,7 +19,7 @@ export const issueSectionSchema = z.object({
 
 export const issueInputSchema = z.object({
   date: z.string().refine(isIssueDate, "date must be a real calendar date in YYYY-MM-DD form"),
-  title: z.string().trim().min(1).max(120).default("Curiofold"),
+  title: z.string().trim().min(1).max(120).default("Filtered"),
   editorNote: z.string().trim().min(1).max(4000),
   coverageGap: z.string().trim().max(2000).nullable().optional(),
   availableMinutes: z.number().int().min(1).max(1440),

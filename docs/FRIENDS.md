@@ -1,6 +1,6 @@
 # Friends and deliberate sharing
 
-This optional pilot gives a reader a username and a private Friends area. It does not expose a public profile, edition, constitution, saved list or reading activity. Readers who never opt in can continue using Curiofold unchanged.
+This optional pilot gives a reader a username and a private Friends area. It does not expose a public profile, edition, constitution, saved list or reading activity. Readers who never opt in can continue using Filtered unchanged.
 
 ## Consent and identity
 

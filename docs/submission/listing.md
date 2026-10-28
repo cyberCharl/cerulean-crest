@@ -4,7 +4,7 @@ Status: copy prepared for review; use only after the stated features are deploye
 
 | Portal field | Proposed value |
 | --- | --- |
-| Name | `[PRODUCT]` (working name: Curiofold) |
+| Name | `[PRODUCT]` (working name: Filtered) |
 | Short description | A finite reading edition, shaped by your interests. |
 | Category | Productivity, if offered by the portal |
 | Developer identity | `[PUBLISHER]`, exactly as verified in the selected OpenAI organization |

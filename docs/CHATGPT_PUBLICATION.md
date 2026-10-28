@@ -1,4 +1,4 @@
-# Publishing Curiofold for ChatGPT
+# Publishing Filtered for ChatGPT
 
 Publication research was checked 18 September 2026 against official OpenAI documentation. The workspace MCP contract has since changed to a Markdown constitution and four tools; rescan and rehearse this exact version before submission. This is a preparation plan, not a submitted or approved listing.
 
@@ -16,15 +16,15 @@ The submission portal accepts remote MCP alone or MCP plus skills; custom UI is 
 
 ## Intended reader journey
 
-1. Sign up on Curiofold and save reading volume and a small initial editorial brief.
+1. Sign up on Filtered and save reading volume and a small initial editorial brief.
 2. Open the actual published directory listing from the onboarding page, install, and connect when prompted.
-3. Authorize using the same Curiofold/Auth0 account. The publisher configures OAuth client credentials centrally; readers do not receive client secrets or create developer-mode connectors.
-4. Start a new chat, invoke Curiofold, and request the first edition.
+3. Authorize using the same Filtered/Auth0 account. The publisher configures OAuth client credentials centrally; readers do not receive client secrets or create developer-mode connectors.
+4. Start a new chat, invoke Filtered, and request the first edition.
 5. Open the returned private edition link and confirm the recurring ChatGPT task requested by the onboarding instruction.
 
 Installation and connection can be separate moments; some plugins request authorization on first use. “Sign in with ChatGPT” is only available to supported partners, so it is not our proposed identity system. Browser signup and MCP authorization continue sharing Auth0 identity. [Install and connect plugins](https://learn.chatgpt.com/docs/plugins)
 
-**Use the directory URL supplied by the publication portal.** Direct listing links are supported, but no Curiofold listing URL exists yet in this investigation. Approval and publication are separate actions. Until publication, the wizard should retain saved preferences and explain that connection is not yet available; opening a link is not proof of connection. [Publication and discovery](https://developers.openai.com/plugins/deploy/app-review#publication-and-distribution)
+**Use the directory URL supplied by the publication portal.** Direct listing links are supported, but no Filtered listing URL exists yet in this investigation. Approval and publication are separate actions. Until publication, the wizard should retain saved preferences and explain that connection is not yet available; opening a link is not proof of connection. [Publication and discovery](https://developers.openai.com/plugins/deploy/app-review#publication-and-distribution)
 
 ## What is already present
 
@@ -94,9 +94,9 @@ These are repository-specific test designs to prepare, not completed test result
 
 | Type | Scenario | Expected result |
 | --- | --- | --- |
-| Positive 1 | “Show my Curiofold editorial brief.” | Current constitution, reading context and any current feedback/recommendations/history, with no other reader's data and no empty placeholders. |
-| Positive 2 | “Check my recent Curiofold editions before selecting anything.” | The assembled read contains only this account's source history; an omitted history section is valid for a new account. |
-| Positive 3 | “Create today's Curiofold edition.” | Read assembled context first, research a broad internal candidate list, submit only the final edition once, return its private link. |
+| Positive 1 | “Show my Filtered editorial brief.” | Current constitution, reading context and any current feedback/recommendations/history, with no other reader's data and no empty placeholders. |
+| Positive 2 | “Check my recent Filtered editions before selecting anything.” | The assembled read contains only this account's source history; an omitted history section is valid for a new account. |
+| Positive 3 | “Create today's Filtered edition.” | Read assembled context first, research a broad internal candidate list, submit only the final edition once, return its private link. |
 | Positive 4 | Repeat creation for the same date. | Existing edition returned unchanged; no duplicated sections/items. |
 | Positive 5 | Change reading volume and the Markdown constitution on the website, then request the brief and next available fixture-date edition. | Agent receives the revised values and uses them. An explicit chat policy edit changes the same document without copying transient context. |
 | Negative 1 | Request another reader's editions. | No access or owner override; own-account data only. |
