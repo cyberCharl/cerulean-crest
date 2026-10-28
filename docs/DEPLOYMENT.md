@@ -2,7 +2,7 @@
 
 ## Filtered domain rollout — 28 October 2026
 
-The product is named **Filtered**. `filtered.page` is attached to the existing `cerulean-works/cerulean-crest` Vercel project. Registration at Porkbun and DNS setup are pending; the existing `cerulean-crest.vercel.app` origin remains active until the custom domain and browser login are verified.
+The product is named **Filtered**. `filtered.page` is registered at Porkbun and attached to the existing `cerulean-works/cerulean-crest` Vercel project. DNS is verified and a TLS certificate has been issued. The existing `cerulean-crest.vercel.app` endpoint remains available for integration compatibility.
 
 Keep Porkbun's nameservers and configure the exact apex records returned by Vercel on 28 October:
 
@@ -13,13 +13,13 @@ Keep Porkbun's nameservers and configure the exact apex records returned by Verc
 
 Replace conflicting apex parking records, preserving unrelated mail and verification records. Re-check with `npx vercel domains verify filtered.page --scope cerulean-works`; DNS acceptance alone does not establish working HTTPS.
 
-Before switching origins, authorize Auth0 CLI administration for `cerulean-works.eu.auth0.com`, add `https://filtered.page/auth/callback` to the existing Production browser client's callback allowlist and `https://filtered.page` to its logout allowlist, retaining existing entries. Set Production `CERULEAN_APP_URL` and `CERULEAN_MARKETING_URL` to `https://filtered.page`, redeploy, and verify sign-in and sign-out. The admin CLI currently requires reauthorization; existing reader login is unaffected.
+The existing Production Auth0 browser client is named Filtered and permits `https://filtered.page/auth/callback`, with `https://filtered.page` in its logout and web-origin allowlists. Existing entries are retained. Production `CERULEAN_APP_URL` and `CERULEAN_MARKETING_URL` use `https://filtered.page`. Browser sessions are host-specific, so readers may need to sign in again on the new domain; their account and stored editions are unchanged.
 
 Keep `CERULEAN_MCP_RESOURCE` and existing client IDs unchanged. The existing ChatGPT connection can continue using its current endpoint; changing its connection URL requires a separate live authorization check. Domain registration does not rename or recreate accounts or data.
 
 The recommended production stack is Vercel for the Next.js application and Neon Postgres for durable relational storage. Vercel’s Neon integration provisions the database and injects its connection string into the project. Both the database and server functions use Frankfurt (`fra1`) so database round trips stay within one region.
 
-Current production: [cerulean-crest.vercel.app](https://cerulean-crest.vercel.app). The Vercel project is `cerulean-works/cerulean-crest`. Each environment has a separate Neon resource on the free plan:
+Current production: [filtered.page](https://filtered.page). The Vercel project is `cerulean-works/cerulean-crest`. Each environment has a separate Neon resource on the free plan:
 
 | Environment | Resource | Neon project |
 | --- | --- | --- |
@@ -93,25 +93,23 @@ curl --fail-with-body \
 
 ## Custom domain
 
-Keep the existing `cerulean-crest` Vercel project. The landing page and application share one deployment. On the existing `cerulean-crest.vercel.app` domain, `/` is the landing page and `/today` opens the signed-in reader. `/landing` is also available for reviewing the landing page.
+Keep the existing `cerulean-crest` Vercel project. The landing page and application share `https://filtered.page`: `/` is the landing page and `/latest` opens the signed-in reader. `/today` redirects to `/latest`. `/landing` is also available for reviewing the landing page.
 
-When a name is final, attach both the main domain and application subdomain to this project. For example, if `curation-station.com` is acquired and selected:
+Inspect the attached domain and verify its DNS configuration:
 
 ```bash
-npx vercel domains add curation-station.com cerulean-crest
-npx vercel domains add app.curation-station.com cerulean-crest
-npx vercel domains inspect curation-station.com
-npx vercel domains inspect app.curation-station.com
+npx vercel domains inspect filtered.page --scope cerulean-works
+npx vercel domains verify filtered.page --scope cerulean-works
 ```
 
-Use the exact DNS records returned by Vercel at the registrar; these commands do not purchase the domain. Configure production origins and redeploy:
+Use the exact DNS records returned by Vercel at the registrar. The production origins are:
 
 ```text
-CERULEAN_MARKETING_URL=https://curation-station.com
-CERULEAN_APP_URL=https://app.curation-station.com
+CERULEAN_MARKETING_URL=https://filtered.page
+CERULEAN_APP_URL=https://filtered.page
 ```
 
-The marketing homepage remains the landing page; the separately configured application host's homepage redirects to `/today`. Signup and sign-in links use the application origin, keeping browser sessions on that host. The project name and visible product name do not have to match either domain. Neither proposed domain has been registered or attached by this implementation.
+Signup and sign-in links use the application origin, keeping browser sessions on that host. A separate application subdomain is optional; if configured later with a different marketing origin, its homepage redirects to `/latest`. The project name and visible product name do not have to match the domain.
 
 `CERULEAN_APP_URL` takes precedence over the Auth0 SDK's `APP_BASE_URL` and the legacy `CERULEAN_SITE_URL`. Use one consistent application origin per environment; for local browser login use `http://localhost:3000`. Do not copy production origins or credentials into Preview/Development. Browser OAuth needs an exact, registered callback, so authenticated preview testing needs a known preview origin and its own Auth0 browser client.
 

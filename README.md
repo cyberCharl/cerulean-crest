@@ -2,7 +2,7 @@
 
 Filtered is a finite, personal magazine on your chosen schedule. Readers sign in to private editions and edit a Markdown editorial constitution. A connected ChatGPT curator reads that document with current feedback and friend recommendations, researches an edition, and publishes the complete final selection through MCP.
 
-Production: [cerulean-crest.vercel.app](https://cerulean-crest.vercel.app)
+Production: [filtered.page](https://filtered.page). The existing `cerulean-crest.vercel.app` endpoint remains available for integration compatibility.
 
 ## Start here
 
