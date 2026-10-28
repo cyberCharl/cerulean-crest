@@ -224,8 +224,8 @@ export async function share(
   if (r?.status !== "accepted")
     throw new SocialError("You can only share with an accepted friend");
   const [article] = await c.query(
-    `SELECT item.title FROM items item JOIN sections sec ON sec.id=item.section_id JOIN issues i ON i.id=sec.issue_id WHERE i.owner_subject=$1 AND item.url=$2 UNION ALL SELECT title FROM article_feedback WHERE owner_subject=$3 AND url=$4 LIMIT 1`,
-    [owner, input.url, owner, input.url],
+    `SELECT item.title FROM items item JOIN sections sec ON sec.id=item.section_id JOIN issues i ON i.id=sec.issue_id WHERE i.owner_subject=$1 AND item.url=$2 UNION ALL SELECT title FROM article_feedback WHERE owner_subject=$3 AND url=$4 UNION ALL SELECT title FROM reading_links WHERE owner_subject=$5 AND url=$6 LIMIT 1`,
+    [owner, input.url, owner, input.url, owner, input.url],
   );
   if (!article) throw new SocialError("Article not found in your editions");
   await c.query(

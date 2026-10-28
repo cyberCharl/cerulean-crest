@@ -34,9 +34,8 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           </Link>
           <nav aria-label="Primary navigation">
             {user ? <>
-              <Link href={appUrl("/latest")}>Latest</Link>
-              <Link href={appUrl("/archive")}>Archive</Link>
-              <Link href={appUrl("/saved")}>Saved</Link>
+              <Link href={appUrl("/latest")}>Your paper</Link>
+              <Link href={appUrl("/links")}>Your links</Link>
               <Link href={appUrl("/friends")}>Friends</Link>
               <Link href={appUrl("/settings")}>Settings</Link>
               <a href={appUrl("/auth/logout")}>Sign out</a>

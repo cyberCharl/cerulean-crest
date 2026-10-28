@@ -52,7 +52,7 @@ Acceptance: a new user can configure a magazine, connect an authorized curator, 
 
 ### 3. Persist feedback and curate with history
 
-**Status: partial.** Owner-scoped recent links and instructions to check them exist. Persisted feedback, a durable appearance history across replacement, and resurfacing requests remain unbuilt.
+**Historical planning status: partial.** This section predates the October reading-candidate implementation. The [current MCP contract](MCP.md) now describes persisted feedback, commitment/read state, independent front/inside exposure and candidate eligibility. Use that contract for implementation and release checks; the remaining items below record the earlier planning discussion.
 
 Store reading state and an independent “include in a future edition” request per user and stable source identity. Distinguish an explicit read mark from opening a link; absence of a mark is not proof that someone did not read. Preserve appearance history across edition replacement and use conservative URL normalization, with editorial deduplication for different treatments of the same work or event.
 
@@ -62,7 +62,7 @@ Editorial intent and proposed resurfacing policy:
 
 - Past editions remain an archive, not a queue the user must finish.
 - Unread or unmarked items are not unfinished assignments. Their state alone is neither a resurfacing request nor evidence of dislike. Even if half an edition is unmarked, the curator must not infer that those pieces belong in future editions or that the reader needs less choice.
-- Explicit resurfacing requests get priority for reconsideration. Otherwise, default to avoiding prior appearances; any exception needs a fresh editorial reason independent of unread status. The precise exception policy remains to be tested.
+- The October candidate model supersedes blanket avoidance of prior appearances: use `readingCandidates.candidates` and `readingCandidates.excludedUrls`. Selection is not exposure; an eligible article from unopened inside pages can return even if listed in a recent edition. Pinned and later commitments signal explicit interest, while read, dormant and currently deferred links are excluded.
 - Resurfaced items consume the new edition's existing time budget. Label them and explain why they returned.
 - Allow users to cancel requests. Resolve a request only after successful publication containing that item; failed publication and retries must not lose it.
 - A repeated publication request must not consume requests again or alter an existing edition.

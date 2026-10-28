@@ -20,10 +20,16 @@ export async function transaction<T>(
     try {
       const result = await work({
         query: async (sql, params = []) => {
-          const statement = db.prepare(sql.replace(/\$\d+/g, "?"));
+          // PostgreSQL placeholders may repeat or appear out of order. Expand
+          // each occurrence when translating to SQLite's positional binding.
+          const ordered: unknown[] = [];
+          const statement = db.prepare(sql.replace(/\$(\d+)/g, (_match, index) => {
+            ordered.push(params[Number(index) - 1]);
+            return "?";
+          }));
           return statement.reader
-            ? (statement.all(...params) as Record<string, unknown>[])
-            : (statement.run(...params), []);
+            ? (statement.all(...ordered) as Record<string, unknown>[])
+            : (statement.run(...ordered), []);
         },
       });
       db.exec("COMMIT");

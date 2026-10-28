@@ -47,6 +47,11 @@ test("HTTP publishing, duplicate protection, authentication and public validatio
   }
   assert.equal(ready, true);
   assert.equal((await fetch(`${base}/mcp`)).status, 401);
+  for (const path of ["/links", "/archive", "/latest", "/latest?prototype=reading&variant=C"]) {
+    const response = await fetch(`${base}${path}`, { redirect: "manual" });
+    assert.equal(response.status, 307, `${path} requires a session`);
+    assert.match(response.headers.get("location") ?? "", /auth\/login/);
+  }
   const headers = { Authorization: `Basic ${Buffer.from("test:local-test-only").toString("base64")}`, "Content-Type": "application/json" };
   for (const date of ["not-a-date", "2026-02-31"]) {
     assert.equal((await fetch(`${base}/issues/${date}`, { redirect: "manual" })).status, 307);
@@ -78,29 +83,36 @@ test("HTTP publishing, duplicate protection, authentication and public validatio
   const privatePage = await fetch(`${base}/issues/${issue.date}`, { headers: ownerSession });
   assert.equal(privatePage.status, 200);
   assert.match(privatePage.headers.get("cache-control") || "", /private/);
-  assert.match(await privatePage.text(), /Original HTTP edition|A focused|issue-hero/);
+  assert.match(await privatePage.text(), /A little room for reading/);
   assert.equal((await fetch(`${base}/issues/${issue.date}`, { headers: otherSession })).status, 404);
   const defaultEdition = await (await fetch(`${base}/issues/${issue.date}`, { headers: ownerSession })).text();
   assert.ok(defaultEdition.includes("Filtered"));
-  assert.ok(defaultEdition.includes(`href="${base}/latest">Latest</a>`));
+  assert.ok(defaultEdition.includes(`href="${base}/latest">Your paper</a>`));
+  assert.ok(defaultEdition.includes(`href="${base}/links">Your links</a>`));
   assert.ok(!defaultEdition.includes("edition has not arrived yet"));
   assert.ok(!defaultEdition.includes("Daybook"));
   assert.ok(defaultEdition.includes('data-reader-theme="quiet-book"'));
-  assert.ok(defaultEdition.includes('class="edition-sidebar"'));
-  assert.equal((defaultEdition.match(/class="edition-sidebar"/g) ?? []).length, 1);
-  assert.ok(defaultEdition.includes('class="article-byline"'));
-  assert.ok(!defaultEdition.includes('class="item-details"'));
-  assert.ok(defaultEdition.includes('class="article-controls"'));
-  assert.ok(!defaultEdition.includes('class="item-utilities"'));
+  assert.ok(defaultEdition.includes('aria-label="Front page"'));
+  assert.ok(defaultEdition.includes("One to settle into"));
+  assert.ok(defaultEdition.includes("Maybe later"));
+  assert.ok(defaultEdition.includes("Pin for later"));
+  assert.ok(defaultEdition.includes("Open the rest of the paper"));
+  assert.ok(!defaultEdition.includes('aria-label="Reading progress"'));
+  assert.ok(!defaultEdition.includes('class="edition-sidebar"'));
+  assert.ok(!defaultEdition.includes('aria-label="Inside pages"'));
   assert.ok(!defaultEdition.includes('Edition appearance'));
   for (const style of ["quiet-book", "tactile-correspondence"]) {
     const response = await fetch(`${base}/issues/${issue.date}/${style}`, { headers: ownerSession, redirect: "manual" });
     assert.equal(response.status, 307);
     assert.equal(response.headers.get("location"), `/issues/${issue.date}`);
   }
-  const otherArchive = await (await fetch(`${base}/archive`, { headers: otherSession })).text();
+  const archiveRedirect = await fetch(`${base}/archive`, { headers: otherSession, redirect: "manual" });
+  assert.equal(archiveRedirect.status, 307);
+  assert.equal(archiveRedirect.headers.get("location"), "/links");
+  const otherArchive = await (await fetch(`${base}/links`, { headers: otherSession })).text();
   assert.ok(!otherArchive.includes(issue.title));
-  assert.ok(otherArchive.includes("Your first edition has not been published"));
+  assert.ok(otherArchive.includes("Links, without the backlog."));
+  assert.ok(otherArchive.includes("Nothing here."));
   assert.equal((await fetch(`${base}/onboarding`, { redirect: "manual" })).status, 307);
   const legacyToday = await fetch(`${base}/today`, { headers: otherSession, redirect: "manual" });
   assert.equal(legacyToday.headers.get("location"), "/latest");

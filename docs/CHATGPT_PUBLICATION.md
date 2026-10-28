@@ -4,7 +4,7 @@ Publication research was checked 18 September 2026 against official OpenAI docum
 
 ## Prepared submission materials
 
-The [submission packet](submission/README.md) now contains listing copy, release notes, public-policy/support drafts, reviewer account setup and seven positive plus five negative review scenarios. The policy drafts remain internal until operator, contact, retention/deletion and regional details are resolved. No live review case is recorded as passed.
+The [submission packet](submission/README.md) now contains listing copy, release notes, public-policy/support drafts, reviewer account setup and reading-candidate checks alongside the original positive and negative scenarios. The policy drafts remain internal until operator, contact, retention/deletion and regional details are resolved. No live review case is recorded as passed.
 
 The domain challenge route is implemented at `/.well-known/openai-apps-challenge`: set `OPENAI_APPS_CHALLENGE` to the exact portal token in the intended deployment and redeploy. It returns 404 until configured. Name/domain selection, verified publisher identity, public policy pages, reviewer credentials and production rehearsal remain outstanding.
 
@@ -38,9 +38,9 @@ Repository evidence, rather than a claim that the public installation flow has p
 | Private data | Edition and settings operations use the verified subject. Browser and MCP clients must remain on the same Auth0 tenant. |
 | Editorial constitution | `get_editorial_brief` supplies assembled read-only curation context. `get_editorial_constitution` returns only the editable document and revision; `update_editorial_constitution` applies exact edits only on explicit request, reflected in Settings. |
 | Article feedback and friends | The brief read includes bounded recent reactions/private notes and pending friend nominations when present. Empty collections add no placeholder prose. These soft signals do not rewrite policy. |
-| History | The brief read includes source titles/URLs from up to seven recent editions for that reader. It does not return persisted reading status or a resurfacing queue. |
+| History and reading candidates | The brief read includes source titles/URLs from up to seven recent editions plus `readingCandidates.candidates` and `readingCandidates.excludedUrls`. Saved-link eligibility reflects commitment, read/dormant state and deferral. Historical selection alone does not prove exposure. These additions require verification on the submitted deployment. |
 | Publication | `create_daily_edition` validates a complete edition and is idempotent for each reader/date; it does not replace an existing edition. |
-| Curation instructions | `plugins/cerulean-crest/skills/curate-daily-edition/SKILL.md` tells the agent to read the assembled brief, search widely with an internal candidate list, and publish only the final edition. |
+| Curation instructions | `plugins/cerulean-crest/skills/curate-daily-edition/SKILL.md` tells the agent to read the assembled brief, combine eligible saved links with discoveries, respect excluded URLs, and publish only the final edition. It aims for a small front page and optional inside reading; the website controls placement and exposure. |
 | Local package | `.mcp.json` still targets localhost with a development bearer. This is not a public production package; do not upload it unchanged or give its token to readers. |
 
 See [the current MCP contract](MCP.md) for the exact workspace behavior. Earlier deployment evidence does not establish that this changed tool set is live.
@@ -74,10 +74,10 @@ Privacy materials should cover account identity, reading preferences, edition co
 
 Product scope and remaining options:
 
-- The current brief combines a persistent Markdown constitution, structured reading context, recent editions, feedback, and friend nominations. The latter three are current context, not durable policy.
+- The current brief combines a persistent Markdown constitution, structured reading context, recent editions, eligible saved reading candidates, excluded URLs, feedback, and friend nominations. Reading activity and these contextual collections never become durable policy or a learned profile automatically.
 - `update_editorial_constitution` applies exact edits against the revision from `get_editorial_constitution`. The assembled brief is not an update source. Save is not an editorial reaction; feedback must not silently rewrite the document.
 - If connection verification is needed in the wizard, design an explicit, account-bound handshake. A user checkbox or a successful browser session proves neither installation nor MCP connection. A past tool request establishes only past access, not a currently valid link. Do not silently turn the existing read-only brief tool into a connection-state mutation.
-- Persist explicit “include in a future edition” feedback and expose it with history when that feature is built. Unread or unmarked articles must not automatically become a queue. This future resurfacing queue is separate from the currently authorized saving and feedback features and is not a submission prerequisite.
+- The website now stores candidate, later and pinned commitments plus dormant/read state. The existing brief tool exposes bounded eligibility for the next edition; the tool list remains `get_editorial_brief`, `get_editorial_constitution`, `update_editorial_constitution`, and `create_daily_edition`. No MCP capture or reading-state write tool is introduced. Do not exclude every URL in recent history: eligible links from unseen inside pages can return, while the supplied excluded URLs must be respected.
 - Custom embedded UI, `search`/`fetch` tools for a separate retrieval use case, and an in-app scheduler are not needed for this initial curation workflow.
 
 ## Scheduling and personalization boundaries
@@ -94,11 +94,12 @@ These are repository-specific test designs to prepare, not completed test result
 
 | Type | Scenario | Expected result |
 | --- | --- | --- |
-| Positive 1 | “Show my Filtered editorial brief.” | Current constitution, reading context and any current feedback/recommendations/history, with no other reader's data and no empty placeholders. |
+| Positive 1 | “Show my Filtered editorial brief.” | Current constitution, reading context, saved candidate/exclusion context and any current feedback/recommendations/history, with no other reader's data and no empty feedback placeholders. |
 | Positive 2 | “Check my recent Filtered editions before selecting anything.” | The assembled read contains only this account's source history; an omitted history section is valid for a new account. |
 | Positive 3 | “Create today's Filtered edition.” | Read assembled context first, research a broad internal candidate list, submit only the final edition once, return its private link. |
 | Positive 4 | Repeat creation for the same date. | Existing edition returned unchanged; no duplicated sections/items. |
 | Positive 5 | Change reading volume and the Markdown constitution on the website, then request the brief and next available fixture-date edition. | Agent receives the revised values and uses them. An explicit chat policy edit changes the same document without copying transient context. |
+| Positive 6 | Save links at different commitment levels, open only an edition's front page, then request the next brief. | Pinned and eligible saved links are considered alongside discovery. Excluded URLs are not selected. An unseen inside-page link remains eligible even if present in recent history; no inferred policy edit occurs. |
 | Negative 1 | Request another reader's editions. | No access or owner override; own-account data only. |
 | Negative 2 | “Replace my existing edition.” | Explain unsupported replacement; do not disguise replacement as creation. |
 | Negative 3 | Attempt publication without write scope or with expired credentials. | Authorization challenge/reconnection; no edition written. |
