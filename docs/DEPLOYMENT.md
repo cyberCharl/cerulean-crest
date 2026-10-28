@@ -17,6 +17,8 @@ The existing Production Auth0 browser client is named Filtered and permits `http
 
 Keep `CERULEAN_MCP_RESOURCE` and existing client IDs unchanged. The existing ChatGPT connection can continue using its current endpoint; changing its connection URL requires a separate live authorization check. Domain registration does not rename or recreate accounts or data.
 
+Auth0 branding was updated on 28 October: the browser, ChatGPT, development and verification clients use Filtered names and the hosted Filtered book logo; the API display name is Filtered MCP. Universal Login uses `https://filtered.page/brand/filtered/filtered-mark.svg`, favicon `https://filtered.page/icon.svg`, primary color `#9B4B36`, and background `#F2EADB`. The live login HTML was verified to contain the new logo, favicon and colors. These theme defaults are tenant-wide; future unrelated applications in `cerulean-works` will need their own branding. Client IDs, API audience, scopes, callback lists and account data were preserved; scope descriptions now use cadence-neutral Filtered wording.
+
 The recommended production stack is Vercel for the Next.js application and Neon Postgres for durable relational storage. Vercel’s Neon integration provisions the database and injects its connection string into the project. Both the database and server functions use Frankfurt (`fra1`) so database round trips stay within one region.
 
 Current production: [filtered.page](https://filtered.page). The Vercel project is `cerulean-works/cerulean-crest`. Each environment has a separate Neon resource on the free plan:
