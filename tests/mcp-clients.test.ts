@@ -1,6 +1,6 @@
 // Checks the discovery chain a standard (non-ChatGPT) MCP client follows, using the
 // MCP SDK's own OAuth client. Auth0's metadata below mirrors the production tenant:
-// no registration_endpoint and no Client ID Metadata Document support.
+// no registration_endpoint, and Client ID Metadata Documents for admin-imported clients.
 import assert from "node:assert/strict";
 import test from "node:test";
 import { auth, extractWWWAuthenticateParams, type OAuthClientProvider } from "@modelcontextprotocol/sdk/client/auth.js";
@@ -21,7 +21,7 @@ const auth0Metadata = {
   jwks_uri: `${issuer}.well-known/jwks.json`, response_types_supported: ["code"],
   code_challenge_methods_supported: ["S256", "plain"], scopes_supported: ["openid", "offline_access"],
   token_endpoint_auth_methods_supported: ["client_secret_basic", "client_secret_post", "none"],
-  authorization_response_iss_parameter_supported: true,
+  authorization_response_iss_parameter_supported: true, client_id_metadata_document_supported: true,
 };
 
 async function withEnv<T>(values: Record<string, string>, run: () => Promise<T> | T): Promise<T> {
@@ -43,7 +43,7 @@ const fetchFn = async (input: string | URL | Request) => {
   return new Response("not found", { status: 404 });
 };
 
-function provider(clientId?: string) {
+function provider(clientId?: string, clientMetadataUrl?: string) {
   let client = clientId ? { client_id: clientId } : undefined;
   let redirected: URL | undefined;
   const value: OAuthClientProvider & { redirected(): URL | undefined } = {
@@ -55,6 +55,7 @@ function provider(clientId?: string) {
     saveCodeVerifier: () => {}, codeVerifier: () => "verifier",
     redirectToAuthorization: (url) => { redirected = url; },
     redirected: () => redirected,
+    ...(clientMetadataUrl ? { clientMetadataUrl } : {}),
   };
   return value;
 }
@@ -95,7 +96,14 @@ test("a different hostname is rejected because the metadata names the audience U
     /does not match expected/);
 }));
 
-test("without a pre-registered client ID, connection stops at client registration", () => withEnv(env, async () => {
+test("a client with a published metadata document uses its URL as the client ID", () => withEnv(env, async () => {
+  const { resourceMetadataUrl, scope } = extractWWWAuthenticateParams(unauthorized());
+  const claude = provider(undefined, "https://claude.ai/oauth/mcp-oauth-client-metadata");
+  assert.equal(await auth(claude, { serverUrl: mcpConnectionUrl(), resourceMetadataUrl, scope, fetchFn }), "REDIRECT");
+  assert.equal(claude.redirected()?.searchParams.get("client_id"), "https://claude.ai/oauth/mcp-oauth-client-metadata");
+}));
+
+test("a client with neither a client ID nor a metadata document can't register", () => withEnv(env, async () => {
   const { resourceMetadataUrl, scope } = extractWWWAuthenticateParams(unauthorized());
   await assert.rejects(auth(provider(), { serverUrl: mcpConnectionUrl(), resourceMetadataUrl, scope, fetchFn }),
     /does not support dynamic client registration/);
