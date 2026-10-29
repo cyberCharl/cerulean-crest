@@ -2,6 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-09-04
+- Update 2026-10-29: the tool is now `publish_edition`, the pilot bearer and Basic-authenticated PUT are removed, and any MCP client can connect. See [agent access](../AGENT_ACCESS.md).
 
 ## Context
 

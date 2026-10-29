@@ -87,8 +87,8 @@ test("existing preferences without a delivery schedule remain valid", () => {
   assert.ok(!buildFirstEditionPrompt(settings).includes("recurring"));
 });
 
-// Captured from the ChatGPT-only implementation before other AI tools were added.
-const curation = "Read my Filtered editorial brief, including its current feedback, friend recommendations, and recent editions. Search widely, keep a candidate list internally, then submit only the complete final edition with create_daily_edition. Return the edition link.";
+// The ChatGPT-only wording, with the tool renamed to publish_edition.
+const curation = "Read my Filtered editorial brief, including its current feedback, friend recommendations, and recent editions. Search widely, keep a candidate list internally, then submit only the complete final edition with publish_edition. Return the edition link.";
 const weekly = { ...defaultSettings, timeZone: "Europe/Amsterdam", deliverySchedule: { frequency: "weekly", day: "Sunday", time: "09:30" } } as const;
 
 test("the ChatGPT instruction is unchanged, with or without naming the tool", () => {

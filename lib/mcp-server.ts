@@ -24,13 +24,13 @@ const editionResultSchema = {
   url: z.string().url(),
 };
 
-export function createCeruleanMcpServer({ baseUrl, scopes, subject, createEdition = (input) => createIssue(subject, input) }: ServerDependencies): McpServer {
+export function createFilteredMcpServer({ baseUrl, scopes, subject, createEdition = (input) => createIssue(subject, input) }: ServerDependencies): McpServer {
   function denied(scope: string) {
     return { isError: true, content: [{ type: "text" as const, text: "This operation requires additional authorization." }],
       _meta: { "mcp/www_authenticate": [mcpChallenge(baseUrl, scope)] } };
   }
   const server = new McpServer(
-    { name: "cerulean-crest", version: "0.2.0" },
+    { name: "filtered", version: "0.3.0" },
     { instructions: curatorServerInstructions },
   );
 
@@ -108,7 +108,7 @@ export function createCeruleanMcpServer({ baseUrl, scopes, subject, createEditio
   );
 
   server.registerTool(
-    "create_daily_edition",
+    "publish_edition",
     {
       title: "Publish a complete edition",
       description: "Submit only the final, fully researched edition. Keep the candidate list internal. Reading-minute totals may vary from the suggested budget. An existing date is returned unchanged.",

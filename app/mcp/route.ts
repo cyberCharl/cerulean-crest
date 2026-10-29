@@ -1,7 +1,7 @@
 import { configuredAppOrigin } from "@/lib/site-config";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { authorizeMcpRequest, mcpAuthConfigured, mcpChallenge } from "@/lib/mcp-auth";
-import { createCeruleanMcpServer } from "@/lib/mcp-server";
+import { createFilteredMcpServer } from "@/lib/mcp-server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -39,7 +39,7 @@ async function handleMcpRequest(request: Request): Promise<Response> {
   }
 
   const transport = new WebStandardStreamableHTTPServerTransport({ enableJsonResponse: true });
-  const server = createCeruleanMcpServer({ baseUrl: configuredAppOrigin() || new URL(request.url).origin, scopes: authInfo.scopes, subject: String(authInfo.extra?.subject || "") });
+  const server = createFilteredMcpServer({ baseUrl: configuredAppOrigin() || new URL(request.url).origin, scopes: authInfo.scopes, subject: String(authInfo.extra?.subject || "") });
   await server.connect(transport);
   const response = await transport.handleRequest(request, { authInfo });
 

@@ -15,7 +15,7 @@ This is the launch scope and readiness record, updated after the 17 September mu
 | Serendipity | Editorial guidance exists. Dedicated preference controls, discovery labels and feedback are not implemented. |
 | First edition and recurring delivery for a new user | Sean completed guided onboarding and created his first edition, as reported by the owner. Unaided setup and recurring delivery remain unverified. Scheduling intentionally remains in ChatGPT. |
 
-See [the implemented onboarding flow](ONBOARDING.md), [ChatGPT publication research](CHATGPT_PUBLICATION.md), [implementation evidence](IMPLEMENTATION_STATUS.md), and [account setup](USER_ACCOUNTS.md).
+See [the implemented onboarding flow](ONBOARDING.md), [agent access](AGENT_ACCESS.md), and [account setup](USER_ACCOUNTS.md).
 
 ## What the announcement should offer
 
@@ -52,7 +52,7 @@ Acceptance: a new user can configure a magazine, connect an authorized curator, 
 
 ### 3. Persist feedback and curate with history
 
-**Historical planning status: partial.** This section predates the October reading-candidate implementation. The [current MCP contract](MCP.md) now describes persisted feedback, commitment/read state, independent front/inside exposure and candidate eligibility. Use that contract for implementation and release checks; the remaining items below record the earlier planning discussion.
+**Historical planning status: partial.** This section predates the October reading-candidate implementation. [Agent access](AGENT_ACCESS.md) now describes persisted feedback, commitment/read state, independent front/inside exposure and candidate eligibility. Use that contract for implementation and release checks; the remaining items below record the earlier planning discussion.
 
 Store reading state and an independent “include in a future edition” request per user and stable source identity. Distinguish an explicit read mark from opening a link; absence of a mark is not proof that someone did not read. Preserve appearance history across edition replacement and use conservative URL normalization, with editorial deduplication for different treatments of the same work or event.
 

@@ -19,7 +19,7 @@ export default async function SupportPage() {
       <p><a href={appUrl("/onboarding?step=connect")}>Setup</a> walks you through it. Sign in to your AI tool and to Filtered with the same account you use here. If the connection stops working, remove Filtered in your AI tool, then add it again.</p>
 
       <h2 id="no-paper">My paper didn’t arrive</h2>
-      <p>Your AI tool makes each paper, on the schedule you set up in that tool. Check that the scheduled task still exists and that Filtered is still connected. Then look in <a href={appUrl("/archive")}>the archive</a>, signed in with the same account.</p>
+      <p>Your AI tool makes each paper, either on a schedule you set up in that tool or when you ask it. If you use a schedule, check that the task still exists and that Filtered is still connected. Then look in <a href={appUrl("/archive")}>the archive</a>, signed in with the same account.</p>
 
       <h2 id="changing">Changing what you get</h2>
       <p>Edit your brief and reading time in <a href={appUrl("/settings")}>Settings</a>, or ask your AI tool to change your brief for you. “More like this” and “less like this” on a piece help it adjust without changing your brief.</p>

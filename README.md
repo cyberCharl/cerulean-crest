@@ -1,17 +1,16 @@
 # Filtered
 
-Filtered is a finite, personal magazine on your chosen schedule. Readers sign in to a small front page, optionally open the rest of the paper, and keep links as candidates, for later, or pinned. A connected ChatGPT curator reads their Markdown editorial constitution alongside saved reading candidates, feedback and friend recommendations, then publishes the complete final selection through MCP.
+Filtered is a finite, personal magazine on your chosen schedule. Readers sign in to a small front page, optionally open the rest of the paper, and keep links as candidates, for later, or pinned. A connected AI curator (ChatGPT, Claude or another MCP tool) reads their Markdown editorial constitution alongside saved reading candidates, feedback and friend recommendations, then publishes the complete final selection through MCP.
 
 The candidate collection and two-stage reader were deployed to production on **29 October 2026**. See [the release record](docs/DEPLOYMENT.md#reading-release--29-october-2026) for verification and rollout details.
 
-Production: [filtered.page](https://filtered.page). The existing `cerulean-crest.vercel.app` endpoint remains available for integration compatibility.
+Production: [filtered.page](https://filtered.page). AI tools connect to `https://filtered.page/mcp`.
 
 ## Start here
 
 - [Reading model](docs/READING.md) — the signed-in paper, durable links, exposure, retirement and metadata behavior.
 - [Reading backlog](docs/BACKLOG.md) — all six product ideas, implementation status, and deferred questions.
-- [Publishing an edition](docs/PUBLISHING.md) — the short runbook for a person or another agent.
-- [MCP integration](docs/MCP.md) — the scheduled-agent pilot, local test flow and external-user gates.
+- [Agent access](docs/AGENT_ACCESS.md) — the MCP server, its tools, sign-in, Auth0 clients and ChatGPT publication.
 - [ADR 0001](docs/adr/0001-publish-scheduled-editions-through-mcp.md) — why scheduled editions use an MCP app instead of GitHub or email transport.
 - [Deployment](docs/DEPLOYMENT.md) — production setup and required secrets.
 - [Roadmap](docs/ROADMAP.md) — MVP, multi-user product, then agent platform.
