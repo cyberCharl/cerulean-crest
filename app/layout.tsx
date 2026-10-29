@@ -49,6 +49,11 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <footer className="site-footer">
           <p><span className="footer-rule" />A finite edition for a better information diet.</p>
           <p>Made with judgment, not engagement metrics.</p>
+          <nav className="footer-links" aria-label="Policies and help">
+            <a href={marketingUrl("/privacy")}>Privacy</a>
+            <a href={marketingUrl("/terms")}>Terms</a>
+            <a href={marketingUrl("/support")}>Help</a>
+          </nav>
         </footer>
       </body>
     </html>
