@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { LandingPage } from "@/components/landing-page";
-import { appUrl } from "@/lib/site-config";
+import { landingAccount, signupUrl } from "@/components/landing/account";
+import { marketingUrl } from "@/lib/site-config";
 
 export const metadata: Metadata = {
-  title: "A wider world. A finite edition.",
-  description: "A personal home for AI-curated reading. Shape your editorial brief, explore original sources, and leave things unread without guilt.",
+  title: "A newspaper of your own",
+  description: "A small paper for a better information diet. Write a brief, and your own AI finds a few good pieces to read on the writers’ own sites. Then it ends.",
 };
 
-export default function Landing() {
-  return <LandingPage signupUrl={appUrl("/auth/login?screen_hint=signup")} signinUrl={appUrl("/auth/login")} />;
+export default async function Landing() {
+  return <LandingPage signupUrl={signupUrl()} whyUrl={marketingUrl("/why")} {...await landingAccount()} />;
 }
