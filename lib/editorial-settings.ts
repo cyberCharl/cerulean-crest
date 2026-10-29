@@ -25,7 +25,7 @@ export type EditorialSettings = z.infer<typeof editorialSettingsSchema>;
 export const editorialPreferencesPatchSchema = editorialSettingsSchema
   .omit({ onboardingStep: true, theme: true, deliverySchedule: true, guidelines: true, interests: true, constitutionMarkdown: true }).partial().strict()
   .refine(value => Object.values(value).some(field => field !== undefined), "Provide at least one preference to update");
-export const defaultSettings: EditorialSettings = { readingMinutes: 60, editionMinutes: 120, guidelines: "", timeZone: "Africa/Johannesburg" };
+export const defaultSettings: EditorialSettings = { readingMinutes: 30, editionMinutes: 60, guidelines: "", timeZone: "Africa/Johannesburg" };
 
 /** Only submitted editorial fields are patched, preserving concurrent appearance changes. */
 export function editorialPreferencesFromForm(form: FormData) {
