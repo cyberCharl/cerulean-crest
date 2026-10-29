@@ -2,7 +2,7 @@
 
 Filtered is a finite, personal magazine on your chosen schedule. Readers sign in to a small front page, optionally open the rest of the paper, and keep links as candidates, for later, or pinned. A connected ChatGPT curator reads their Markdown editorial constitution alongside saved reading candidates, feedback and friend recommendations, then publishes the complete final selection through MCP.
 
-The candidate collection and two-stage reader are implemented on this branch; they have **not yet been deployed to production**.
+The candidate collection and two-stage reader were deployed to production on **29 October 2026**. See [the release record](docs/DEPLOYMENT.md#reading-release--29-october-2026) for verification and rollout details.
 
 Production: [filtered.page](https://filtered.page). The existing `cerulean-crest.vercel.app` endpoint remains available for integration compatibility.
 

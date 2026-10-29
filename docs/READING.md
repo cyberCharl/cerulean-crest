@@ -1,6 +1,6 @@
 # Reading model
 
-Implemented on the candidate/front-page branch on 28 October 2026, following the owner's selection of prototype layout C. This document describes the implementation; **production deployment is still pending**. The [backlog](BACKLOG.md) retains all six product ideas and their outstanding questions.
+Implemented on the candidate/front-page branch on 28 October 2026, following the owner's selection of prototype layout C. Deployed to **filtered.page on 29 October 2026**. This document describes the released implementation. The [backlog](BACKLOG.md) retains all six product ideas and their outstanding questions.
 
 ## Private paper and link collection
 
@@ -74,6 +74,6 @@ Bulk URL import and share extensions, Substack/X/newsletter connectors, a person
 
 ## Rollout and verification
 
-Before deploying this branch against Postgres, run the normal `npm run db:migrate` with the target database configured; migration 006 must exist before the new application runs. Adoption is lazy and batched per reader. No production schema or data was changed while implementing this branch.
+Before deploying this branch against Postgres, run the normal `npm run db:migrate` with the target database configured; migration 006 must exist before the new application runs. Adoption is lazy and batched per reader. On 29 October 2026, migration 006 was applied to production and the pre-existing publication, settings, feedback and social tables were verified unchanged. Batched adoption retained 524 links from 62 editions, with no inferred exposures. See [the release record](DEPLOYMENT.md#reading-release--29-october-2026).
 
 Verification includes the production build, unit regressions for lifecycle and metadata access, authenticated HTTP action tests, Postgres ownership/concurrency tests, and signed-in desktop/mobile browser checks. A separate Neon copy of production was used to rehearse migration and adoption of 62 editions / 524 links; hashes of the pre-existing publication, settings, feedback and social tables were unchanged afterwards. Metadata extraction and the reading Postgres flow were also exercised on Node 24.22.1.

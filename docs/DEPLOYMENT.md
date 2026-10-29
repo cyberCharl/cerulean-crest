@@ -1,5 +1,17 @@
 # Deployment
 
+## Reading release — 29 October 2026
+
+The private candidate collection and layout-C paper are live at [filtered.page](https://filtered.page). Deployed application commit: `397b088` on `codex/candidates-frontpage-prototype`; [PR #2](https://github.com/cyberCharl/cerulean-crest/pull/2) remains open into `main`. Subsequent release-record commits only update documentation.
+
+- Production deployment: `dpl_6xhB97pwn3yVvP8aEMVmdtXXWfk5`, [immutable deployment URL](https://cerulean-crest-g1i4s1pvs-cerulean-works.vercel.app), status Ready, Node 24 / Frankfurt functions. It was built with production configuration, checked without changing the public domain, then promoted.
+- Applied `006-reading-links.sql` to Production. Preview was still at migration 001, so its additive migrations 002–006 were applied too. The pre-existing tables were checked by row count and content hash and were unchanged. Production adoption retained 524 distinct links from 62 editions without recording any exposure.
+- Validation: typecheck, 75 unit tests, production build, two authenticated HTTP integration flows, green GitHub push/PR checks, and desktop/mobile browser review. The separate Postgres concurrency/lifecycle tests and production-copy migration rehearsal passed during implementation. All 12 staged smoke checks passed, then passed directly against filtered.page after promotion: landing/brand assets, health, private-route redirects, API/MCP authentication and 404 handling. The deployed Auth0 redirect retains the filtered.page callback. No runtime errors were found for the promoted deployment in the release log scan.
+- Staging caught a `require(ESM)` incompatibility in jsdom 30 before public promotion. jsdom is pinned to 26.1.0, the extractor has a matching regression test, and parser loading is deferred into the optional metadata worker so a parser failure cannot block reading routes.
+- The previous public deployment was `dpl_77m3TGsjiGKqf6bVwNeRZYFVNCcn`. Migration 006 is additive; rolling back application code leaves the durable reading tables in place. Do not remove those tables to roll back the UI.
+
+See [Reading model](READING.md) for exposure, retirement, capture and compatibility rules. The policy-review pages in the separate PR #1 are not included in this release.
+
 ## Filtered domain rollout — 28 October 2026
 
 The product is named **Filtered**. `filtered.page` is registered at Porkbun and attached to the existing `cerulean-works/cerulean-crest` Vercel project. DNS is verified and a TLS certificate has been issued. The existing `cerulean-crest.vercel.app` endpoint remains available for integration compatibility.

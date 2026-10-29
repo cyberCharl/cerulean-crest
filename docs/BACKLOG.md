@@ -1,6 +1,6 @@
 # Filtered reading backlog
 
-Recorded 28 October 2026 after the personal-newspaper experiment. All six ideas remain recorded here. Ideas **1 and 2 are implemented together on this branch**, following approval of prototype layout C (the pocket paper), and await production deployment. The branch implementation and its boundaries are documented in [Reading model](READING.md). Ideas **4 and 6 remain uncertain and deferred**; their inclusion here does not approve broader source-access infrastructure or automated spending policies.
+Recorded 28 October 2026 after the personal-newspaper experiment. All six ideas remain recorded here. Ideas **1 and 2 are implemented together on this branch**, following approval of prototype layout C (the pocket paper), and were deployed on 29 October 2026. The implementation and its boundaries are documented in [Reading model](READING.md). Ideas **4 and 6 remain uncertain and deferred**; their inclusion here does not approve broader source-access infrastructure or automated spending policies.
 
 The disposable prototype has been removed. `/latest`, `/links`, and dated reading views require a signed-in account. Capturing a link needs only a URL; its title is optional and reading time is looked up in the background.
 
@@ -23,7 +23,7 @@ The opportunity is to help people choose what deserves their attention and keep 
 
 ## Implementation status
 
-The following describes this branch, not a production deployment:
+The following describes the production release of 29 October 2026:
 
 | Area | Implemented | Still outside this release |
 | --- | --- | --- |
@@ -37,7 +37,7 @@ See [Reading model](READING.md) for eligibility rules, migration limits and meta
 
 ## 1. A candidate collection without a reading debt
 
-**Status: implemented on this branch together with idea 2; awaiting production deployment.**
+**Status: deployed on 29 October 2026 together with idea 2.**
 
 Bring saved links and new discoveries into one personal collection. Pasting an individual URL is implemented. Bulk URL import and direct sharing from other apps remain follow-up work suitable for closing existing tabs. Browser, newsletter, Substack, and X capture are possible later sources; connector availability and access must be established before promising integrations. Saving a link means “consider this when choosing something for me,” not “I must finish this.”
 
