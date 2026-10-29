@@ -2,6 +2,7 @@ import { requireUser } from "@/lib/browser-auth";
 import { getSettings, patchSettings, compareAndSetConstitution, listArticleFeedback } from "@/lib/db";
 import { EditorialConstitution } from "@/components/editorial-constitution";
 import { ArticleActions } from "@/components/article-actions";
+import { DeleteAccountForm } from "@/components/delete-account-form";
 import { editorialConstitutionSchema, editorialPreferencesFromForm } from "@/lib/editorial-settings";
 import { editorialConstitution } from "@/lib/editorial-brief";
 import { constitutionRevision } from "@/lib/editorial-constitution-update";
@@ -103,6 +104,11 @@ export default async function Settings({ searchParams }: { searchParams: Promise
       <h2 id="curator-setup">Connect your curator</h2>
       <p><Link href="/onboarding?step=connect">Continue to your first edition</Link> for connection steps and a short instruction to give your curator.</p>
       <p><Link href="/onboarding?step=rhythm">Choose your delivery frequency and time</Link>, then copy the updated instruction into your AI tool. ChatGPT can create or update a recurring task; with a tool that can’t schedule, ask it for each edition yourself.</p>
+    </section>
+    <section aria-labelledby="delete-account-heading" id="delete-account" className={styles.danger}>
+      <h2 id="delete-account-heading">Delete your account</h2>
+      <p>Deleting your account removes everything Filtered keeps about you, straight away. To stop your AI tool making papers, disconnect Filtered there too. <Link href="/privacy#deleting">What gets deleted</Link></p>
+      <DeleteAccountForm className={styles.form} />
     </section>
   </main>;
 }

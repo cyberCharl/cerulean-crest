@@ -200,6 +200,9 @@
   font-size: .8rem;
   color: #6c5e4f;
 }
+.footerLinks { display: flex; gap: 1.25rem; }
+.footerLinks a { text-decoration: none; }
+.footerLinks a:hover { text-decoration: underline; text-underline-offset: .25em; }
 
 @media (max-width: 960px) {
   .spread { grid-template-columns: minmax(0, 40rem); grid-template-areas: "letter" "side" "reply"; grid-template-rows: none; }
@@ -208,6 +211,7 @@
 }
 @media (max-width: 600px) {
   .bar, .desk, .footer { width: calc(100% - 2rem); }
+  .footer { flex-direction: column; }
   .bar { height: 4.5rem; }
   .brand { font-size: 1.25rem; }
   .desk { padding-top: .5rem; }
