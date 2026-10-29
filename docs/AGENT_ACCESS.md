@@ -34,15 +34,15 @@ The [curation skill](../plugins/filtered/skills/curate-edition/SKILL.md) is the 
 
 Tenant `cerulean-works.eu.auth0.com` (browser login uses the custom domain `login.filtered.page`; MCP tokens keep the tenant issuer). Manage it with `auth0 … --tenant cerulean-works.eu.auth0.com`. Never paste client secrets into a conversation or the repo.
 
-**API "Filtered MCP"**, identifier `https://filtered.page/mcp`: scopes `editions:read` and `editions:write`, RS256, 1-hour access tokens, offline access (rotating refresh tokens), RBAC off. User access requires a per-client grant; machine-to-machine access is denied. The earlier API `https://cerulean-crest.vercel.app/mcp` is retired once every client has moved.
+**API "Filtered MCP"**, identifier `https://filtered.page/mcp`: scopes `editions:read` and `editions:write`, RS256, 1-hour access tokens, offline access (rotating refresh tokens), RBAC off. User access requires a per-client grant; machine-to-machine access is denied. Created 29 October 2026 (id `6ae361de86e14b3189bb37ed`). The earlier API `https://cerulean-crest.vercel.app/mcp` stays until ChatGPT is verified on the new address, then gets deleted.
 
 Tenant settings: Resource Parameter Compatibility Profile on, issuer in authorization responses on, Client ID Metadata Document (CIMD) registration on for **admin-imported clients only**. Dynamic CIMD and Dynamic Client Registration stay off, so nobody can add a client to the tenant except an admin.
 
 | Client | How it identifies itself | Callback | Notes |
 | --- | --- | --- | --- |
 | Filtered - ChatGPT | Predefined confidential client (`client_secret_post`) | `https://chatgpt.com/connector_platform_oauth_redirect` | Credentials go only into ChatGPT's OAuth fields. |
-| Claude (claude.ai web, desktop, mobile, Cowork) | Imported CIMD `https://claude.ai/oauth/mcp-oauth-client-metadata` | `https://claude.ai/api/mcp/auth_callback` | Public client. Readers paste the URL and leave Claude's advanced settings empty. |
-| Claude Code | Imported CIMD `https://claude.ai/oauth/claude-code-client-metadata` | `http://localhost/callback` on any port | See the status note below. |
+| Claude (claude.ai web, desktop, mobile, Cowork) | Imported CIMD `https://claude.ai/oauth/mcp-oauth-client-metadata` (`tpc_wYciikRFpxppLSDocCmnRf`) | `https://claude.ai/api/mcp/auth_callback` | Public client. Readers paste the URL and leave Claude's advanced settings empty. |
+| Claude Code | Imported CIMD `https://claude.ai/oauth/claude-code-client-metadata` (`tpc_fuf3mV3Dv3zMS7H1MFDFQZ`) | `http://localhost/callback` and `http://127.0.0.1/callback`, any port | Auth0 accepts any loopback port for this native client. |
 | Filtered - Owner verification | Native public client | Loopback | For CLI token checks only. |
 | Filtered, Filtered - Browser Development | Browser sign-in clients | `/auth/callback` | The production "Filtered" client also holds a `delete:users`-only Management grant for account deletion (`AUTH0_MANAGEMENT_DOMAIN`). Don't remove it. |
 
@@ -53,8 +53,8 @@ Tenant settings: Resource Parameter Compatibility Profile on, issuer in authoriz
 | Client | Status |
 | --- | --- |
 | ChatGPT | Verified through the developer-mode pilot on the former address; reconnect and re-verify after the address change. |
-| Claude (web/desktop/mobile) | Expected to work once the CIMD import and grant are in place; not yet verified end to end. |
-| Claude Code | Expected; Auth0 may reject its loopback redirect in an imported CIMD, in which case use a native client with a fixed `--callback-port`. Not yet verified. |
+| Claude (web/desktop/mobile) | Imported and granted; Auth0 accepts its authorize request. Not yet verified end to end. |
+| Claude Code | Imported and granted; Auth0 accepts its authorize request on any loopback port. Not yet verified end to end. |
 | Other MCP tools | Work if they support remote Streamable HTTP, RFC 9728 metadata and PKCE, and identify themselves with an imported CIMD or a pre-registered client. Tools that only support Dynamic Client Registration, or the older 2025-03-26 flow without protected-resource metadata, can't connect. |
 
 ## ChatGPT publication
