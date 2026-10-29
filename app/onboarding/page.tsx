@@ -2,10 +2,11 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/browser-auth";
 import { getSettingsState, latestIssueDate } from "@/lib/db";
-import { buildFirstEditionPrompt, configuredChatGptPluginUrl, configuredMcpPublicClientId, curatorTool, mcpConnectionUrl } from "@/lib/onboarding";
+import { buildFirstEditionPrompt, configuredChatGptPluginUrl, curatorTool, mcpConnectionUrl } from "@/lib/onboarding";
 import { describeDeliverySchedule } from "@/lib/delivery-schedule";
 import { OnboardingForm } from "@/components/onboarding-form";
 import { FirstEditionPrompt } from "@/components/first-edition-prompt";
+import { marketingUrl } from "@/lib/site-config";
 import styles from "./onboarding.module.css";
 
 export const dynamic = "force-dynamic";
@@ -85,20 +86,18 @@ export default async function Onboarding({ searchParams }: { searchParams: Promi
   </main>;
 }
 
-/** Connection steps for any MCP client with remote-server and OAuth support. */
+/** Connection steps for MCP clients other than ChatGPT. Auth0 recognises approved tools by their published client identity. */
 function OtherToolConnection() {
   const serverUrl = mcpConnectionUrl();
-  const clientId = configuredMcpPublicClientId();
   return <div className={styles.connection}>
     <h2>Connect Filtered in your AI tool</h2>
-    <p>Filtered works with AI tools that can add a remote MCP server and sign in with OAuth. It has been tested with ChatGPT. Other tools, such as Claude, are expected to work but haven’t been verified with Filtered yet.</p>
+    <p>Filtered works with Claude and with other AI tools that can add a remote MCP server and sign in with OAuth.</p>
     <p className={styles.serverUrl}><span>MCP server URL</span><code>{serverUrl}</code></p>
     <ol className={styles.connectSteps}>
-      <li>Add a remote MCP server, sometimes called a custom connector, with exactly this URL. In Claude, go to Customize → Connectors → Add custom connector.</li>
-      {clientId ? <li>If your tool asks for an OAuth client ID, enter <code>{clientId}</code> and leave the client secret blank.</li> : null}
+      <li>Add a remote MCP server, sometimes called a custom connector, with exactly this URL. In Claude, go to Customize → Connectors → Add custom connector and leave the advanced settings empty. In Claude Code, run <code>claude mcp add --transport http filtered {serverUrl}</code>.</li>
       <li>When your tool asks you to sign in, use the same Filtered account you used here and approve access to your editions.</li>
       <li>Paste the instruction below into a new conversation.</li>
     </ol>
-    {clientId ? null : <p className={styles.notice}>Filtered can’t register new AI tools automatically yet, so tools that need their own sign-in client can’t finish connecting. Your brief is saved; you can return here when the connection is ready.</p>}
+    <p className={styles.quiet}>Filtered approves each AI tool before it can sign in. If yours reports a sign-in or client error, let us know through <a href={marketingUrl("/support")}>Help</a>.</p>
   </div>;
 }

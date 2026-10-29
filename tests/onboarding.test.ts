@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { buildFirstEditionPrompt, configuredMcpPublicClientId, curatorTool, settingsFromOnboarding } from "../lib/onboarding.ts";
+import { buildFirstEditionPrompt, curatorTool, settingsFromOnboarding } from "../lib/onboarding.ts";
 import { defaultSettings, editorialSettingsSchema } from "../lib/editorial-settings.ts";
 import { deliveryDays, deliveryScheduleSchema } from "../lib/delivery-schedule.ts";
 
@@ -124,19 +124,4 @@ test("other AI tools get a schedule request that admits when a tool can't schedu
 test("only an explicit choice selects another AI tool", () => {
   assert.equal(curatorTool("other"), "other");
   for (const value of [undefined, "", "chatgpt", "claude", ["other"]]) assert.equal(curatorTool(value), "chatgpt");
-});
-
-test("a public MCP client ID is optional and validated before display", () => {
-  const previous = process.env.CERULEAN_MCP_PUBLIC_CLIENT_ID;
-  try {
-    delete process.env.CERULEAN_MCP_PUBLIC_CLIENT_ID;
-    assert.equal(configuredMcpPublicClientId(), undefined);
-    process.env.CERULEAN_MCP_PUBLIC_CLIENT_ID = " AbC123def456_-xyz ";
-    assert.equal(configuredMcpPublicClientId(), "AbC123def456_-xyz");
-    process.env.CERULEAN_MCP_PUBLIC_CLIENT_ID = "<script>";
-    assert.throws(() => configuredMcpPublicClientId());
-  } finally {
-    if (previous === undefined) delete process.env.CERULEAN_MCP_PUBLIC_CLIENT_ID;
-    else process.env.CERULEAN_MCP_PUBLIC_CLIENT_ID = previous;
-  }
 });

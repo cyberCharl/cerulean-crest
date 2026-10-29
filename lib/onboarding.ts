@@ -57,14 +57,6 @@ export function mcpConnectionUrl(): string {
   return resource ?? appUrl("/mcp");
 }
 
-/** A public (secretless, PKCE) OAuth client for MCP tools that can't register themselves. */
-export function configuredMcpPublicClientId(): string | undefined {
-  const value = process.env.CERULEAN_MCP_PUBLIC_CLIENT_ID?.trim();
-  if (!value) return undefined;
-  if (!/^[A-Za-z0-9_-]{8,128}$/.test(value)) throw new Error("CERULEAN_MCP_PUBLIC_CLIENT_ID must be an OAuth client ID");
-  return value;
-}
-
 export function configuredChatGptPluginUrl(): string | undefined {
   const value = process.env.CERULEAN_CHATGPT_PLUGIN_URL;
   if (!value) return undefined;
