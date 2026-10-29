@@ -1,7 +1,18 @@
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import test from "node:test";
 import { gzipSync } from "node:zlib";
 import { createLinkMetadataExtractor, pinnedLookup, type MetadataRequest, type MetadataResponse } from "../lib/link-metadata.ts";
+
+test("metadata module loads when the deployment runtime disables require(ESM)", () => {
+  const moduleUrl = new URL("../lib/link-metadata.ts", import.meta.url).href;
+  const result = spawnSync(process.execPath, [
+    "--no-experimental-require-module", "--experimental-strip-types", "--input-type=module", "--eval",
+    `const module = await import(${JSON.stringify(moduleUrl)}); if (typeof module.extractLinkMetadata !== "function") throw new Error("Missing metadata export");`,
+  ], { encoding: "utf8", timeout: 10_000 });
+  assert.ifError(result.error);
+  assert.equal(result.status, 0, `Metadata import failed under deployment module settings:\n${result.stderr}`);
+});
 
 const PUBLIC = { address: "93.184.216.34", family: 4 };
 const paragraph = "A quiet afternoon gives us time to notice the small details of everyday life. Walking through the garden, we find that patient observation changes how we understand familiar places and the people who share them with us.";

@@ -20,7 +20,7 @@ Production: [filtered.page](https://filtered.page). The existing `cerulean-crest
 
 ## Local development
 
-Requirements: **Node.js 24.15 or newer in the Node 24 line** and npm. The metadata parser uses jsdom 30, which requires Node 24.15+; an older Node 24 release is insufficient. Node 24.22.1 was used for implementation verification. Run `nvm use` if you use nvm.
+Requirements: **Node.js 24** and npm. Node 24.22.1 was used for implementation verification. The metadata parser is pinned to jsdom 26.1.0 so it also loads when the deployment runtime disables CommonJS `require()` of ES modules; a focused test checks that setting. Run `nvm use` if you use nvm.
 
 ```bash
 cp .env.example .env.local

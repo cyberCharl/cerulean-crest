@@ -63,7 +63,7 @@ Work is bounded and scheduled after capture or collection activity, using persis
 
 SQLite applies the reading schema locally; Postgres uses [migration 006](../migrations/006-reading-links.sql). Reading state is account-scoped in both implementations. Replacing a published edition preserves exposure history for links removed from the replacement, so earlier presentation is not accidentally erased.
 
-The metadata parser requires Node.js 24.15+ within the Node 24 runtime line because it uses jsdom 30. Implementation verification used Node 24.22.1.
+The application uses Node.js 24; implementation verification used Node 24.22.1. The metadata parser is pinned to jsdom 26.1.0 because the deployment runtime disables CommonJS `require()` of ES modules. jsdom 30's encoding dependency fails during import under that setting. A child-process regression imports the extractor with `--no-experimental-require-module`; dependency upgrades must preserve that compatibility.
 
 The existing `get_editorial_brief` response now includes `readingCandidates`: up to 100 eligible candidates, ordered Pinned first, then eligible Maybe later, then ordinary candidates, plus up to 1,000 excluded URLs. A curator can consider the reader's saved interests alongside new discoveries while continuing to publish complete editions through the existing contract. The next-edition brief also excludes ordinary candidates already presented in the active paper, anticipating their retirement; unopened inside links and pinned links remain eligible. The collection is not automatically appended to a paper; the curator chooses the final links. Broader agent capture/search tools remain backlog work.
 
