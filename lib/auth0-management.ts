@@ -1,13 +1,14 @@
-// Deletes a reader's Auth0 user through the Management API, using a
-// machine-to-machine client that has only the delete:users permission.
-// AUTH0_MANAGEMENT_DOMAIN is the tenant's own domain (e.g. tenant.eu.auth0.com),
-// not the custom sign-in domain, because Management API tokens are issued for it.
+// Deletes a reader's Auth0 user through the Management API. It reuses the
+// website's own Auth0 client, which is allowed client credentials and only the
+// delete:users permission. AUTH0_MANAGEMENT_DOMAIN is the tenant's own domain
+// (e.g. tenant.eu.auth0.com), not the custom sign-in domain, because Management
+// API tokens are issued for it.
 
 type Env = Record<string, string | undefined>;
 export type Auth0Deletion = "deleted" | "not-configured" | "failed";
 
 export function auth0ManagementConfigured(env: Env = process.env): boolean {
-  return Boolean(env.AUTH0_MANAGEMENT_DOMAIN && env.AUTH0_MANAGEMENT_CLIENT_ID && env.AUTH0_MANAGEMENT_CLIENT_SECRET);
+  return Boolean(env.AUTH0_MANAGEMENT_DOMAIN && env.AUTH0_CLIENT_ID && env.AUTH0_CLIENT_SECRET);
 }
 
 export async function deleteAuth0User(subject: string, env: Env = process.env, fetcher: typeof fetch = fetch): Promise<Auth0Deletion> {
@@ -18,8 +19,8 @@ export async function deleteAuth0User(subject: string, env: Env = process.env, f
     headers: { "content-type": "application/json" },
     body: JSON.stringify({
       grant_type: "client_credentials",
-      client_id: env.AUTH0_MANAGEMENT_CLIENT_ID,
-      client_secret: env.AUTH0_MANAGEMENT_CLIENT_SECRET,
+      client_id: env.AUTH0_CLIENT_ID,
+      client_secret: env.AUTH0_CLIENT_SECRET,
       audience: `${origin}/api/v2/`,
     }),
     signal: AbortSignal.timeout(10_000),

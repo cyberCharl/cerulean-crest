@@ -8,7 +8,7 @@ const directory = fs.mkdtempSync(path.join(os.tmpdir(), "filtered-account-deleti
 process.env.DATABASE_PATH = path.join(directory, "test.sqlite");
 delete process.env.DATABASE_URL;
 delete process.env.VERCEL;
-for (const name of ["AUTH0_MANAGEMENT_DOMAIN", "AUTH0_MANAGEMENT_CLIENT_ID", "AUTH0_MANAGEMENT_CLIENT_SECRET"]) delete process.env[name];
+delete process.env.AUTH0_MANAGEMENT_DOMAIN;
 
 const db = await import("../lib/db.ts");
 const social = await import("../lib/social-store.ts");
@@ -74,7 +74,7 @@ test("deleting an account removes all of that reader's records and leaves other 
 });
 
 test("Auth0 deletion uses a client-credentials token and accepts an already-deleted user", async () => {
-  const env = { AUTH0_MANAGEMENT_DOMAIN: "https://tenant.eu.auth0.com/", AUTH0_MANAGEMENT_CLIENT_ID: "id", AUTH0_MANAGEMENT_CLIENT_SECRET: "secret" };
+  const env = { AUTH0_MANAGEMENT_DOMAIN: "https://tenant.eu.auth0.com/", AUTH0_CLIENT_ID: "id", AUTH0_CLIENT_SECRET: "secret" };
   const calls: Array<{ url: string; method?: string; body?: string; auth?: string }> = [];
   const respond = (deleteStatus: number) => (async (url: string | URL | Request, init?: RequestInit) => {
     const headers = new Headers(init?.headers);
@@ -92,5 +92,5 @@ test("Auth0 deletion uses a client-credentials token and accepts an already-dele
 
   assert.equal(await deleteAuth0User("auth0|gone", env, respond(404)), "deleted");
   await assert.rejects(deleteAuth0User("auth0|x", env, respond(403)), /403/);
-  assert.equal(await deleteAuth0User("auth0|x", {}, respond(204)), "not-configured");
+  assert.equal(await deleteAuth0User("auth0|x", { AUTH0_CLIENT_ID: "id", AUTH0_CLIENT_SECRET: "secret" }, respond(204)), "not-configured");
 });

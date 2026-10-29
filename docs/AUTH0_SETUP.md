@@ -73,12 +73,10 @@ Next connect ChatGPT, retrieve the brief and recent editions, publish one real e
 
 ## Account deletion
 
-Settings → Delete my account removes the reader's records and then their Auth0 user. The Auth0 step needs a machine-to-machine application in the `cerulean-works.eu.auth0.com` tenant, authorized for the **Auth0 Management API** with only the `delete:users` permission. Set these server-only variables in Production:
+Settings → Delete my account removes the reader's records and then their Auth0 user. The Auth0 step reuses the production **Filtered** browser client (`AUTH0_CLIENT_ID`/`AUTH0_CLIENT_SECRET`). On 29 October 2026 that client was given the `client_credentials` grant and a Management API client grant with only `delete:users`; it has no other Management API permissions. Production also needs:
 
 | Variable | Value |
 | --- | --- |
 | `AUTH0_MANAGEMENT_DOMAIN` | `cerulean-works.eu.auth0.com` (the tenant domain, not the custom sign-in domain) |
-| `AUTH0_MANAGEMENT_CLIENT_ID` | That application's client ID |
-| `AUTH0_MANAGEMENT_CLIENT_SECRET` | That application's client secret |
 
-Without them, deletion still removes every record Filtered stores, but the Auth0 user remains and must be deleted in the Auth0 dashboard. The privacy page promises that sign-in records are deleted, so configure these before deploying it. If the Auth0 call fails, the server logs `account deletion: records removed, Auth0 user still needs removing` with the subject to delete by hand.
+Without it, deletion still removes every record Filtered stores, but the Auth0 user remains and must be deleted in the Auth0 dashboard. If the Auth0 call fails, the server logs `account deletion: records removed, Auth0 user still needs removing` with the subject to delete by hand. The Browser Development client has no such grant, so local deletion leaves the Auth0 user in place.
