@@ -6,7 +6,7 @@ Filtered uses Auth0 browser signup/sign-in, private editions and archives, a pub
 
 The browser uses Auth0's Next.js SDK with authorization-code login, encrypted HTTP-only session cookies, and `/auth/login`, `/auth/callback`, and `/auth/logout`. Signup uses `/auth/login?screen_hint=signup`. The token endpoint is not exposed to the browser. Signup returns to `/latest`; readers without an edition continue to onboarding. `/today` remains a compatibility redirect.
 
-The server derives ownership from the browser session or verified MCP access token's subject. The caller cannot choose an owner in the edition payload. All edition queries, archive navigation, recent-history tools, and settings are scoped by subject. Machine subjects are rejected by MCP authentication. One Auth0 issuer is configured per deployment; browser and MCP clients must use that same tenant so identities match.
+The server derives ownership from the browser session or verified MCP access token's subject. The caller cannot choose an owner in the edition payload. All edition queries, archive navigation, recent-history tools, and settings are scoped by subject. Machine subjects are rejected by MCP authentication. Browser and MCP clients must use the same Auth0 tenant so subjects identify the same accounts. Their domains may differ: production browser login uses the verified custom domain `login.filtered.page`, while MCP retains its separately configured tenant issuer and audience.
 
 The Basic recovery publisher and optional pilot bearer token remain restricted to the explicitly configured `CERULEAN_OWNER_SUBJECT`. They are not general-user credentials. Missing configuration fails closed.
 
@@ -22,6 +22,8 @@ AUTH0_SECRET=... # random 32-byte hex secret, different per environment
 CERULEAN_APP_URL=https://your-app-host
 CERULEAN_MARKETING_URL=https://your-landing-host
 ```
+
+Production uses `AUTH0_DOMAIN=login.filtered.page` with the existing browser client and `https://filtered.page/auth/callback`. This custom domain belongs to the existing `cerulean-works.eu.auth0.com` tenant; it does not create new accounts. Keep `CERULEAN_OAUTH_ISSUER`, `CERULEAN_OAUTH_JWKS_URL`, and `CERULEAN_MCP_RESOURCE` unchanged when switching browser login domains. Auth0 management commands still target the tenant domain.
 
 Use `http://localhost:3000` for Development. See [deployment domain configuration](DEPLOYMENT.md#custom-domain) for using two domains with one Vercel project. Auth0 connection-client management uses `/connections/{id}/clients`; the legacy `enabled_clients` field is retired on this tenant.
 
