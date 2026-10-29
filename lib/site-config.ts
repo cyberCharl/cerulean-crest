@@ -39,3 +39,6 @@ export function isSeparateAppHost(host: string | null): boolean {
   const marketing = configuredMarketingOrigin();
   return Boolean(host && app && marketing && app !== marketing && host.toLowerCase() === new URL(app).host.toLowerCase());
 }
+
+/** Where readers write for help and privacy requests. */
+export const contactEmail = "hello@filtered.page";

@@ -1,0 +1,39 @@
+.page { width: min(100% - 2rem, 780px); margin: 0 auto; padding: 1.5rem 0 4rem; }
+
+.document {
+  padding: clamp(1.75rem, 5vw, 3.25rem) clamp(1.25rem, 5vw, 3.5rem) clamp(2rem, 5vw, 3rem);
+  background: var(--paper);
+  box-shadow: var(--lift);
+  font-family: var(--text);
+  font-size: 1rem;
+  line-height: 1.68;
+}
+.document h1 {
+  margin: 1.25rem 0 1rem;
+  font-family: var(--serif);
+  font-size: clamp(2.6rem, 7vw, 3.6rem);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -.01em;
+}
+.intro { font-family: var(--serif); font-size: clamp(1.2rem, 2.2vw, 1.32rem); font-weight: 500; line-height: 1.55; }
+.intro p { margin: 0 0 .9rem; }
+.document h2 {
+  margin: 2.4rem 0 .6rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--hairline);
+  font-family: var(--sans);
+  font-size: .82rem;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  scroll-margin-top: 1.5rem;
+}
+.document h3 { margin: 1.3rem 0 .3rem; font-size: 1rem; font-weight: 600; }
+.document p { margin: 0 0 .85rem; }
+.document ul { margin: 0 0 1rem; padding-left: 1.15rem; }
+.document li { margin-bottom: .45rem; }
+.document li::marker { color: var(--accent); }
+.document a { text-decoration-color: var(--hairline); text-underline-offset: .18em; overflow-wrap: anywhere; }
+.document a:hover { text-decoration-color: currentColor; }

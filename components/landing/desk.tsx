@@ -26,6 +26,12 @@ export const finds = [
 
 export type AccountLink = { href: string; label: string };
 
+export const policies = [
+  { path: "/privacy", title: "Privacy" },
+  { path: "/terms", title: "Terms" },
+  { path: "/support", title: "Help" },
+] as const;
+
 function PaperClip() {
   return (
     <svg className={styles.clip} viewBox="0 0 24 64" aria-hidden="true">
@@ -48,6 +54,9 @@ export function Desk({ account, children }: { account: AccountLink; children: Re
       {children}
       <footer className={styles.footer}>
         <span>Filtered<span className={styles.dot}>.</span> A small paper for a better information diet.</span>
+        <nav className={styles.footerLinks} aria-label="Policies and help">
+          {policies.map(page => <a key={page.path} href={marketingUrl(page.path)}>{page.title}</a>)}
+        </nav>
       </footer>
     </div>
   );

@@ -47,6 +47,11 @@ test("HTTP publishing, duplicate protection, authentication and public validatio
   }
   assert.equal(ready, true);
   assert.equal((await fetch(`${base}/mcp`)).status, 401);
+  for (const page of ["/privacy", "/terms", "/support"]) {
+    const response = await fetch(`${base}${page}`);
+    assert.equal(response.status, 200, `${page} is public`);
+    assert.ok((await response.text()).includes("hello@filtered.page"), `${page} gives the contact address`);
+  }
   for (const path of ["/links", "/archive", "/friends", "/latest", "/latest?prototype=reading&variant=C"]) {
     const response = await fetch(`${base}${path}`, { redirect: "manual" });
     assert.equal(response.status, 307, `${path} requires a session`);

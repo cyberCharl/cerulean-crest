@@ -70,3 +70,15 @@ Use a separate API audience and client for an isolated preview verification; nev
 Production OAuth was activated on 15 September in deployment `dpl_HTv8x2oca4tbcESWX8RWhPKgU9Kz`. Live signed-token checks passed; wrong-owner and wrong-audience rejection also passed using the application's verifier. Native-client login and refresh do not establish that ChatGPT's separate PKCE/client-secret flow works.
 
 Next connect ChatGPT, retrieve the brief and recent editions, publish one real edition, and confirm the reader and delivery health. The subsequent three unattended scheduled runs remain a separate acceptance gate. No test edition was written to Production during OAuth verification.
+
+## Account deletion
+
+Settings → Delete my account removes the reader's records and then their Auth0 user. The Auth0 step needs a machine-to-machine application in the `cerulean-works.eu.auth0.com` tenant, authorized for the **Auth0 Management API** with only the `delete:users` permission. Set these server-only variables in Production:
+
+| Variable | Value |
+| --- | --- |
+| `AUTH0_MANAGEMENT_DOMAIN` | `cerulean-works.eu.auth0.com` (the tenant domain, not the custom sign-in domain) |
+| `AUTH0_MANAGEMENT_CLIENT_ID` | That application's client ID |
+| `AUTH0_MANAGEMENT_CLIENT_SECRET` | That application's client secret |
+
+Without them, deletion still removes every record Filtered stores, but the Auth0 user remains and must be deleted in the Auth0 dashboard. The privacy page promises that sign-in records are deleted, so configure these before deploying it. If the Auth0 call fails, the server logs `account deletion: records removed, Auth0 user still needs removing` with the subject to delete by hand.
