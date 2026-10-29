@@ -1,6 +1,8 @@
 import { editorialSettingsSchema, type EditorialSettings } from "./editorial-settings.ts";
 import { describeDeliverySchedule } from "./delivery-schedule.ts";
 import { initialEditorialConstitution } from "./editorial-brief.ts";
+import { oauthConfig } from "./mcp-auth.ts";
+import { appUrl } from "./site-config.ts";
 
 export type BriefStep = "rhythm" | "interests";
 export type OnboardingFormState = { error?: string };
@@ -27,12 +29,40 @@ export function settingsFromOnboarding(current: EditorialSettings, step: BriefSt
   });
 }
 
-export function buildFirstEditionPrompt(settings: EditorialSettings, hasEdition = false): string {
-  const curation = "Read my Filtered editorial brief, including its current feedback, friend recommendations, and recent editions. Search widely, keep a candidate list internally, then submit only the complete final edition with create_daily_edition. Return the edition link.";
-  const firstEdition = `Create my first edition now. ${curation}`;
+/** The AI tool a reader connects. ChatGPT is the default and keeps its original wording. */
+export type CuratorTool = "chatgpt" | "other";
+export function curatorTool(value: unknown): CuratorTool {
+  return value === "other" ? "other" : "chatgpt";
+}
+
+const curation = "Read my Filtered editorial brief, including its current feedback, friend recommendations, and recent editions. Search widely, keep a candidate list internally, then submit only the complete final edition with create_daily_edition. Return the edition link.";
+const firstEdition = `Create my first edition now. ${curation}`;
+
+export function buildFirstEditionPrompt(settings: EditorialSettings, hasEdition = false, tool: CuratorTool = "chatgpt"): string {
   if (!settings.deliverySchedule) return hasEdition ? curation : firstEdition;
   const schedule = describeDeliverySchedule(settings.deliverySchedule, settings.timeZone);
+  if (tool === "other") {
+    // Scheduling varies by tool, so ask for it only where the tool can do it and never let it claim one.
+    return `${hasEdition ? "" : `${firstEdition} `}My preferred Filtered delivery schedule is ${schedule}. If you can run scheduled or recurring tasks, set one up on that schedule, using local time in ${settings.timeZone} and following daylight-saving changes where applicable. For each scheduled run: ${curation} If a scheduled Filtered task already exists, update it instead of creating a duplicate, then confirm the schedule with me. If you can't run scheduled tasks, say so plainly and don't claim a schedule exists; I'll ask you for each edition myself.`;
+  }
   return `${hasEdition ? "Set up recurring editions for me in Filtered." : firstEdition} Create or update my recurring ChatGPT task to curate and publish an edition on this schedule: ${schedule}. Use local time in ${settings.timeZone}, following daylight-saving changes where applicable. ${hasEdition ? "" : "For each recurring run: "}${curation} If a recurring task already exists for this app, including under an earlier name, update it instead of creating a duplicate. Confirm the schedule with me in ChatGPT.`;
+}
+
+/**
+ * The URL other MCP clients must enter. It is the OAuth audience: clients check that the
+ * protected-resource metadata names exactly this URL, so another hostname fails to connect.
+ */
+export function mcpConnectionUrl(): string {
+  const resource = process.env.CERULEAN_MCP_AUTH_MODE === "pilot" ? undefined : oauthConfig()?.resource;
+  return resource ?? appUrl("/mcp");
+}
+
+/** A public (secretless, PKCE) OAuth client for MCP tools that can't register themselves. */
+export function configuredMcpPublicClientId(): string | undefined {
+  const value = process.env.CERULEAN_MCP_PUBLIC_CLIENT_ID?.trim();
+  if (!value) return undefined;
+  if (!/^[A-Za-z0-9_-]{8,128}$/.test(value)) throw new Error("CERULEAN_MCP_PUBLIC_CLIENT_ID must be an OAuth client ID");
+  return value;
 }
 
 export function configuredChatGptPluginUrl(): string | undefined {

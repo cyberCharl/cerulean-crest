@@ -20,7 +20,7 @@ export const editorialSettingsSchema = z.object({
 });
 export type EditorialSettings = z.infer<typeof editorialSettingsSchema>;
 // The curator can change editorial choices, not appearance, onboarding state,
-// or the delivery preference used to generate the ChatGPT setup instruction.
+// or the delivery preference used to generate the curator setup instruction.
 // Omitted fields remain unchanged.
 export const editorialPreferencesPatchSchema = editorialSettingsSchema
   .omit({ onboardingStep: true, theme: true, deliverySchedule: true, guidelines: true, interests: true, constitutionMarkdown: true }).partial().strict()

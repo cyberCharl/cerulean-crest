@@ -43,7 +43,7 @@ export function OnboardingForm({ step, settings, detectTimeZone }: { step: Brief
       </div>
       <fieldset className={styles.schedule}>
         <legend>When would you like your editions?</legend>
-        <p id="schedule-help">Choose your rhythm. We’ll include it in the instruction you give ChatGPT to set up recurring editions.</p>
+        <p id="schedule-help">Choose your rhythm. We’ll include it in the instruction you give your AI curator, such as ChatGPT, to set up recurring editions where it can.</p>
         <div className={styles.scheduleFields}>
           <label className={styles.field} htmlFor="deliveryFrequency">How often
             <select id="deliveryFrequency" name="deliveryFrequency" value={deliveryFrequency} onChange={event => setDeliveryFrequency(event.target.value as DeliverySchedule["frequency"])} aria-describedby="schedule-help">
@@ -64,7 +64,7 @@ export function OnboardingForm({ step, settings, detectTimeZone }: { step: Brief
         </div>
         <label className={styles.field} htmlFor="timeZone">Your timezone
           <input id="timeZone" name="timeZone" required maxLength={100} value={timeZone} onChange={event => { timeZoneEdited.current = true; setTimeZone(event.target.value); }} aria-describedby="timezone-help" />
-          <small id="timezone-help">We suggest your browser’s timezone on first setup. Change it if needed. Scheduling stays in ChatGPT.</small>
+          <small id="timezone-help">We suggest your browser’s timezone on first setup. Change it if needed. Scheduling happens in your AI tool, not on Filtered.</small>
         </label>
       </fieldset>
     </> : <>

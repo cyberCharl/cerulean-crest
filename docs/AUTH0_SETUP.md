@@ -53,6 +53,18 @@ If moving to CIMD later, use the exact client metadata URL supplied by ChatGPT a
 
 Sources: [OpenAI authentication requirements](https://developers.openai.com/plugins/build/auth), [Auth0 client registration options](https://auth0.com/ai/docs/mcp/guides/registering-your-mcp-client-application).
 
+## Register other MCP clients
+
+Not done yet; each step is a tenant change for the owner to approve. The production tenant has no dynamic registration or Client ID Metadata Document support, so other AI tools need a pre-registered client. See [client compatibility](MCP.md#client-compatibility).
+
+1. Create one **Filtered - MCP tools** Native (public) application: token endpoint authentication `none`, authorization-code and rotating refresh-token grants, PKCE required, consent kept, third-party as for the ChatGPT client, and the same domain-level password connection.
+2. Allowed callbacks, exactly: `https://claude.ai/api/mcp/auth_callback` (claude.ai web, desktop, mobile and Cowork) and one fixed loopback such as `http://localhost:8080/callback` for Claude Code. Auth0 matches ports exactly, so Claude Code users connect with `claude mcp add --transport http --client-id <id> --callback-port 8080 filtered https://cerulean-crest.vercel.app/mcp`. Add other tools' exact callbacks only after checking them in that tool; no wildcards.
+3. Grant the client the edition read/write scopes on the Filtered MCP API, as for the ChatGPT client.
+4. Set `CERULEAN_MCP_PUBLIC_CLIENT_ID` in Production to the new client ID and redeploy. Onboarding then shows it to readers who choose "Another AI tool". It is a public identifier, not a secret.
+5. Verify in Claude: add a custom connector with the Vercel MCP URL and this client ID (secret blank), sign in as a non-owner reader, read the brief, publish one edition, and confirm a token refresh after an hour. Record the result in `docs/MCP.md` before calling Claude verified.
+
+Enabling open DCR or CIMD instead would remove the client-ID step for every tool, but adds a registered client per connection (DCR) or depends on Auth0 CIMD support; choose deliberately rather than as a side effect.
+
 ## Application configuration and verification
 
 Fetch the actual tenant's discovery metadata and use its exact `issuer` and `jwks_uri` values. Set the production variables below only after the provider and owner account are configured:

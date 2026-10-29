@@ -17,7 +17,7 @@ export default async function BriefPreview() {
   return <main className={styles.page}>
     <p><Link href="/settings">← Settings</Link></p>
     <h1>What the curator receives</h1>
-    <p>These are the exact instruction and assembled curation-context strings this server supplies. ChatGPT may combine them with its own instructions and the separate curation skill. This assembled response must never be saved as the constitution; policy edits use the separate constitution-only read.</p>
+    <p>These are the exact instruction and assembled curation-context strings this server supplies. Your AI tool may combine them with its own instructions; ChatGPT also receives the separate curation skill. This assembled response must never be saved as the constitution; policy edits use the separate constitution-only read.</p>
     <h2>MCP connection instructions</h2>
     <pre className={styles.briefPreview}>{curatorServerInstructions}</pre>
     <h2>Current editorial brief</h2>
