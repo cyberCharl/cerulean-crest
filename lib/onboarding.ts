@@ -53,8 +53,7 @@ export function buildFirstEditionPrompt(settings: EditorialSettings, hasEdition 
  * protected-resource metadata names exactly this URL, so another hostname fails to connect.
  */
 export function mcpConnectionUrl(): string {
-  const resource = process.env.CERULEAN_MCP_AUTH_MODE === "pilot" ? undefined : oauthConfig()?.resource;
-  return resource ?? appUrl("/mcp");
+  return oauthConfig()?.resource ?? appUrl("/mcp");
 }
 
 export function configuredChatGptPluginUrl(): string | undefined {
