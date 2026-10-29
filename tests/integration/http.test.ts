@@ -221,8 +221,8 @@ test("HTTP publishing, duplicate protection, authentication and public validatio
   assert.ok(constitutionDocument, "Settings renders the active constitution as a reading document");
   const escapeHtml = (value: string) => value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#x27;");
   assert.equal(activeBrief.constitution, savedConstitution);
-  assert.equal(activeBrief.readingContext.readingMinutes, 60);
-  assert.equal(activeBrief.readingContext.editionMinutes, 120);
+  assert.equal(activeBrief.readingContext.readingMinutes, 30);
+  assert.equal(activeBrief.readingContext.editionMinutes, 60);
   assert.ok(constitutionDocument.includes("First constitution paragraph"));
   assert.ok(constitutionDocument.includes("Preserve this second paragraph"));
   assert.ok(!constitutionDocument.includes("<script>unsafe()"));
