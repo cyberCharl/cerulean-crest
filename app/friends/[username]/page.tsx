@@ -57,7 +57,7 @@ export default async function FriendConversationPage({
             <div className={styles.emptyThread}>
               <span aria-hidden="true">✦</span>
               <h2>Nothing passed between you yet.</h2>
-              <p>Find a piece in <Link href="/latest">Latest</Link> or <Link href="/saved">Saved</Link> and choose “Send to a friend”.</p>
+              <p>Find a piece in <Link href="/latest">your paper</Link> or <Link href="/links">your links</Link> and choose “Send to a friend” under “Editorial feedback &amp; sharing”.</p>
             </div>
           ) : messages.map((article) => (
             <article key={article.id} className={`${styles.message} ${article.direction === "sent" ? styles.sent : styles.received}`}>

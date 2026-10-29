@@ -47,7 +47,7 @@ test("HTTP publishing, duplicate protection, authentication and public validatio
   }
   assert.equal(ready, true);
   assert.equal((await fetch(`${base}/mcp`)).status, 401);
-  for (const path of ["/links", "/archive", "/latest", "/latest?prototype=reading&variant=C"]) {
+  for (const path of ["/links", "/archive", "/friends", "/latest", "/latest?prototype=reading&variant=C"]) {
     const response = await fetch(`${base}${path}`, { redirect: "manual" });
     assert.equal(response.status, 307, `${path} requires a session`);
     assert.match(response.headers.get("location") ?? "", /auth\/login/);
@@ -80,6 +80,10 @@ test("HTTP publishing, duplicate protection, authentication and public validatio
   }
   const ownerSession = await session("http-test-owner");
   const otherSession = await session("other-reader");
+  const friendsPage = await fetch(`${base}/friends`, { headers: ownerSession });
+  assert.equal(friendsPage.status, 200);
+  assert.match(friendsPage.headers.get("cache-control") || "", /private/);
+  assert.match(friendsPage.headers.get("x-robots-tag") || "", /noindex/);
   const privatePage = await fetch(`${base}/issues/${issue.date}`, { headers: ownerSession });
   assert.equal(privatePage.status, 200);
   assert.match(privatePage.headers.get("cache-control") || "", /private/);
