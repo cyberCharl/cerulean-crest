@@ -4,7 +4,7 @@ Status: copy prepared for review; use only after the stated features are deploye
 
 | Portal field | Proposed value |
 | --- | --- |
-| Name | `[PRODUCT]` (working name: Curiofold) |
+| Name | `[PRODUCT]` (working name: Filtered) |
 | Short description | A finite reading edition, shaped by your interests. |
 | Category | Productivity, if offered by the portal |
 | Developer identity | `[PUBLISHER]`, exactly as verified in the selected OpenAI organization |
@@ -20,9 +20,11 @@ Status: copy prepared for review; use only after the stated features are deploye
 
 ## Long description
 
-[PRODUCT] helps you turn your interests into a finite personal reading edition. Ask ChatGPT to read your saved Markdown editorial constitution with current feedback and friend recommendations, research suitable sources, and save only the final edition to your private reader. Each selection links to its source and includes a short explanation of why it is worth your time.
+[PRODUCT] helps you turn your interests and saved links into a finite personal reading edition. Ask ChatGPT to read your saved Markdown editorial constitution with eligible reading candidates, current feedback and friend recommendations, research suitable sources, and save only the final edition to your private reader. Start with a small front page and open the optional inside pages when you want more. Articles link to their original sources.
 
 Set your reading budget and edit your constitution on the website, or ask ChatGPT to update the constitution after an explicit request. Both paths save the same Markdown document. In the reader, save articles for later and use “Tell the editor” to leave a reaction or private note. During curation, that feedback provides context for future selections; saving alone is not a request for more of a topic.
+
+Add a link without guessing its reading time or supplying a title. Choose ordinary candidate, Maybe later or pinned commitment, and recover dormant links when you want them considered again. The curator combines eligible saved links with discoveries. An article on an inside page you never opened remains a candidate; appearing in an edition alone does not mean you saw it. Reading activity does not silently rewrite your preferences or create a learned profile.
 
 An account and connected authorization are required. Editions are private to your account. The connected host supplies research capabilities; [PRODUCT] stores your preferences, feedback and editions. Scheduling is arranged separately in the host and depends on its supported capabilities.
 
@@ -35,7 +37,7 @@ An account and connected authorization are required. Editions are private to you
 
 ## Initial release notes
 
-Initial submission of [PRODUCT], a personal reading service with a remote MCP server and a curation skill. The integration retrieves the authenticated reader's Markdown constitution with recent edition history, article feedback and friend recommendations, publishes complete private editions, and updates the constitution on explicit request. The companion website provides settings, saved articles and private article feedback.
+Initial submission of [PRODUCT], a personal reading service with a remote MCP server and a curation skill. The integration retrieves the authenticated reader's Markdown constitution with saved candidate/exclusion context, recent edition history, article feedback and friend recommendations, publishes complete private editions, and updates the constitution on explicit request. The companion website provides settings, a link collection with commitment levels, a small front page with optional inside reading, and private article feedback. The same four MCP tools remain; collection and reading-state edits are website operations.
 
 The reviewer guide includes account setup, reproducible positive and negative cases, and expected outcomes. Source discovery happens through the host's research tools. Same-date edition creation returns the existing edition instead of replacing it. No public publication, purchases, messages to other people or in-app scheduling are offered by this submission.
 

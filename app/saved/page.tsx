@@ -30,6 +30,6 @@ export default async function SavedPage() {
         {socialProfile.enabled ? <ArticleShare url={article.url} title={article.title} /> : null}
       </article>)}
     </div>}
-    <p><Link href="/archive">Browse all editions →</Link></p>
+    <p><Link href="/links">Browse your links →</Link></p>
   </main>;
 }

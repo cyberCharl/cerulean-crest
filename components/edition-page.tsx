@@ -1,66 +1,40 @@
 import { getSocialProfile } from "@/lib/social-store";
-import { readerTheme } from "@/lib/reader-theme";
 import { requireUser } from "@/lib/browser-auth";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { IssueContent } from "@/components/issue-content";
-import { longDate, weekday } from "@/lib/date";
-import { getIssue, neighboringIssues, getSettings, listArticleFeedback } from "@/lib/db";
-
+import { longDate } from "@/lib/date";
+import { listArticleFeedback } from "@/lib/db";
+import { getReadingEdition } from "@/lib/reading-store";
+import styles from "@/components/reading.module.css";
 
 type PageProps = { params: Promise<{ date: string }> };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const user = await requireUser();
+  await requireUser();
   const { date } = await params;
-  const issue = await getIssue(user.subject, date);
-  return issue
-    ? { title: longDate(issue.date), robots: { index: false, follow: false } }
-    : { title: "Issue not found" };
+  return { title: `Your paper · ${date}`, robots: { index: false, follow: false } };
 }
 
 export async function EditionPage({ params }: PageProps) {
   const user = await requireUser();
   const { date } = await params;
-  const issue = await getIssue(user.subject, date);
-  if (!issue) notFound();
+  const edition = await getReadingEdition(user.subject, date);
+  if (!edition) notFound();
 
-  const [neighbors, settings, articleFeedback, socialProfile] = await Promise.all([
-    neighboringIssues(user.subject, date), getSettings(user.subject),
-    listArticleFeedback(user.subject, { urls: issue.sections.flatMap((section) => section.items.map((item) => item.url)) }),
+  if (edition.retired) return <main className={styles.page}>
+    <header className={styles.masthead}>
+      <p className={styles.eyebrow}>{longDate(date)}</p>
+      <h1>This edition has retired.</h1>
+      <p>The paper moves on. Its links stay in your collection.</p>
+    </header>
+    <div className={styles.retiredLinks}><Link className={styles.primary} href="/latest">Open your paper →</Link><Link href="/links">Find a link in your collection</Link></div>
+  </main>;
+
+  const [articleFeedback, socialProfile] = await Promise.all([
+    listArticleFeedback(user.subject, { urls: [...edition.front, ...edition.inside].map(link => link.url) }),
     getSocialProfile(user.subject),
   ]);
-  const theme = readerTheme(settings);
-  const [dayOfMonth, month, year] = longDate(issue.date).split(" ");
-
-  return (
-    <main className={`edition-study ${theme}`} data-edition-style={theme}>
-      <article>
-        <IssueContent key={`${user.subject}:${issue.date}`} issue={issue} sharingEnabled={socialProfile.enabled} articleFeedback={articleFeedback} owner={user.subject} canImportLegacyProgress={user.subject === process.env.CERULEAN_OWNER_SUBJECT} header={
-        <header className="issue-hero">
-          <div className="issue-cover">
-            <p className="discovery-label">Your personal discovery feed</p>
-            <p className="issue-day">{weekday(issue.date)}</p>
-            <h1 className="issue-date" aria-label={longDate(issue.date)}>
-              <span className="issue-date-main">
-                <b>{dayOfMonth}</b><em>{month}</em>
-              </span>
-              <span className="issue-date-year">{year}</span>
-            </h1>
-          </div>
-          <div className="editor-note">
-            <p>{issue.editorNote}</p>
-          </div>
-        </header>
-        } />
-
-        <nav className="issue-navigation" aria-label="Issue navigation">
-          {neighbors.previous ? <Link href={`/issues/${neighbors.previous}`}>← {longDate(neighbors.previous)}</Link> : <span />}
-          <Link href="/archive">All editions</Link>
-          {neighbors.next ? <Link href={`/issues/${neighbors.next}`}>{longDate(neighbors.next)} →</Link> : <span />}
-        </nav>
-      </article>
-    </main>
-  );
+  return <IssueContent key={`${user.subject}:${date}:${edition.revision}`} edition={edition} owner={user.subject} articleFeedback={articleFeedback} sharingEnabled={socialProfile.enabled} />;
 }

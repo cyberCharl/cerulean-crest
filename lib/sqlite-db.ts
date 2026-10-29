@@ -206,7 +206,7 @@ export function listArticleFeedback(owner: string, options: ArticleFeedbackListO
 }
 const updateArticleFeedbackTransaction = db.transaction((owner: string, input: ArticleFeedbackUpdate) => {
   const existing = getArticleFeedback(owner, input.url);
-  const article = existing ?? db.prepare(`SELECT it.title, it.publication FROM items it
+  const article = existing ?? db.prepare("SELECT title,publication FROM reading_links WHERE owner_subject=? AND url=?").get(owner,input.url) as {title:string;publication:string}|undefined ?? db.prepare(`SELECT it.title, it.publication FROM items it
     JOIN sections s ON s.id = it.section_id JOIN issues i ON i.id = s.issue_id
     WHERE i.owner_subject = ? AND it.url = ? ORDER BY i.issue_date DESC, it.id DESC LIMIT 1`)
     .get(owner, input.url) as { title: string; publication: string } | undefined;

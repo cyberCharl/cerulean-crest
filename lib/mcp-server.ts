@@ -38,7 +38,7 @@ export function createCeruleanMcpServer({ baseUrl, scopes, subject, createEditio
     "get_editorial_brief",
     {
       title: "Read your current editorial brief",
-      description: "Read the reader's Markdown constitution and all current context before searching for an edition. This single read includes recent editions, article feedback and pending friend recommendations when present. Empty feedback or recommendations add no placeholder text.",
+      description: "Read the reader's Markdown constitution and current context before choosing an edition. Includes eligible saved links, excluded URLs, recent editions, article feedback and friend recommendations. Publication is not presentation: unseen saved links can be selected again.",
       outputSchema: {
         brief: z.string(),
         constitution: z.string(),
@@ -46,6 +46,10 @@ export function createCeruleanMcpServer({ baseUrl, scopes, subject, createEditio
         recentEditions: z.array(z.object({ date: z.string(), url: z.string(), items: z.array(z.object({ title: z.string(), url: z.string() })) })),
         articleFeedback: z.array(z.object({ url: z.string(), title: z.string(), publication: z.string(), reaction: z.string().nullable(), note: z.string(), updatedAt: z.string() })).optional(),
         friendRecommendations: z.array(z.object({ username: z.string(), url: z.string(), title: z.string(), note: z.string() })).optional(),
+        readingCandidates: z.object({
+          candidates: z.array(z.object({url:z.string(),title:z.string(),publication:z.string(),readingMinutes:z.number().nullable(),commitment:z.enum(["candidate","later","pinned"]),dormant:z.boolean(),read:z.boolean(),metadataStatus:z.string(),eligibleAfter:z.number(),lastPresentedAt:z.string().nullable(),updatedAt:z.string()})),
+          excludedUrls:z.array(z.string()),
+        }),
       },
       _meta: { securitySchemes: [{ type: "oauth2", scopes: ["editions:read"] }] },
       annotations: { readOnlyHint: true, openWorldHint: false, destructiveHint: false },

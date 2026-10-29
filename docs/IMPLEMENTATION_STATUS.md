@@ -1,6 +1,6 @@
-# Curiofold workspace review — 1 October 2026
+# Filtered workspace review — 1 October 2026
 
-The reviewed workspace includes the Curiofold brand, Latest navigation with a legacy `/today` redirect, schedule-aware publication health, persistent editorial constitutions, and friend conversations with read state. No deployment was performed during this review.
+The reviewed workspace includes the Filtered brand, Latest navigation with a legacy `/today` redirect, schedule-aware publication health, persistent editorial constitutions, and friend conversations with read state. No deployment was performed during this review.
 
 Review fixes make constitution saves atomic against concurrent edits in SQLite and Postgres, reject stale Settings forms, keep the latest 500 conversation messages in chronological order, and validate route usernames without decoding them twice. Regression coverage includes simultaneous policy edits, changed legacy policy, long threads and stale browser submissions.
 

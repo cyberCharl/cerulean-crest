@@ -1,6 +1,7 @@
 // Canonical local SQLite schema. Postgres uses the versioned SQL migrations.
 // Existing SQLite databases are preserved; legacy issue ownership is migrated after setup.
-export const sqliteSchema = `
+import { readingSchema } from "./reading-schema.ts";
+export const sqliteSchema = readingSchema + `
 CREATE TABLE IF NOT EXISTS issues (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   owner_subject TEXT,

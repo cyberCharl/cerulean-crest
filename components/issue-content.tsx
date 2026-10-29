@@ -1,118 +1,95 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
-import { ArticleShare } from "@/components/article-share";
-import { ArticleActions } from "@/components/article-actions";
+import { recordReadingStage } from "@/app/links/actions";
+import { ReadingLinkCard } from "@/components/reading-link-card";
+import { useReadingLinks } from "@/components/use-reading-links";
 import type { ArticleFeedback } from "@/lib/article-feedback";
-import type { Issue } from "@/lib/schema";
-import { parseReadingProgress, serializeReadingProgress } from "@/lib/reading-progress";
-import { setSharedArticleReadFromReader, syncSharedArticleReads } from "@/app/friends/actions";
+import type { ReadingEdition } from "@/lib/reading";
+import { longDate, weekday } from "@/lib/date";
+import styles from "./reading.module.css";
 
-function storageKey(owner: string, date: string) {
-  return `cerulean-crest:${encodeURIComponent(owner)}:${date}:read`;
-}
+export function IssueContent({ edition, owner, articleFeedback = [], sharingEnabled = false }: {
+  edition: ReadingEdition; owner: string; articleFeedback?: ArticleFeedback[]; sharingEnabled?: boolean;
+}) {
+  const { links, updateLink, refreshMetadata, syncError } = useReadingLinks(owner, [...edition.front, ...edition.inside]);
+  const [inside, setInside] = useState(false);
+  const [pending, startTransition] = useTransition();
+  const [stageError, setStageError] = useState("");
+  const [frontRecorded, setFrontRecorded] = useState(false);
+  const frontStarted = useRef(false);
+  const heading = useRef<HTMLHeadingElement>(null);
+  const previousInside = useRef(false);
+  const linksByUrl = new Map(links.map(link => [link.url, link]));
+  const feedbackByUrl = new Map(articleFeedback.map(feedback => [feedback.url, feedback]));
+  const front = edition.front.map(link => linksByUrl.get(link.url) ?? link);
+  const insideLinks = edition.inside.map(link => linksByUrl.get(link.url) ?? link);
+  const [lead, ...shorts] = front;
 
-export function IssueContent({ header, issue, owner, canImportLegacyProgress = false, articleFeedback = [], sharingEnabled = false }: { header?: ReactNode; sharingEnabled?: boolean; issue: Issue; owner: string; canImportLegacyProgress?: boolean; articleFeedback?: ArticleFeedback[] }) {
-  const [readItems, setReadItems] = useState<Set<string>>(() => new Set());
-  const items = useMemo(() => issue.sections.flatMap((section) => section.items), [issue.sections]);
+  const recordFront = useCallback(async () => {
+    setStageError("");
+    try {
+      const result = await recordReadingStage({ date: edition.date, stage: "front", revision: edition.revision });
+      if (result.error) setStageError(result.error);
+      else setFrontRecorded(true);
+    } catch { setStageError("We couldn’t save which page you opened. Please try again."); }
+  }, [edition.date, edition.revision]);
 
   useEffect(() => {
-    try {
-      const current = localStorage.getItem(storageKey(owner, issue.date));
-      // Only the explicitly assigned legacy owner may inherit pre-account progress.
-      const value = current ?? (canImportLegacyProgress ? localStorage.getItem(`cerulean-crest:${issue.date}:read`) : null);
-      const stored = parseReadingProgress(value, items);
-      setReadItems(stored);
-      if (stored.size) void syncSharedArticleReads([...stored]);
-      try {
-        localStorage.setItem(storageKey(owner, issue.date), serializeReadingProgress(stored));
-      } catch { /* Keep loaded progress even when writes are unavailable. */ }
-    } catch {
-      setReadItems(new Set());
+    // Rendering or prefetching a route never counts as opening the paper.
+    // A background tab waits until the reader actually brings it into view.
+    function presented() {
+      if (document.visibilityState !== "visible" || frontStarted.current) return;
+      frontStarted.current = true;
+      void recordFront();
     }
-  }, [owner, issue.date, items, canImportLegacyProgress]);
+    presented();
+    document.addEventListener("visibilitychange", presented);
+    return () => document.removeEventListener("visibilitychange", presented);
+  }, [recordFront]);
 
-  function toggleRead(url: string) {
-    const next = new Set(readItems);
-    if (next.has(url)) next.delete(url);
-    else next.add(url);
-    setReadItems(next);
-    try {
-      localStorage.setItem(storageKey(owner, issue.date), serializeReadingProgress(next));
-    } catch { /* Reading remains usable when browser storage is disabled/full. */ }
-    void setSharedArticleReadFromReader({ url, read: next.has(url) });
+  function openInside() {
+    setStageError("");
+    startTransition(async () => {
+      try {
+        const result = await recordReadingStage({ date: edition.date, stage: "inside", revision: edition.revision });
+        if (result.error) { setStageError(result.error); return; }
+        setInside(true);
+      } catch { setStageError("The inside pages couldn’t be opened. Please try again."); }
+    });
   }
+  useEffect(() => {
+    if (previousInside.current !== inside) {
+      heading.current?.focus(); heading.current?.scrollIntoView({ block: "start" });
+      previousInside.current = inside;
+    }
+  }, [inside]);
+  const card = (link: (typeof links)[number], isLead = false) => <ReadingLinkCard key={link.url} link={link} lead={isLead} onChange={updateLink} onMetadataRetry={refreshMetadata} feedback={feedbackByUrl.get(link.url)} sharingEnabled={sharingEnabled} />;
 
-  const feedbackByUrl = new Map(articleFeedback.map((feedback) => [feedback.url, feedback]));
-  const readCount = items.filter((item) => readItems.has(item.url)).length;
-  const readMinutes = items.reduce((total, item) => total + (readItems.has(item.url) ? item.readingMinutes : 0), 0);
-  const percent = items.length === 0 ? 0 : Math.round((readCount / items.length) * 100);
-
-  return (
-    <div className="issue-body">
-      <aside className="edition-sidebar" aria-label="Edition details and reading progress">
-        <div className="edition-sidebar-content">
-          <p className="margin-label">In this edition</p>
-          <p className="issue-metrics"><span>{items.length} pieces</span><span>{issue.availableMinutes} minutes of reading</span></p>
-          {issue.coverageGap ? <details className="coverage-note"><summary>Coverage note</summary><p>{issue.coverageGap}</p></details> : null}
-          <div className="edition-progress" aria-label="Reading progress">
-            <p><strong>{readCount} / {items.length}</strong> pieces read</p>
-            <div className="edition-progress-track" aria-hidden="true"><span style={{ width: `${percent}%` }} /></div>
-            <p>{readMinutes} min complete</p>
-          </div>
-          <Link className="edition-saved-link" href="/saved">Your saved articles →</Link>
-        </div>
-      </aside>
-
-      <div className="edition-reading-column">
-        {header}
-      <div className="sections">
-        {issue.sections.map((section, sectionIndex) => (
-          <section className="issue-section" key={section.id} aria-labelledby={`section-${section.id}`}>
-            <header className="section-heading">
-              <span>0{sectionIndex + 1}</span>
-              <h2 id={`section-${section.id}`}>{section.title}</h2>
-              <i />
-            </header>
-            <div className="item-list">
-              {section.items.map((item) => {
-                const isRead = readItems.has(item.url);
-                return (
-                  <article className={`issue-item${isRead ? " is-read" : ""}`} id={`item-${item.number}`} key={item.id}>
-                    <div className="item-copy">
-                      <h3><a href={item.url} target="_blank" rel="noreferrer">{item.title}</a></h3>
-                      <p className="article-byline">
-                        <span>{item.author}</span><span>{item.publication}</span><span>{item.publishedAt}</span><span>{item.type}</span><span>{item.readingMinutes} min read</span>
-                      </p>
-                      <p className="summary">{item.summary}</p>
-                    </div>
-                    <footer className="article-controls" aria-label="Article actions">
-                      <div className="item-actions">
-                        <a className="source-link" href={item.url} target="_blank" rel="noreferrer">
-                          Read at source <span aria-hidden="true">↗</span>
-                        </a>
-                        <button
-                          className="read-toggle"
-                          type="button"
-                          aria-pressed={isRead}
-                          onClick={() => toggleRead(item.url)}
-                        >
-                          <span aria-hidden="true">{isRead ? "✓" : "+"}</span>
-                          {isRead ? "Read" : "Mark as read"}
-                        </button>
-                      </div>
-                      <ArticleActions url={item.url} initialFeedback={feedbackByUrl.get(item.url)} />
-                      {sharingEnabled ? <ArticleShare url={item.url} title={item.title} /> : null}
-                    </footer>
-                  </article>
-                );
-              })}
-            </div>
-          </section>
-        ))}
-      </div>
-      </div>
-    </div>
-  );
+  return <main className={styles.page}>
+    <header className={styles.masthead}>
+      <p className={styles.eyebrow}>{weekday(edition.date)} · {longDate(edition.date)}</p>
+      <h1 ref={heading} tabIndex={-1}>{inside ? "A little more to read." : "A little room for reading."}</h1>
+      <p>{inside ? "Follow whichever curiosity takes you." : "A few good pieces. Take what interests you."}</p>
+    </header>
+    {syncError ? <p className={styles.error} role="alert">{syncError}</p> : null}
+    {stageError ? <div className={styles.error} role="alert"><p>{stageError}</p>{!frontRecorded ? <button className={styles.quietButton} type="button" onClick={() => void recordFront()}>Retry saving this visit</button> : null}</div> : null}
+    {inside ? <section className={styles.inside} aria-label="Inside pages">
+      <button type="button" className={styles.back} onClick={() => setInside(false)}>← Back to the front page</button>
+      {insideLinks.map(link => card(link))}
+      <p className={styles.end}>That’s the paper. Enjoy the rest of your day.</p>
+    </section> : <>
+      <section className={styles.pocket} aria-label="Front page">
+        {lead ? <div className={styles.pocketLead}><p className={styles.eyebrow}>One to settle into</p>{card(lead, true)}</div> : <p className={styles.empty}>There’s nothing in this edition yet.</p>}
+        {shorts.length ? <div className={styles.pocketShorts}><p className={styles.eyebrow}>A few shorter reads</p>{shorts.map(link => card(link))}</div> : null}
+      </section>
+      <section className={styles.fold} aria-label="End of the front page">
+        <span aria-hidden="true">❧</span>
+        <h2>This can be enough.</h2>
+        {insideLinks.length ? <><p>There’s more inside, if you feel like it.</p><button type="button" disabled={pending} onClick={openInside}>{pending ? "Opening…" : "Open the rest of the paper"}<span aria-hidden="true">→</span></button><p className={styles.foldNote}>Unopened pages won’t change your candidates.</p></> : <p>Enjoy the rest of your day.</p>}
+      </section>
+    </>}
+    <p className={styles.collectionLink}><Link href="/links">Your links, whenever you want them →</Link></p>
+  </main>;
 }

@@ -17,7 +17,7 @@ export function LandingPage({ signupUrl, signinUrl }: LandingPageProps) {
             something you didn’t know you were looking for.
           </p>
           <p className={styles.description}>
-            Curiofold is a personal, AI-curated discovery feed. Give your curator a
+            Filtered is a personal, AI-curated paper. Give your curator a
             direction and find a considered selection of articles waiting in each edition, on a schedule you choose.
           </p>
           <div className={styles.actions}>
@@ -28,7 +28,7 @@ export function LandingPage({ signupUrl, signinUrl }: LandingPageProps) {
         </div>
         <aside className={styles.edition} aria-labelledby="sample-title">
           <div className={styles.editionTop}>
-            <span className={styles.editionBrand}>Curiofold<span>.</span></span>
+            <span className={styles.editionBrand}>Filtered<span>.</span></span>
             <span>Illustrative edition</span>
           </div>
           <p className={styles.editionLabel}>A few things worth your attention</p>
@@ -71,7 +71,7 @@ export function LandingPage({ signupUrl, signinUrl }: LandingPageProps) {
           <li>
             <span className={styles.stepNumber} aria-hidden="true">03 / The edition</span>
             <h3>Follow what catches you</h3>
-            <p>Read the context, open the original articles, save a piece for later, and leave feedback to guide future selections.</p>
+            <p>Start with a small front page and open more if you want. Read at the source, keep a link for later, and leave feedback to guide future selections.</p>
           </li>
         </ol>
       </section>

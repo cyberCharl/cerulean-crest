@@ -290,7 +290,9 @@ export async function updateArticleFeedback(owner: string, input: ArticleFeedbac
   const rows = await sql`WITH source_article AS (
     SELECT title, publication, 0 AS priority FROM article_feedback WHERE owner_subject = ${owner} AND url = ${input.url}
     UNION ALL
-    SELECT it.title, it.publication, 1 AS priority FROM items it
+    SELECT title, publication, 1 AS priority FROM reading_links WHERE owner_subject = ${owner} AND url = ${input.url}
+    UNION ALL
+    SELECT it.title, it.publication, 2 AS priority FROM items it
     JOIN sections s ON s.id = it.section_id JOIN issues i ON i.id = s.issue_id
     WHERE i.owner_subject = ${owner} AND it.url = ${input.url}
   ) INSERT INTO article_feedback(owner_subject, url, title, publication, saved, reaction, note)

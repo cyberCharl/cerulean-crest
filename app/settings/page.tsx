@@ -47,7 +47,7 @@ export default async function Settings({ searchParams }: { searchParams: Promise
     <h1>Settings</h1>
     <section aria-labelledby="appearance-heading" className={styles.appearance}>
       <h2 id="appearance-heading">Appearance</h2>
-      <p>Choose how Curiofold looks. Your choice follows you across editions and devices.</p>
+      <p>Choose how Filtered looks. Your choice follows you across editions and devices.</p>
       {query.appearance === "saved" ? <p role="status">Your appearance is saved.</p> : null}
       {query.error === "theme" ? <p role="alert">Choose one of the two themes, then try again.</p> : null}
       <form action={updateTheme} className={styles.form}>

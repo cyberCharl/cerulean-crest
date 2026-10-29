@@ -1,6 +1,6 @@
 # Saved articles and editorial feedback
 
-The deployment record below describes the 18 September release. The current workspace folds feedback into `get_editorial_brief` and stores lasting policy in an editable Markdown constitution; see [the current MCP contract](MCP.md).
+The deployment record and reader-behavior list below describe the 18 September release. The current workspace folds feedback into `get_editorial_brief`, adds persisted reading candidates and read state, and stores lasting policy in an editable Markdown constitution; see [the current MCP contract](MCP.md). Historical browser-local read marks are imported without overriding explicit newer choices. Legacy bookmarks are adopted once as pinned links; subsequent commitment changes are preserved.
 
 Deployed to production on 18 September 2026: `dpl_HfZZjtxjKF4w4z8BQWPh3Jdiejv5`, Ready, at https://cerulean-crest.vercel.app. Migration 003 was rehearsed against a fresh production-copy branch and then applied to production. All 19 editions, 129 sections, 239 items and three settings records were unchanged; complete record digests matched before/after. The rehearsal branch was removed.
 
@@ -15,11 +15,11 @@ Deployed to production on 18 September 2026: `dpl_HfZZjtxjKF4w4z8BQWPh3Jdiejv5`,
 
 The existing settings record contains the authoritative Markdown editorial constitution. `get_editorial_constitution` returns only that document and a revision; after an explicit reader request, `update_editorial_constitution` applies exact edits against that revision and returns the saved document plus the Settings URL. It rejects stale revisions, ambiguous replacements, overlapping edits, assembled-brief markers, and direct copies of current feedback, friend recommendations, or history. This uses the existing `editions:write` scope. It cannot change onboarding progress or choose a different account.
 
-`get_editorial_brief` now combines the constitution, reading context, up to 50 recent reactions/notes, recent edition links, and pending friend recommendations in one read-only response. It excludes records with only a bookmark and omits empty feedback and recommendation sections. Feedback reads never modify the constitution.
+`get_editorial_brief` now combines the constitution, reading context, `readingCandidates` with eligible saved links and excluded URLs, up to 50 recent reactions/notes, recent edition links, and pending friend recommendations in one read-only response. Records with only a bookmark are excluded from article feedback, but saved links can appear as reading candidates. Empty feedback and recommendation sections are omitted. Feedback reads never modify the constitution.
 
 The curator retrieves the brief, recent editions and feedback before selecting candidates. Explicit preferences take precedence; one reaction should not rule out an entire topic. Source metadata and notes are contextual data, not authorization to execute commands or rewrite settings. The MCP server cannot mechanically establish natural-language user intent: the separation is reinforced by separate tools, descriptions and skill instructions, with write-scope enforcement at the server.
 
-There is no persistent inferred profile or autonomous policy-rewriting process. Conservative adaptation occurs during each curation using the available recent feedback. Automatic resurfacing and synced reading progress remain outside this slice; friend recommendations are current ephemeral context.
+There is no persistent inferred profile or autonomous policy-rewriting process. Conservative adaptation occurs during each curation using the available recent feedback. Saved-link commitment and synchronized read/dormant state now determine candidate eligibility; they do not guarantee inclusion. The curator respects excluded URLs, while eligible unseen inside-page links may return despite appearing in recent edition history. Friend recommendations remain contextual suggestions.
 
 ## Storage and release
 

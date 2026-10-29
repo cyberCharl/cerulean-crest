@@ -1,6 +1,6 @@
 # ChatGPT plugin submission packet
 
-Prepared 18 September 2026. **Draft, not submitted.** The working product name is Curiofold. Replace bracketed inputs consistently once the name and domain are final. These files do not publish policies or configure any provider.
+Prepared 18 September 2026. **Draft, not submitted.** The working product name is Filtered. Replace bracketed inputs consistently once the name and domain are final. These files do not publish policies or configure any provider.
 
 ## Ready to review
 
@@ -50,7 +50,7 @@ The portal's current upload validation is authoritative. This packet is not an i
 
 ## Product claims to keep out of this first listing
 
-- Public sharing, friends, email delivery and automatic resurfacing of saved articles.
+- Public sharing, friends, email delivery and guarantees that every saved link will be resurfaced. Candidate eligibility informs curation; it is not a promise of inclusion. Claim candidate/commitment controls only after the updated deployment and reviewer cases pass.
 - Guaranteed autonomous scheduling or universal availability of chat memory.
 - Publicly published editions: edition links require the owning reader's login.
 - A persistent learned profile unless that specific implementation has shipped and been verified. Article feedback can influence selection without writing a separate learned profile.

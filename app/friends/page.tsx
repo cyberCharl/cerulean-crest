@@ -76,7 +76,7 @@ export default async function FriendsPage({
               <div className={styles.emptyThread}>
                 <span aria-hidden="true">✦</span>
                 <h3>Your first thread will appear here.</h3>
-                <p>Add someone whose reading judgment you trust, then send them a piece from an edition or Saved.</p>
+                <p>Add someone whose reading judgment you trust, then send them a piece from your paper or link collection.</p>
               </div>
             ) : (
               <ul className={styles.threadList}>
@@ -100,7 +100,7 @@ export default async function FriendsPage({
 
             {state.friends.length ? (
               <p className={styles.threadHint}>
-                Send from any article in <Link href="/latest">Latest</Link> or <Link href="/saved">Saved</Link>. Unread articles from these threads are the friend recommendations your curator sees.
+                Send from any article in <Link href="/latest">your paper</Link> or <Link href="/links">your links</Link>. Unread articles from these threads are the friend recommendations your curator sees.
               </p>
             ) : null}
           </section>

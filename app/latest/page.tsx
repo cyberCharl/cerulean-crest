@@ -3,7 +3,7 @@ import { requireUser } from "@/lib/browser-auth";
 import { latestIssueDate } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Latest edition", robots: { index: false, follow: false } };
+export const metadata = { title: "Your paper", robots: { index: false, follow: false } };
 
 export default async function LatestPage() {
   const user = await requireUser();
