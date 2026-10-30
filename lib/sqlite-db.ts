@@ -42,8 +42,7 @@ if (!(db.prepare("PRAGMA table_info(issues)").all() as Array<{name: string}>).so
   })();
   db.pragma("foreign_keys = ON");
 }
-// Unassigned legacy editions stay inaccessible unless an operator specifies their owner.
-if (process.env.CERULEAN_OWNER_SUBJECT) db.prepare("UPDATE issues SET owner_subject = ? WHERE owner_subject IS NULL").run(process.env.CERULEAN_OWNER_SUBJECT);
+// Editions from before ownership stay unowned and inaccessible.
 
 const replaceIssueTransaction = db.transaction((owner: string, input: IssueInput) => {
   const existing = db.prepare("SELECT id FROM issues WHERE owner_subject = ? AND issue_date = ?").get(owner, input.date) as { id: number } | undefined;
@@ -104,7 +103,7 @@ export function createIssue(owner: string, input: IssueInput): { issueId: number
 }
 
 if (process.env.SEED_DEMO === "true" && (db.prepare("SELECT COUNT(*) AS count FROM issues").get() as { count: number }).count === 0) {
-  replaceIssue(process.env.CERULEAN_OWNER_SUBJECT || "demo", seedIssue);
+  replaceIssue(process.env.SEED_OWNER_SUBJECT || "demo", seedIssue);
 }
 
 type IssueRow = {

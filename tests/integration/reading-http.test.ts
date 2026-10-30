@@ -10,6 +10,8 @@ import {EncryptJWT} from "jose";
 import {setTimeout as delay} from "node:timers/promises";
 import {seedIssue} from "../../lib/seed.ts";
 import Database from "better-sqlite3";
+import {Client} from "@modelcontextprotocol/sdk/client/index.js";
+import {StreamableHTTPClientTransport} from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 
 test("signed-in reading flow preserves intent, enforces exposure and enriches URL-only captures",{timeout:90000},async context=>{
   const directory=await mkdtemp(`${tmpdir()}/filtered-reading-http-`);
@@ -19,10 +21,10 @@ test("signed-in reading flow preserves intent, enforces exposure and enriches UR
   const server=spawn(process.execPath,["node_modules/next/dist/bin/next","start","-p",String(port)],{
     env:{...process.env,VERCEL:"",DATABASE_URL:"",DATABASE_URL_UNPOOLED:"",DATABASE_PATH:`${directory}/test.db`,SEED_DEMO:"false",
       AUTH0_DOMAIN:"test.example.com",AUTH0_CLIENT_ID:"reading-http",AUTH0_CLIENT_SECRET:"test-only",AUTH0_SECRET:"a".repeat(64),
-      CERULEAN_APP_URL:base,CERULEAN_MARKETING_URL:base,APP_BASE_URL:base,CERULEAN_OWNER_SUBJECT:"reading-http-owner",
-      CERULEAN_API_USER:"test",CERULEAN_API_PASSWORD:"test-only"},stdio:"ignore",
+      CERULEAN_APP_URL:base,CERULEAN_MARKETING_URL:base,APP_BASE_URL:base,CERULEAN_MCP_DEV_TOKEN:"reading-mcp-only",CERULEAN_MCP_DEV_SUBJECT:"reading-http-owner"},stdio:"ignore",
   });
-  context.after(async()=>{if(server.exitCode===null){const exit=once(server,"exit");server.kill();await exit;}await rm(directory,{recursive:true,force:true});});
+  let client:Client|undefined;
+  context.after(async()=>{await client?.close();if(server.exitCode===null){const exit=once(server,"exit");server.kill();await exit;}await rm(directory,{recursive:true,force:true});});
   for(let attempt=0;attempt<100;attempt++){try{if((await fetch(base)).ok)break;}catch{}await delay(100);}
   async function session(subject:string){
     const now=Math.floor(Date.now()/1000);
@@ -47,9 +49,14 @@ test("signed-in reading flow preserves intent, enforces exposure and enriches UR
       return row.source_revision;
     } finally {database.close();}
   }
-  const basic={Authorization:`Basic ${Buffer.from("test:test-only").toString("base64")}`,"Content-Type":"application/json"};
+  client=new Client({name:"reading-http-test",version:"1.0.0"});
+  await client.connect(new StreamableHTTPClientTransport(new URL(`${base}/mcp`),{requestInit:{headers:{Authorization:"Bearer reading-mcp-only"}}}));
+  async function publish(edition:typeof seedIssue){
+    const result=await client!.callTool({name:"create_daily_edition",arguments:edition});
+    assert.equal((result.structuredContent as {status?:string})?.status,"created");
+  }
   const issue={...seedIssue,date:"2034-01-01"};
-  assert.equal((await fetch(`${base}/api/issues/${issue.date}`,{method:"PUT",headers:basic,body:JSON.stringify(issue)})).status,201);
+  await publish(issue);
   for(const path of ["/links","/latest?prototype=reading&variant=C",`/issues/${issue.date}`])assert.equal((await fetch(`${base}${path}`,{redirect:"manual"})).status,307);
   assert.equal((await fetch(`${base}/api/reading-links`)).status,401);
   assert.match(await action("addReadingLink",{}, {url:"https://example.invalid/private"}),/session has ended/);
@@ -59,7 +66,9 @@ test("signed-in reading flow preserves intent, enforces exposure and enriches UR
   assert.deepEqual(await links(other),[]);
   const staleRevision=editionRevision(issue.date);
   const replacement={...issue,sections:issue.sections.map((section,index)=>index ? section : {...section,items:section.items.map((item,index)=>index ? item : {...item,title:`${item.title} (updated)`})})};
-  assert.equal((await fetch(`${base}/api/issues/${issue.date}`,{method:"PUT",headers:basic,body:JSON.stringify(replacement)})).status,200);
+  // Agents can't replace an edition, so replace it in the data layer the way an operator would.
+  process.env.DATABASE_PATH=`${directory}/test.db`;
+  assert.equal((await import("../../lib/sqlite-db.ts")).replaceIssue("reading-http-owner",replacement).created,false);
   await links();
   const revision=editionRevision(issue.date);
   assert.notEqual(revision,staleRevision);
@@ -92,7 +101,7 @@ test("signed-in reading flow preserves intent, enforces exposure and enriches UR
   assert.match(privateLinks.headers.get("cache-control")??"",/private/);
   const libraryHtml=await privateLinks.text();assert.match(libraryHtml,/optional/);assert.doesNotMatch(libraryHtml,/type="number"/);
   const next={...issue,date:"2034-01-02"};
-  assert.equal((await fetch(`${base}/api/issues/${next.date}`,{method:"PUT",headers:basic,body:JSON.stringify(next)})).status,201);
+  await publish(next);
   const retained=await links();
   assert.equal(retained.length,seedIssue.sections.flatMap(section=>section.items).length+2);
   assert.equal(retained.find(link=>link.url===presented[0].url)?.commitment,"later");

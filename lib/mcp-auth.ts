@@ -11,24 +11,29 @@ function safeEqual(left: string, right: string): boolean {
 }
 
 export const MCP_SCOPES = ["editions:read", "editions:write"] as const;
-export type OAuthConfig = { issuer: string; resource: string; jwksUrl: string; ownerSubject?: string };
+export type OAuthConfig = { issuer: string; resource: string; jwksUrl: string };
 const keySets = new Map<string, ReturnType<typeof createRemoteJWKSet>>();
 
 export function oauthConfig(): OAuthConfig | null {
   const issuer = process.env.CERULEAN_OAUTH_ISSUER;
   const resource = process.env.CERULEAN_MCP_RESOURCE;
   const jwksUrl = process.env.CERULEAN_OAUTH_JWKS_URL;
-  const ownerSubject = process.env.CERULEAN_OWNER_SUBJECT;
   if (!issuer || !resource || !jwksUrl) return null;
   try {
     if ([issuer, resource, jwksUrl].some((value) => new URL(value).protocol !== "https:")) return null;
   } catch { return null; }
-  return { issuer, resource, jwksUrl, ownerSubject };
+  return { issuer, resource, jwksUrl };
+}
+
+/** A fixed bearer token for MCP Inspector and integration tests. Ignored on any Vercel deployment. */
+export function devTokenConfig(): { token: string; subject: string } | null {
+  const token = process.env.CERULEAN_MCP_DEV_TOKEN;
+  if (!token || process.env.VERCEL) return null;
+  return { token, subject: process.env.CERULEAN_MCP_DEV_SUBJECT || "dev-reader" };
 }
 
 export function mcpAuthConfigured(): boolean {
-  return process.env.CERULEAN_MCP_AUTH_MODE === "pilot"
-    ? Boolean(process.env.CERULEAN_MCP_TOKEN && process.env.CERULEAN_OWNER_SUBJECT) : Boolean(oauthConfig());
+  return Boolean(oauthConfig() || devTokenConfig());
 }
 
 export async function verifyUserToken(token: string, config: OAuthConfig, keys: JWTVerifyGetKey): Promise<AuthInfo | null> {
@@ -48,7 +53,7 @@ export async function verifyUserToken(token: string, config: OAuthConfig, keys: 
 /** RFC 9728 metadata. `resource` is the OAuth audience, so it is also the only URL clients can connect to. */
 export function protectedResourceMetadataResponse(): Response {
   const config = oauthConfig();
-  if (process.env.CERULEAN_MCP_AUTH_MODE === "pilot" || !config) {
+  if (!config) {
     return Response.json({ error: "OAuth is not configured" }, { status: 503 });
   }
   return Response.json({ resource: config.resource, authorization_servers: [config.issuer], scopes_supported: MCP_SCOPES,
@@ -57,33 +62,24 @@ export function protectedResourceMetadataResponse(): Response {
 }
 
 export function mcpChallenge(origin: string, scope = MCP_SCOPES.join(" ")): string {
-  if (process.env.CERULEAN_MCP_AUTH_MODE === "pilot") return 'Bearer realm="Filtered MCP"';
+  if (!oauthConfig()) return 'Bearer realm="Filtered MCP"';
   const metadata = new URL("/.well-known/oauth-protected-resource", configuredAppOrigin() || origin);
   return `Bearer resource_metadata="${metadata}", scope="${scope}", error="insufficient_scope", error_description="Authorize Filtered to continue"`;
 }
 
 export async function authorizeMcpRequest(authorization: string | null): Promise<AuthInfo | null> {
-  if (process.env.CERULEAN_MCP_AUTH_MODE !== "pilot") {
-    if (!authorization?.startsWith("Bearer ")) return null;
-    const config = oauthConfig();
-    if (!config) return null;
-    let keys = keySets.get(config.jwksUrl);
-    if (!keys) {
-      keys = createRemoteJWKSet(new URL(config.jwksUrl), { timeoutDuration: 5_000 });
-      keySets.set(config.jwksUrl, keys);
-    }
-    return verifyUserToken(authorization.slice(7), config, keys);
-  }
-  const expectedToken = process.env.CERULEAN_MCP_TOKEN;
-  if (!expectedToken || !process.env.CERULEAN_OWNER_SUBJECT || !authorization?.startsWith("Bearer ")) return null;
-
+  if (!authorization?.startsWith("Bearer ")) return null;
   const token = authorization.slice("Bearer ".length);
-  if (!safeEqual(token, expectedToken)) return null;
-
-  return {
-    token,
-    clientId: "cerulean-crest-pilot",
-    scopes: ["editions:read", "editions:write"],
-    extra: { subject: process.env.CERULEAN_OWNER_SUBJECT },
-  };
+  const dev = devTokenConfig();
+  if (dev && safeEqual(token, dev.token)) {
+    return { token, clientId: "filtered-dev", scopes: [...MCP_SCOPES], extra: { subject: dev.subject } };
+  }
+  const config = oauthConfig();
+  if (!config) return null;
+  let keys = keySets.get(config.jwksUrl);
+  if (!keys) {
+    keys = createRemoteJWKSet(new URL(config.jwksUrl), { timeoutDuration: 5_000 });
+    keySets.set(config.jwksUrl, keys);
+  }
+  return verifyUserToken(token, config, keys);
 }

@@ -11,6 +11,7 @@ import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/
 import { seedIssue } from "../../lib/seed.ts";
 import { hkdfSync } from "node:crypto";
 import { EncryptJWT } from "jose";
+import Database from "better-sqlite3";
 
 test("HTTP publishing, duplicate protection, authentication and public validation", { timeout: 60_000 }, async (context) => {
   const directory = await mkdtemp(`${tmpdir()}/cerulean-http-`);
@@ -23,7 +24,7 @@ test("HTTP publishing, duplicate protection, authentication and public validatio
     env: { ...process.env, VERCEL: "", DATABASE_URL: "", DATABASE_URL_UNPOOLED: "", DATABASE_PATH: `${directory}/test.db`, SEED_DEMO: "false",
       AUTH0_DOMAIN: "test.example.com", AUTH0_CLIENT_ID: "http-test", AUTH0_CLIENT_SECRET: "test-only", AUTH0_SECRET: "a".repeat(64),
       CERULEAN_APP_URL: base, CERULEAN_MARKETING_URL: base, APP_BASE_URL: base,
-      CERULEAN_OWNER_SUBJECT: "http-test-owner", CERULEAN_SITE_URL: base, CERULEAN_API_USER: "test", CERULEAN_API_PASSWORD: "local-test-only", CERULEAN_MCP_AUTH_MODE: "pilot", CERULEAN_MCP_TOKEN: "local-mcp-only" },
+      CERULEAN_SITE_URL: base, CERULEAN_MCP_DEV_TOKEN: "local-mcp-only", CERULEAN_MCP_DEV_SUBJECT: "http-test-owner" },
     stdio: "ignore",
   });
   let client: Client | undefined;
@@ -57,11 +58,10 @@ test("HTTP publishing, duplicate protection, authentication and public validatio
     assert.equal(response.status, 307, `${path} requires a session`);
     assert.match(response.headers.get("location") ?? "", /auth\/login/);
   }
-  const headers = { Authorization: `Basic ${Buffer.from("test:local-test-only").toString("base64")}`, "Content-Type": "application/json" };
   for (const date of ["not-a-date", "2026-02-31"]) {
     assert.equal((await fetch(`${base}/issues/${date}`, { redirect: "manual" })).status, 307);
-    assert.equal((await fetch(`${base}/api/issues/${date}`, { headers })).status, 404);
   }
+  assert.equal((await fetch(`${base}/api/issues/2021-01-15`)).status, 404, "the old Basic-auth publishing route is gone");
   // An old edition must still be the latest without a false missing-today warning.
   const issue = { ...seedIssue, date: "2021-01-15", title: "Original HTTP edition" };
   client = new Client({ name: "http-test", version: "1.0.0" });
@@ -72,7 +72,6 @@ test("HTTP publishing, duplicate protection, authentication and public validatio
   assert.equal((created.structuredContent as Record<string, unknown>)?.status, "created");
   const duplicate = await client.callTool({ name: "create_daily_edition", arguments: { ...issue, title: "Must not replace" } });
   assert.equal((duplicate.structuredContent as Record<string, unknown>)?.status, "already_exists");
-  assert.equal((await (await fetch(`${base}/api/issues/${issue.date}`, { headers })).json()).title, issue.title);
   assert.equal((await fetch(`${base}/issues/${issue.date}`, { redirect: "manual" })).status, 307);
   // Exercise the real SDK session decoder with test-only encrypted cookies.
   // No authentication bypass is added to the application.
@@ -96,6 +95,9 @@ test("HTTP publishing, duplicate protection, authentication and public validatio
   assert.equal((await fetch(`${base}/issues/${issue.date}`, { headers: otherSession })).status, 404);
   const defaultEdition = await (await fetch(`${base}/issues/${issue.date}`, { headers: ownerSession })).text();
   assert.ok(defaultEdition.includes("Filtered"));
+  const stored = new Database(`${directory}/test.db`, { readonly: true });
+  assert.equal((stored.prepare("SELECT title FROM issues WHERE owner_subject = ? AND issue_date = ?").get("http-test-owner", issue.date) as { title: string }).title, issue.title, "a duplicate publish leaves the original");
+  stored.close();
   assert.ok(defaultEdition.includes(`href="${base}/latest">Your paper</a>`));
   assert.ok(defaultEdition.includes(`href="${base}/links">Your links</a>`));
   assert.ok(!defaultEdition.includes("edition has not arrived yet"));
@@ -316,15 +318,14 @@ test("HTTP publishing, duplicate protection, authentication and public validatio
   assert.equal((await fetch(`${base}/friends/http_sender`, {headers:otherSession})).status, 404);
 
   assert.equal((await fetch(`${base}/issues/${issue.date}`, { headers: { Cookie: "__session=tampered" }, redirect: "manual" })).status, 307);
-  for (const [date, payload, expected] of [
-    ["2031-01-16", { ...issue, date: "2031-01-16" }, 201],
-    [issue.date, { ...issue, title: "Explicit replacement" }, 200],
-    ["2031-01-17", issue, 409],
-    ["2026-02-31", { ...issue, date: "2026-02-31" }, 422],
-    [issue.date, { ...issue, availableMinutes: 1441 }, 422],
-  ] as const) {
-    const response = await fetch(`${base}/api/issues/${date}`, { method: "PUT", headers, body: JSON.stringify(payload) });
-    assert.equal(response.status, expected);
+  // Publication validates the payload; invalid editions are refused without being stored.
+  async function refused(args: unknown) {
+    try { return (await client!.callTool({ name: "create_daily_edition", arguments: args as Record<string, unknown> })).isError === true; }
+    catch { return true; }
   }
-  assert.equal((await fetch(`${base}/api/issues/${issue.date}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(issue) })).status, 401);
+  assert.equal(await refused({ ...issue, date: "2026-02-31" }), true);
+  assert.equal(await refused({ ...issue, date: "2031-01-17", availableMinutes: 1441 }), true);
+  const another = await client.callTool({ name: "create_daily_edition", arguments: { ...issue, date: "2031-01-16" } });
+  assert.equal((another.structuredContent as Record<string, unknown>)?.status, "created");
+  assert.equal((await fetch(`${base}/mcp`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer wrong" }, body: "{}" })).status, 401);
 });

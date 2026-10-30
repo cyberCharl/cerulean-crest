@@ -11,7 +11,6 @@ import { curatorServerInstructions } from "../lib/curator-instructions.ts";
 const issuer = "https://tenant.example.auth0.com/";
 const resource = "https://mcp-host.example.com/mcp";
 const env = {
-  CERULEAN_MCP_AUTH_MODE: "oauth",
   CERULEAN_OAUTH_ISSUER: issuer,
   CERULEAN_OAUTH_JWKS_URL: `${issuer}.well-known/jwks.json`,
   CERULEAN_MCP_RESOURCE: resource,
@@ -110,7 +109,7 @@ test("a client with neither a client ID nor a metadata document can't register",
     /does not support dynamic client registration/);
 }));
 
-test("pilot mode shows the local endpoint instead of an OAuth audience", () => withEnv({ ...env, CERULEAN_MCP_AUTH_MODE: "pilot" }, () => {
+test("without OAuth, onboarding shows the local endpoint", () => withEnv({ ...env, CERULEAN_MCP_RESOURCE: "" }, () => {
   assert.equal(mcpConnectionUrl(), "https://reader.example.com/mcp");
 }));
 

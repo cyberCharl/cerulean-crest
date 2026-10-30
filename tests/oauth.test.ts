@@ -6,8 +6,8 @@ import { verifyUserToken, type OAuthConfig } from "../lib/mcp-auth.ts";
 test("OAuth verifies signature, issuer, audience, expiration, authenticated subjects and scopes", async () => {
   const { privateKey, publicKey } = await generateKeyPair("ES256");
   const keys = createLocalJWKSet({ keys: [{ ...await exportJWK(publicKey), kid: "test", alg: "ES256" }] });
-  const config: OAuthConfig = { issuer: "https://auth.example/", resource: "https://cerulean.example/mcp", jwksUrl: "https://auth.example/jwks", ownerSubject: "owner-1" };
-  const claims = { iss: config.issuer, aud: config.resource, sub: config.ownerSubject, exp: Math.floor(Date.now() / 1000) + 600, scope: "editions:read editions:write" };
+  const config: OAuthConfig = { issuer: "https://auth.example/", resource: "https://cerulean.example/mcp", jwksUrl: "https://auth.example/jwks" };
+  const claims = { iss: config.issuer, aud: config.resource, sub: "reader-1", exp: Math.floor(Date.now() / 1000) + 600, scope: "editions:read editions:write" };
   const sign = (payload: Record<string, unknown>) => new SignJWT(payload).setProtectedHeader({ alg: "ES256", kid: "test" }).sign(privateKey);
   assert.deepEqual((await verifyUserToken(await sign(claims), config, keys))?.scopes, ["editions:read", "editions:write"]);
   for (const patch of [{ iss: "https://wrong.example" }, { aud: "wrong" }, { sub: "service@clients" }, { exp: 1 }, { scope: "unrelated" }, { nbf: claims.exp + 1000 }]) {
