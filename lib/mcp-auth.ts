@@ -45,6 +45,17 @@ export async function verifyUserToken(token: string, config: OAuthConfig, keys: 
   } catch { return null; }
 }
 
+/** RFC 9728 metadata. `resource` is the OAuth audience, so it is also the only URL clients can connect to. */
+export function protectedResourceMetadataResponse(): Response {
+  const config = oauthConfig();
+  if (process.env.CERULEAN_MCP_AUTH_MODE === "pilot" || !config) {
+    return Response.json({ error: "OAuth is not configured" }, { status: 503 });
+  }
+  return Response.json({ resource: config.resource, authorization_servers: [config.issuer], scopes_supported: MCP_SCOPES,
+    bearer_methods_supported: ["header"], resource_name: "Filtered" },
+  { headers: { "Access-Control-Allow-Origin": "*", "Cache-Control": "no-store" } });
+}
+
 export function mcpChallenge(origin: string, scope = MCP_SCOPES.join(" ")): string {
   if (process.env.CERULEAN_MCP_AUTH_MODE === "pilot") return 'Bearer realm="Filtered MCP"';
   const metadata = new URL("/.well-known/oauth-protected-resource", configuredAppOrigin() || origin);

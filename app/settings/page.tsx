@@ -63,7 +63,7 @@ export default async function Settings({ searchParams }: { searchParams: Promise
     <EditorialConstitution markdown={editorialConstitution(settings)} />
     <p><Link href="/settings/brief">See exactly what this server sends to your curator →</Link></p>
     <h2>Edit your constitution</h2>
-    <p>Edit the Markdown here, or ask your connected curator in ChatGPT to make a lasting editorial change. Both save the same document.</p>
+    <p>Edit the Markdown here, or ask your connected AI curator, such as ChatGPT, to make a lasting editorial change. Both save the same document.</p>
     {query.constitution === "saved" ? <p role="status">Your constitution is saved. Your curator receives it on its next brief read.</p> : null}
     {query.error === "constitution" ? <p role="alert">Write a constitution under 30,000 characters, then try again.</p> : null}
     {query.error === "constitution-conflict" ? <p role="alert">Your constitution changed while you were editing. Your submission was not saved; review the current document before trying again.</p> : null}
@@ -79,7 +79,7 @@ export default async function Settings({ searchParams }: { searchParams: Promise
     <form action={updateSettings} className={styles.form}>
       <label>Reading time, in minutes<input name="readingMinutes" type="number" min="5" max="240" required defaultValue={settings.readingMinutes} /><span>The time you would like to spend. It is fine to stop there.</span></label>
       <label>Material in each edition, in minutes<input name="editionMinutes" type="number" min="5" max="480" required defaultValue={settings.editionMinutes} /><span>Extra material gives you choice. You never need to finish every piece.</span></label>
-      <label>Your timezone<input name="timeZone" required maxLength={100} defaultValue={settings.timeZone} placeholder="Africa/Johannesburg" /><span>Used to date your editions; delivery scheduling stays in ChatGPT.</span></label>
+      <label>Your timezone<input name="timeZone" required maxLength={100} defaultValue={settings.timeZone} placeholder="Africa/Johannesburg" /><span>Used to date your editions; delivery scheduling happens in your AI tool, not on Filtered.</span></label>
       <button type="submit">Save reading settings</button>
     </form>
     <section aria-labelledby="editorial-feedback">
@@ -103,7 +103,7 @@ export default async function Settings({ searchParams }: { searchParams: Promise
     <section aria-labelledby="curator-setup">
       <h2 id="curator-setup">Connect your curator</h2>
       <p><Link href="/onboarding?step=connect">Continue to your first edition</Link> for connection steps and a short instruction to give your curator.</p>
-      <p><Link href="/onboarding?step=rhythm">Choose your delivery frequency and time</Link>, then copy the updated instruction into ChatGPT to create or update your recurring task.</p>
+      <p><Link href="/onboarding?step=rhythm">Choose your delivery frequency and time</Link>, then copy the updated instruction into your AI tool. ChatGPT can create or update a recurring task; with a tool that can’t schedule, ask it for each edition yourself.</p>
     </section>
     <section aria-labelledby="delete-account-heading" id="delete-account" className={styles.danger}>
       <h2 id="delete-account-heading">Delete your account</h2>

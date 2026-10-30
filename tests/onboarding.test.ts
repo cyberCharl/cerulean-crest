@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { buildFirstEditionPrompt, settingsFromOnboarding } from "../lib/onboarding.ts";
+import { buildFirstEditionPrompt, curatorTool, settingsFromOnboarding } from "../lib/onboarding.ts";
 import { defaultSettings, editorialSettingsSchema } from "../lib/editorial-settings.ts";
 import { deliveryDays, deliveryScheduleSchema } from "../lib/delivery-schedule.ts";
 
@@ -85,4 +85,43 @@ test("existing preferences without a delivery schedule remain valid", () => {
   const settings = editorialSettingsSchema.parse(defaultSettings);
   assert.equal(settings.deliverySchedule, undefined);
   assert.ok(!buildFirstEditionPrompt(settings).includes("recurring"));
+});
+
+// Captured from the ChatGPT-only implementation before other AI tools were added.
+const curation = "Read my Filtered editorial brief, including its current feedback, friend recommendations, and recent editions. Search widely, keep a candidate list internally, then submit only the complete final edition with create_daily_edition. Return the edition link.";
+const weekly = { ...defaultSettings, timeZone: "Europe/Amsterdam", deliverySchedule: { frequency: "weekly", day: "Sunday", time: "09:30" } } as const;
+
+test("the ChatGPT instruction is unchanged, with or without naming the tool", () => {
+  const first = `Create my first edition now. ${curation} Create or update my recurring ChatGPT task to curate and publish an edition on this schedule: Every Sunday at 09:30 (Europe/Amsterdam). Use local time in Europe/Amsterdam, following daylight-saving changes where applicable. For each recurring run: ${curation} If a recurring task already exists for this app, including under an earlier name, update it instead of creating a duplicate. Confirm the schedule with me in ChatGPT.`;
+  const recurring = `Set up recurring editions for me in Filtered. Create or update my recurring ChatGPT task to curate and publish an edition on this schedule: Every Sunday at 09:30 (Europe/Amsterdam). Use local time in Europe/Amsterdam, following daylight-saving changes where applicable. ${curation} If a recurring task already exists for this app, including under an earlier name, update it instead of creating a duplicate. Confirm the schedule with me in ChatGPT.`;
+  for (const tool of [undefined, "chatgpt"] as const) {
+    assert.equal(buildFirstEditionPrompt(weekly, false, tool), first);
+    assert.equal(buildFirstEditionPrompt(weekly, true, tool), recurring);
+    assert.equal(buildFirstEditionPrompt(defaultSettings, false, tool), `Create my first edition now. ${curation}`);
+    assert.equal(buildFirstEditionPrompt(defaultSettings, true, tool), curation);
+  }
+});
+
+test("other AI tools get a schedule request that admits when a tool can't schedule", () => {
+  const first = buildFirstEditionPrompt(weekly, false, "other");
+  const recurring = buildFirstEditionPrompt(weekly, true, "other");
+  for (const prompt of [first, recurring]) {
+    assert.doesNotMatch(prompt, /ChatGPT/);
+    assert.ok(prompt.includes("Every Sunday at 09:30 (Europe/Amsterdam)"));
+    assert.ok(prompt.includes("daylight-saving"));
+    assert.ok(prompt.includes("If you can run scheduled or recurring tasks"));
+    assert.ok(prompt.includes("don't claim a schedule exists; I'll ask you for each edition myself"));
+    assert.ok(prompt.includes("update it instead of creating a duplicate"));
+    assert.ok(prompt.includes(curation));
+  }
+  assert.ok(first.startsWith(`Create my first edition now. ${curation}`));
+  assert.ok(!recurring.includes("first edition"));
+  // Without a schedule there is nothing tool-specific to say.
+  assert.equal(buildFirstEditionPrompt(defaultSettings, false, "other"), buildFirstEditionPrompt(defaultSettings));
+  assert.equal(buildFirstEditionPrompt(defaultSettings, true, "other"), curation);
+});
+
+test("only an explicit choice selects another AI tool", () => {
+  assert.equal(curatorTool("other"), "other");
+  for (const value of [undefined, "", "chatgpt", "claude", ["other"]]) assert.equal(curatorTool(value), "chatgpt");
 });

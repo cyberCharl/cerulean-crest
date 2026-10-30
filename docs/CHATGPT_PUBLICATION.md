@@ -1,6 +1,6 @@
 # Publishing Filtered for ChatGPT
 
-Publication research was checked 18 September 2026 against official OpenAI documentation. The workspace MCP contract has since changed to a Markdown constitution and four tools; rescan and rehearse this exact version before submission. This is a preparation plan, not a submitted or approved listing.
+Publication research was checked 18 September 2026 against official OpenAI documentation. The workspace MCP contract has since changed to a Markdown constitution and four tools; rescan and rehearse this exact version before submission. This is a preparation plan, not a submitted or approved listing. On 29 October the server instructions' last sentence changed from ChatGPT-only scheduling wording to tool-neutral wording, and `/.well-known/oauth-protected-resource/mcp` was added; tools, schemas, OAuth and the ChatGPT onboarding are otherwise unchanged. See [client compatibility](MCP.md#client-compatibility).
 
 ## Prepared submission materials
 

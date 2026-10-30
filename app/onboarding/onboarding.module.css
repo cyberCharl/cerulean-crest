@@ -42,6 +42,16 @@
 .error { border-left: 3px solid var(--signal); padding: .8rem 1rem; line-height: 1.5; }
 .summary { border-top: 4px solid var(--ink); border-bottom: 1px solid var(--hairline); padding: 1rem 0 1.5rem; line-height: 1.6; }
 .connection { margin: 2rem 0; }
+.toolChoice { display: flex; flex-wrap: wrap; align-items: baseline; gap: .5rem 1rem; margin: 2rem 0 0; }
+.toolChoice p { flex-basis: 100%; margin: 0 0 .25rem; font-weight: 600; }
+.toolChoice a { color: var(--cerulean-dark); border: 1px solid var(--hairline); padding: .55rem .9rem; text-decoration: none; }
+.toolChoice a[aria-current] { border-color: var(--cerulean-dark); background: rgba(8,120,163,.08); font-weight: 700; }
+.toolChoice a:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
+.serverUrl span { display: block; font-weight: 600; margin-bottom: .35rem; }
+.serverUrl code, .connectSteps code { overflow-wrap: anywhere; user-select: all; background: var(--paper-deep); padding: .15rem .35rem; }
+.serverUrl code { display: inline-block; padding: .6rem .8rem; border: 1px solid var(--hairline); font-size: 1rem; }
+.connectSteps { padding-left: 1.4rem; line-height: 1.5; }
+.connectSteps li + li { margin-top: .4rem; }
 .connection p, .content > p { line-height: 1.5; }
 .notice { border-left: 3px solid var(--signal); padding: 1rem; background: var(--paper-deep); }
 .prompt { padding: 1.25rem; background: var(--paper-deep); border: 1px solid var(--hairline); }
