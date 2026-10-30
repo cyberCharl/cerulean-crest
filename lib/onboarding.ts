@@ -35,7 +35,7 @@ export function curatorTool(value: unknown): CuratorTool {
   return value === "other" ? "other" : "chatgpt";
 }
 
-const curation = "Read my Filtered editorial brief, including its current feedback, friend recommendations, and recent editions. Search widely, keep a candidate list internally, then submit only the complete final edition with create_daily_edition. Return the edition link.";
+const curation = "Read my Filtered editorial brief, including its current feedback, friend recommendations, and recent editions. Search widely, keep a candidate list internally, then submit only the complete final edition with publish_edition. Return the edition link.";
 const firstEdition = `Create my first edition now. ${curation}`;
 
 export function buildFirstEditionPrompt(settings: EditorialSettings, hasEdition = false, tool: CuratorTool = "chatgpt"): string {

@@ -7,7 +7,7 @@ Prepared 18 September 2026. **Draft, not submitted.** The working product name i
 - [Listing copy and release notes](listing.md)
 - [Reviewer setup, prompts, expected results and evidence sheet](reviewer-guide.md)
 - [Privacy, terms and support page drafts](policy-drafts.md)
-- [Technical publication runbook](../CHATGPT_PUBLICATION.md)
+- [Agent access and publication checklist](../AGENT_ACCESS.md#chatgpt-publication)
 
 Current official route: remote MCP plus the curation skill, **With MCP → Universal**. No embedded ChatGPT UI is proposed. Enter the stable production `/mcp` endpoint in the portal and upload the final tested skill bundle; the repository's development `.mcp.json` is not the production submission. [Official submission procedure](https://developers.openai.com/plugins/deploy/submission)
 
@@ -33,20 +33,20 @@ Identity must match the public policies and listing. Changing a published MCP or
 1. Fill the inputs above. Review the policy drafts against actual provider configuration, logs, backups, data use and deletion operations; publish completed pages at `/privacy`, `/terms` and `/support` or update the listing URLs to their real locations.
 2. Deploy the tested application and migrate the intended database. Verify the OAuth audience, scopes, PKCE and exact callback allowlist against the portal settings. Give reviewers a dedicated account without MFA, email/SMS gates or private-network access; retain normal protection on personal/operator accounts.
 3. Use the portal-generated domain challenge with the new `/.well-known/openai-apps-challenge` route. Set `OPENAI_APPS_CHALLENGE` in the target deployment to the exact token, with no added newline. It is a public verification value, not an OAuth secret. The route returns 404 until configured and serves plain text without caching when configured. Redeploy after setting the variable, fetch the endpoint anonymously, and compare the returned bytes to the token.
-4. Build the final skill archive from `plugins/cerulean-crest/skills/`. Inspect its contents and test that exact file tree. Supply the production MCP server separately through the portal. Do not include `.env` files, `.mcp.json` development bearer configuration, credentials, local databases, personal editions or test output containing tokens.
+4. Build the final skill archive from `plugins/filtered/skills/`. Inspect its contents and test that exact file tree. Supply the production MCP server separately through the portal. Do not include `.env` files, `.mcp.json` development bearer configuration, credentials, local databases, personal editions or test output containing tokens.
 5. Scan tools on the live authenticated endpoint, compare the discovered schemas and annotations with the implementation, run [reviewer cases](reviewer-guide.md), and attach real output/screenshots. An automated test pass is supporting evidence, not a completed ChatGPT rehearsal.
 6. Review the completed listing, identity, policies, availability, credentials and evidence as one packet. Submit from the portal once ready. Approval and the later publish action are separate; record the actual directory URL after publishing and configure onboarding with it.
 
 CLI preparation for the skill archive (run only after final skill edits):
 
 ```bash
-mkdir -p /tmp/cerulean-submission
-cd plugins/cerulean-crest/skills
-zip -r /tmp/cerulean-submission/curation-skills.zip curate-daily-edition -x '*/.DS_Store'
-unzip -l /tmp/cerulean-submission/curation-skills.zip
+mkdir -p /tmp/filtered-submission
+cd plugins/filtered/skills
+zip -r /tmp/filtered-submission/curation-skills.zip curate-edition -x '*/.DS_Store'
+unzip -l /tmp/filtered-submission/curation-skills.zip
 ```
 
-The portal's current upload validation is authoritative. This packet is not an invented manifest format or a substitute for its authentication fields. A draft archive was generated and inspected at `/tmp/cerulean-submission/curation-skills.zip` after the editorial workflow update. It contains only the curation skill and its agent metadata. Regenerate after final naming or skill changes; this draft is not a submitted or ChatGPT-rehearsed artifact.
+The portal's current upload validation is authoritative. This packet is not an invented manifest format or a substitute for its authentication fields. A draft archive was generated and inspected at `/tmp/filtered-submission/curation-skills.zip` after the editorial workflow update. It contains only the curation skill and its agent metadata. Regenerate after final naming or skill changes; this draft is not a submitted or ChatGPT-rehearsed artifact.
 
 ## Product claims to keep out of this first listing
 

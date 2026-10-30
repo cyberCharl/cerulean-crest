@@ -52,7 +52,7 @@ test("signed-in reading flow preserves intent, enforces exposure and enriches UR
   client=new Client({name:"reading-http-test",version:"1.0.0"});
   await client.connect(new StreamableHTTPClientTransport(new URL(`${base}/mcp`),{requestInit:{headers:{Authorization:"Bearer reading-mcp-only"}}}));
   async function publish(edition:typeof seedIssue){
-    const result=await client!.callTool({name:"create_daily_edition",arguments:edition});
+    const result=await client!.callTool({name:"publish_edition",arguments:edition});
     assert.equal((result.structuredContent as {status?:string})?.status,"created");
   }
   const issue={...seedIssue,date:"2034-01-01"};

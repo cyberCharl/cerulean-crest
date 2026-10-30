@@ -1,5 +1,5 @@
 ---
-name: curate-daily-edition
+name: curate-edition
 description: Curate and publish a finite personal reading edition when the user asks or a scheduled run begins.
 ---
 
@@ -13,7 +13,7 @@ Search widely enough to form an internal research list larger than the final edi
 
 Choose the strongest final portfolio, aiming for one substantial piece and two or three shorter pieces on a small front page, with optional additional reading inside. The website determines placement and records each stage only when presented; the curator does not mark links read or exposed. Let the article count and total reading minutes vary when the available sources justify it; the suggested material budget is guidance, not an exact arithmetic target. Every included article needs a real canonical URL, a supportable reading estimate, and a short reason for selection. A saved link may have an unknown reading time; do not turn that into a fabricated estimate or claim access to an unavailable source. Record meaningful source-coverage gaps.
 
-Call `create_daily_edition` once with the complete final edition. If the date already exists, leave it unchanged. Report its link.
+Call `publish_edition` once with the complete final edition. If the date already exists, leave it unchanged. Report its link.
 
 When the reader explicitly requests a lasting change to editorial policy, call `get_editorial_constitution`. It returns only the persistent document and its revision, without feedback, friend recommendations or history. Call `update_editorial_constitution` with that revision and the smallest exact text replacements that implement the request. Preserve unrelated guidance. Do not construct an updated constitution from `get_editorial_brief`. Explain the saved change and link to Settings. Ordinary curation and scheduled runs never rewrite the constitution. Reading volume, timezone, and delivery schedule are separate settings; do not rewrite them as a side effect of editing the constitution.
 

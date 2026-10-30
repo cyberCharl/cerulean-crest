@@ -67,10 +67,10 @@ test("HTTP publishing, duplicate protection, authentication and public validatio
   client = new Client({ name: "http-test", version: "1.0.0" });
   await client.connect(new StreamableHTTPClientTransport(new URL(`${base}/mcp`), { requestInit: { headers: { Authorization: "Bearer local-mcp-only" } } }));
   const tools = await client.listTools();
-  assert.ok(tools.tools.some((tool) => tool.name === "create_daily_edition"));
-  const created = await client.callTool({ name: "create_daily_edition", arguments: issue });
+  assert.ok(tools.tools.some((tool) => tool.name === "publish_edition"));
+  const created = await client.callTool({ name: "publish_edition", arguments: issue });
   assert.equal((created.structuredContent as Record<string, unknown>)?.status, "created");
-  const duplicate = await client.callTool({ name: "create_daily_edition", arguments: { ...issue, title: "Must not replace" } });
+  const duplicate = await client.callTool({ name: "publish_edition", arguments: { ...issue, title: "Must not replace" } });
   assert.equal((duplicate.structuredContent as Record<string, unknown>)?.status, "already_exists");
   assert.equal((await fetch(`${base}/issues/${issue.date}`, { redirect: "manual" })).status, 307);
   // Exercise the real SDK session decoder with test-only encrypted cookies.
@@ -320,12 +320,12 @@ test("HTTP publishing, duplicate protection, authentication and public validatio
   assert.equal((await fetch(`${base}/issues/${issue.date}`, { headers: { Cookie: "__session=tampered" }, redirect: "manual" })).status, 307);
   // Publication validates the payload; invalid editions are refused without being stored.
   async function refused(args: unknown) {
-    try { return (await client!.callTool({ name: "create_daily_edition", arguments: args as Record<string, unknown> })).isError === true; }
+    try { return (await client!.callTool({ name: "publish_edition", arguments: args as Record<string, unknown> })).isError === true; }
     catch { return true; }
   }
   assert.equal(await refused({ ...issue, date: "2026-02-31" }), true);
   assert.equal(await refused({ ...issue, date: "2031-01-17", availableMinutes: 1441 }), true);
-  const another = await client.callTool({ name: "create_daily_edition", arguments: { ...issue, date: "2031-01-16" } });
+  const another = await client.callTool({ name: "publish_edition", arguments: { ...issue, date: "2031-01-16" } });
   assert.equal((another.structuredContent as Record<string, unknown>)?.status, "created");
   assert.equal((await fetch(`${base}/mcp`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer wrong" }, body: "{}" })).status, 401);
 });

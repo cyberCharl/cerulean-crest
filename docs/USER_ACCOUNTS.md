@@ -8,7 +8,6 @@ The browser uses Auth0's Next.js SDK with authorization-code login, encrypted HT
 
 The server derives ownership from the browser session or verified MCP access token's subject. The caller cannot choose an owner in the edition payload. All edition queries, archive navigation, recent-history tools, and settings are scoped by subject. Machine subjects are rejected by MCP authentication. Browser and MCP clients must use the same Auth0 tenant so subjects identify the same accounts. Their domains may differ: production browser login uses the verified custom domain `login.filtered.page`, while MCP retains its separately configured tenant issuer and audience.
 
-The Basic recovery publisher and optional pilot bearer token remain restricted to the explicitly configured `CERULEAN_OWNER_SUBJECT`. They are not general-user credentials. Missing configuration fails closed.
 
 ## Browser configuration
 
@@ -44,14 +43,14 @@ For new readers to authorize MCP, the app-specific API's scopes represent readin
 
 ## Migration and recovery
 
-Migration `002-edition-ownership.sql` adds ownership, replaces global date uniqueness with `(owner_subject, issue_date)`, and creates editorial settings. The migration runner assigns legacy NULL ownership only when `CERULEAN_OWNER_SUBJECT` is supplied; it never assigns old editions to the first signup. Unassigned editions remain inaccessible. SQLite rebuilds the original issue table while preserving parent/child IDs and follows the same explicit-owner rule.
+Migration `002-edition-ownership.sql` adds ownership, replaces global date uniqueness with `(owner_subject, issue_date)`, and creates editorial settings. Editions from before ownership stay unowned and inaccessible; the one-off owner assignment has already run in Production. SQLite rebuilds the original issue table while preserving parent/child IDs and follows the same explicit-owner rule.
 
 Rehearse on a production copy and preserve a recovery branch before the live migration. Compare the full issue/section/item contents before and after. After accepting multiple owners, **do not roll application code back to the old globally scoped reader**: it can expose or mix readers' editions and its publishing conflict target no longer matches the schema. Recovery must retain ownership checks or restore an isolated pre-migration copy under controlled access.
 
 ## Settings and remaining work
 
-`/settings` stores intended reading minutes, suggested edition minutes, timezone, delivery choices, and one Markdown editorial constitution. `get_editorial_brief` reads the requesting user's current values on every call and adds current feedback, recommendations, and recent history as read-only context. `get_editorial_constitution` is the clean source for explicit policy edits. Surplus material may offer choice; unread pieces must not automatically roll forward. Delivery schedules run in ChatGPT.
+`/settings` stores intended reading minutes, suggested edition minutes, timezone, delivery choices, and one Markdown editorial constitution. `get_editorial_brief` reads the requesting user's current values on every call and adds current feedback, recommendations, and recent history as read-only context. `get_editorial_constitution` is the clean source for explicit policy edits. Surplus material may offer choice; unread pieces must not automatically roll forward. Filtered never schedules editions; the reader's AI tool does, if it can.
 
-The ChatGPT connection is still an early developer-mode pilot requiring connector setup/credentials from the maintainer. A website account alone does not create a ChatGPT connection or schedule. Public plugin distribution and unattended delivery for a new reader remain separate verification gates. Reading progress remains browser-local; persisted feedback and “include in a future edition” are not implemented in this slice.
+A website account alone does not connect an AI tool or create a schedule; see [agent access](AGENT_ACCESS.md) for connection and client status.
 
-Anonymous `/api/health` returns liveness only. Detailed owner delivery health requires the Basic recovery credential, and the GitHub health workflow needs `CERULEAN_API_USER` and `CERULEAN_API_PASSWORD` repository secrets. This avoids exposing a reader's edition dates publicly.
+Anonymous `/api/health` returns liveness only.

@@ -1,6 +1,6 @@
 # Saved articles and editorial feedback
 
-The deployment record and reader-behavior list below describe the 18 September release. The current workspace folds feedback into `get_editorial_brief`, adds persisted reading candidates and read state, and stores lasting policy in an editable Markdown constitution; see [the current MCP contract](MCP.md). Historical browser-local read marks are imported without overriding explicit newer choices. Legacy bookmarks are adopted once as pinned links; subsequent commitment changes are preserved.
+The deployment record and reader-behavior list below describe the 18 September release. The current workspace folds feedback into `get_editorial_brief`, adds persisted reading candidates and read state, and stores lasting policy in an editable Markdown constitution; see [agent access](AGENT_ACCESS.md). Historical browser-local read marks are imported without overriding explicit newer choices. Legacy bookmarks are adopted once as pinned links; subsequent commitment changes are preserved.
 
 Deployed to production on 18 September 2026: `dpl_HfZZjtxjKF4w4z8BQWPh3Jdiejv5`, Ready, at https://cerulean-crest.vercel.app. Migration 003 was rehearsed against a fresh production-copy branch and then applied to production. All 19 editions, 129 sections, 239 items and three settings records were unchanged; complete record digests matched before/after. The rehearsal branch was removed.
 

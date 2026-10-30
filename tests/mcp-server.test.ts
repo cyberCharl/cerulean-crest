@@ -6,7 +6,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
-import { createCeruleanMcpServer } from "../lib/mcp-server.ts";
+import { createFilteredMcpServer } from "../lib/mcp-server.ts";
 import type { IssueInput } from "../lib/schema.ts";
 
 const issue: IssueInput = {
@@ -19,7 +19,7 @@ const issue: IssueInput = {
 
 async function connectedClient(subject = "mcp-test-owner", scopes = ["editions:read", "editions:write"], createEdition?: (input: IssueInput) => Promise<{ issueId: number; created: boolean }>) {
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
-  const server = createCeruleanMcpServer({ baseUrl: "https://cerulean.example", scopes, subject, createEdition });
+  const server = createFilteredMcpServer({ baseUrl: "https://cerulean.example", scopes, subject, createEdition });
   const client = new Client({ name: "cerulean-test", version: "1.0.0" });
   await server.connect(serverTransport);
   await client.connect(clientTransport);
@@ -50,10 +50,10 @@ test("MCP separates curation context from constitution reads and writes", async 
   const { client, server } = await connectedClient();
   context.after(async () => { await client.close(); await server.close(); });
   const tools = (await client.listTools()).tools;
-  assert.deepEqual(tools.map((tool) => tool.name).sort(), ["create_daily_edition", "get_editorial_brief", "get_editorial_constitution", "update_editorial_constitution"]);
+  assert.deepEqual(tools.map((tool) => tool.name).sort(), ["get_editorial_brief", "get_editorial_constitution", "publish_edition", "update_editorial_constitution"]);
   assert.equal(tools.find((tool) => tool.name === "get_editorial_brief")?.annotations?.readOnlyHint, true);
   assert.equal(tools.find((tool) => tool.name === "get_editorial_constitution")?.annotations?.readOnlyHint, true);
-  assert.equal(tools.find((tool) => tool.name === "create_daily_edition")?.annotations?.idempotentHint, true);
+  assert.equal(tools.find((tool) => tool.name === "publish_edition")?.annotations?.idempotentHint, true);
   assert.equal(tools.find((tool) => tool.name === "update_editorial_constitution")?.annotations?.destructiveHint, true);
 });
 
@@ -121,7 +121,7 @@ test("read and write scopes protect the brief, document and publication", async 
   const write = await connectedClient("scope-reader", ["editions:write"]);
   context.after(async () => { for (const connection of [read, write]) { await connection.client.close(); await connection.server.close(); } });
   assert.equal((await read.client.callTool({ name: "update_editorial_constitution", arguments: { revision: "a".repeat(64), edits: [{ oldText: "old", newText: "new" }] } })).isError, true);
-  assert.equal((await read.client.callTool({ name: "create_daily_edition", arguments: issue })).isError, true);
+  assert.equal((await read.client.callTool({ name: "publish_edition", arguments: issue })).isError, true);
   assert.equal((await write.client.callTool({ name: "get_editorial_brief", arguments: {} })).isError, true);
   assert.equal((await write.client.callTool({ name: "get_editorial_constitution", arguments: {} })).isError, true);
 });
@@ -130,10 +130,10 @@ test("final publication accepts discretionary duration but still validates shape
   let calls = 0;
   const { client, server } = await connectedClient("publication-reader", ["editions:read", "editions:write"], async () => { calls++; return { issueId: 1, created: true }; });
   context.after(async () => { await client.close(); await server.close(); });
-  const created = await client.callTool({ name: "create_daily_edition", arguments: issue });
+  const created = await client.callTool({ name: "publish_edition", arguments: issue });
   assert.equal((created.structuredContent as { status: string }).status, "created");
   assert.equal(calls, 1);
-  const invalid = await client.callTool({ name: "create_daily_edition", arguments: { ...issue, date: "2031-02-31" } });
+  const invalid = await client.callTool({ name: "publish_edition", arguments: { ...issue, date: "2031-02-31" } });
   assert.equal(invalid.isError, true);
   assert.equal(calls, 1);
 });
