@@ -2,7 +2,7 @@
 
 ## Auth0 custom login domain — 29 October 2026
 
-Production browser sign-in, signup and logout now use `login.filtered.page`. Updated only Production `AUTH0_DOMAIN`; the existing browser client, application callback, MCP issuer/JWKS/audience, and account data are unchanged. The custom domain's discovery document and signing keys were verified against the existing tenant.
+Production browser sign-in, signup and logout now use `login.filtered.page`. Updated only Production `AUTH0_DOMAIN`; the existing browser client, application callback, MCP issuer/JWKS/audience, and account data are unchanged. The custom domain's discovery document and signing keys were verified against the existing tenant. On 30 October 2026 MCP followed: Production `CERULEAN_OAUTH_ISSUER` and `CERULEAN_OAUTH_JWKS_URL` now point at `login.filtered.page`, so AI tools sign in on the same page as the website.
 
 Deployment `dpl_4RKDD5SaYVhnzpPPBkz7pMfyqm4k` ([immutable URL](https://cerulean-crest-11qysg64f-cerulean-works.vercel.app)), built from `7c6100a`, supersedes the reading release deployment below. All 12 staged smoke checks passed before promotion and again on `filtered.page`. Live login and signup redirects reached branded Auth0 forms successfully using cookie-aware requests; logout targets the custom domain and returns to `https://filtered.page`. Callback remains `https://filtered.page/auth/callback`. These checks verified routing and hosted forms without submitting account credentials. The deployment's runtime error scan was clear. No migration was needed.
 

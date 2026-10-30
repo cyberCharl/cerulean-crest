@@ -32,7 +32,7 @@ The [curation skill](../plugins/filtered/skills/curate-edition/SKILL.md) is the 
 
 ## Auth0
 
-Tenant `cerulean-works.eu.auth0.com` (browser login uses the custom domain `login.filtered.page`; MCP tokens keep the tenant issuer). Manage it with `auth0 … --tenant cerulean-works.eu.auth0.com`. Never paste client secrets into a conversation or the repo.
+Tenant `cerulean-works.eu.auth0.com`. Both the website and AI tools sign in through the custom domain `login.filtered.page`, so MCP tokens carry the issuer `https://login.filtered.page/` (`CERULEAN_OAUTH_ISSUER`, with `CERULEAN_OAUTH_JWKS_URL` at that domain's `/.well-known/jwks.json`). Switched from the tenant domain on 30 October 2026; tools connected before then must reconnect once. Manage it with `auth0 … --tenant cerulean-works.eu.auth0.com`. Never paste client secrets into a conversation or the repo.
 
 **API "Filtered MCP"**, identifier `https://filtered.page/mcp`: scopes `editions:read` and `editions:write`, RS256, 1-hour access tokens, offline access (rotating refresh tokens), RBAC off. User access requires a per-client grant; machine-to-machine access is denied. Created 29 October 2026 (id `6ae361de86e14b3189bb37ed`). The earlier API `https://cerulean-crest.vercel.app/mcp` stays until ChatGPT is verified on the new address, then gets deleted.
 
