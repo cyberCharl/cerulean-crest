@@ -40,7 +40,8 @@ Tenant settings: Resource Parameter Compatibility Profile on, issuer in authoriz
 
 | Client | How it identifies itself | Callback | Notes |
 | --- | --- | --- | --- |
-| Filtered - ChatGPT | Predefined confidential client (`client_secret_post`) | `https://chatgpt.com/connector_platform_oauth_redirect` | Credentials go only into ChatGPT's OAuth fields. |
+| ChatGPT (developer mode and the published plugin) | Imported CIMD `https://chatgpt.com/oauth/client.json` (`tpc_anpLqMaveW2yqeMdnEcSFM`), signs token requests with `private_key_jwt` | `https://chatgpt.com/connector_platform_oauth_redirect` | Third-party client, imported 30 October 2026. Readers paste only the URL; ChatGPT picks CIMD because Auth0 advertises it. Auth0 stored ChatGPT's current signing key (`kid` `cimd-20260428030119`); see key rotation below. |
+| Filtered - ChatGPT | Predefined confidential client (`client_secret_post`) | `https://chatgpt.com/connector_platform_oauth_redirect` | Fallback from before the import. Credentials go only into ChatGPT's OAuth fields. Remove once ChatGPT is verified through CIMD. |
 | Claude (claude.ai web, desktop, mobile, Cowork) | Imported CIMD `https://claude.ai/oauth/mcp-oauth-client-metadata` (`tpc_wYciikRFpxppLSDocCmnRf`) | `https://claude.ai/api/mcp/auth_callback` | Public client. Readers paste the URL and leave Claude's advanced settings empty. |
 | Claude Code | Imported CIMD `https://claude.ai/oauth/claude-code-client-metadata` (`tpc_fuf3mV3Dv3zMS7H1MFDFQZ`) | `http://localhost/callback` and `http://127.0.0.1/callback`, any port | Auth0 accepts any loopback port for this native client. |
 | Filtered - Owner verification | Native public client | Loopback | For CLI token checks only. |
@@ -48,11 +49,18 @@ Tenant settings: Resource Parameter Compatibility Profile on, issuer in authoriz
 
 **Adding another AI tool.** If the tool publishes a CIMD, import its URL (Applications → Create Application → Import from URL, or `auth0 api post clients/cimd/register`), then grant it both edition scopes on the Filtered MCP API (`subject_type: user`). If it only accepts a pre-registered client ID, create a native public client with its exact callbacks and the same grant. Avoid wildcard callbacks. Record the tool in the table above and in the client list below.
 
+**Key rotation for imported clients.** Claude's clients are public (`none`) and have no keys. ChatGPT signs with a key from `https://chatgpt.com/oauth/jwks.json`, and Auth0 keeps the copy taken at import: an admin-imported client doesn't fetch new keys by itself. When ChatGPT publishes a new `kid`, its sign-ins fail at the token step until the import is refreshed. Compare the two, and re-import if they differ (re-registering updates the same client and keeps its grant):
+
+```bash
+curl -s https://chatgpt.com/oauth/jwks.json | jq -r '.keys[].kid'
+auth0 api post clients/cimd/register --tenant cerulean-works.eu.auth0.com --data '{"external_client_id":"https://chatgpt.com/oauth/client.json"}'
+```
+
 ## Clients
 
 | Client | Status |
 | --- | --- |
-| ChatGPT | Verified through the developer-mode pilot on the former address; reconnect and re-verify after the address change. |
+| ChatGPT | Imported and granted; Auth0 accepts its authorize request. Verified earlier through the developer-mode pilot on the former address with the confidential client; reconnect with just the URL and re-verify end to end. |
 | Claude (web/desktop/mobile) | Imported and granted; Auth0 accepts its authorize request. Not yet verified end to end. |
 | Claude Code | Imported and granted; Auth0 accepts its authorize request on any loopback port. Not yet verified end to end. |
 | Other MCP tools | Work if they support remote Streamable HTTP, RFC 9728 metadata and PKCE, and identify themselves with an imported CIMD or a pre-registered client. Tools that only support Dynamic Client Registration, or the older 2025-03-26 flow without protected-resource metadata, can't connect. |
@@ -63,4 +71,4 @@ Route: an OpenAI plugin using this remote MCP server (**With MCP**, **Universal*
 
 **Submit only after the server is on `https://filtered.page/mcp`.** Changing a published plugin's MCP origin needs a new plugin and a new review; a path change is only a new version.
 
-Before submitting: verify ChatGPT on the new address (connect, brief, publish, refresh after an hour), set the challenge token, scan the live tool set from the review account, and run the reviewer cases. The review account must be isolated from real readers. The EU Auth0 tenant is unrelated to OpenAI project data residency, but OpenAI excludes EU-residency projects from MCP submissions. After approval, set `CERULEAN_CHATGPT_PLUGIN_URL` to the listing so onboarding links to it.
+Before submitting: verify ChatGPT on the new address (connect, brief, publish, refresh after an hour), set the challenge token, scan the live tool set from the review account, and run the reviewer cases. The review account must be isolated from real readers. ChatGPT identifies itself through its imported CIMD, so the portal shouldn't need the confidential client's credentials; if it asks for them anyway, enter them privately there. The EU Auth0 tenant is unrelated to OpenAI project data residency, but OpenAI excludes EU-residency projects from MCP submissions. After approval, set `CERULEAN_CHATGPT_PLUGIN_URL` to the listing so onboarding links to it.
